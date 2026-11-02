@@ -1,63 +1,62 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#102a32"><title>فك الزحمة | مختبر المحرك V0.4</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#102a32"><title>فك الزحمة | عجمان V0.5</title>
 <style>
-:root{--p:#102a32;--m:#9ce9c7;--t:#f5faf9;--u:#abc0c1;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#b6d1ad;color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}button{font:inherit;border:0;color:inherit;touch-action:manipulation}canvas{position:absolute;inset:0;width:100%;height:100%}.top{position:absolute;top:calc(8px + var(--st));left:10px;right:10px;display:flex;justify-content:center;pointer-events:none}.hud{background:#102a32ee;border:1px solid #ffffff20;border-radius:17px;display:flex;min-width:min(720px,90%);box-shadow:0 7px 25px #173b3d25}.s{flex:1;padding:9px 13px;border-left:1px solid #ffffff18}.s:last-child{border:0}.s span{font-size:9px;color:var(--u)}.s b{display:block;font-size:19px;direction:ltr;text-align:right}.s small{font-size:8px;color:var(--m)}
-.controls{position:absolute;bottom:calc(10px + var(--sb));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:7px;border-radius:18px;background:#102a32ee}.sig,.btn{background:#27464d;border-radius:13px}.sig{min-width:120px;height:55px;font-weight:800;font-size:11px}.sig.on{background:var(--m);color:#102a32}.btn{width:52px;height:52px}.note{position:absolute;right:10px;top:calc(82px + var(--st));width:220px;background:#102a32e9;border-radius:15px;padding:12px}.note b{font-size:13px}.note p{font-size:10px;color:var(--u);line-height:1.6;margin:5px 0}.ok{color:var(--m)!important}
-@media(max-width:650px){.hud{min-width:95%}.s{padding:7px}.s b{font-size:15px}.note{width:180px}.controls{left:6px;right:6px;transform:none;justify-content:center}.sig{min-width:102px}}
-@media(max-height:550px) and (orientation:landscape){.top{top:calc(3px + var(--st))}.note{top:calc(62px + var(--st));padding:8px}.controls{bottom:calc(3px + var(--sb));padding:5px}.sig{height:45px}.btn{height:45px}}
+:root{--p:#102a32;--m:#9ce9c7;--t:#f5faf9;--u:#abc0c1;--red:#ff7467;--amber:#f1c768;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#b6d1ad;color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}button{font:inherit;border:0;color:inherit;touch-action:manipulation}canvas{position:absolute;inset:0;width:100%;height:100%}.top{position:absolute;top:calc(7px + var(--st));left:8px;right:8px;display:flex;justify-content:center;pointer-events:none}.hud{background:#102a32ee;border:1px solid #ffffff20;border-radius:17px;display:flex;min-width:min(780px,94%);box-shadow:0 7px 25px #173b3d25}.s{flex:1;padding:8px 12px;border-left:1px solid #ffffff18}.s:last-child{border:0}.s span{font-size:9px;color:var(--u)}.s b{display:block;font-size:18px;direction:ltr;text-align:right}.s small{font-size:8px;color:var(--m)}
+.card{position:absolute;right:9px;top:calc(80px + var(--st));width:225px;background:#102a32e9;border-radius:15px;padding:11px}.card b{font-size:13px}.card p{font-size:10px;color:var(--u);line-height:1.55;margin:5px 0}.progress{height:5px;background:#29464c;border-radius:8px;overflow:hidden;margin:8px 0}.progress i{display:block;height:100%;background:var(--m)}.danger{color:var(--red)!important}
+.controls{position:absolute;bottom:calc(8px + var(--sb));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:7px;border-radius:18px;background:#102a32ee;max-width:94%;overflow:auto}.sig,.btn{background:#27464d;border-radius:13px;white-space:nowrap}.sig{min-width:120px;height:54px;font-weight:800;font-size:11px}.sig.on{background:var(--m);color:#102a32}.btn{width:50px;height:50px}.sig.locked{opacity:.35}.toast{position:absolute;top:calc(145px + var(--st));left:50%;transform:translateX(-50%);background:#102a32;padding:10px 15px;border-radius:12px;font-size:11px;opacity:0;transition:.2s}.toast.show{opacity:1}
+@media(max-width:650px){.s{padding:6px}.s b{font-size:14px}.card{width:180px}.controls{left:5px;right:5px;transform:none;justify-content:center}.sig{min-width:105px}}
+@media(max-height:550px) and (orientation:landscape){.top{top:calc(3px + var(--st))}.card{top:calc(60px + var(--st));padding:8px;width:185px}.controls{bottom:calc(3px + var(--sb));padding:5px}.sig{height:44px}.btn{height:44px}}
 </style></head><body>
 <canvas id="c"></canvas>
-<div class="top"><div class="hud"><div class="s"><span>عبرت</span><b id="score">0</b><small>سيارة</small></div><div class="s"><span>داخل المحاكاة</span><b id="cars">0</b><small>مركبة</small></div><div class="s"><span>الطابور</span><b id="queue">0</b><small>متوقفة</small></div><div class="s"><span>أقرب مسافة</span><b id="gap">--</b><small>بكسل</small></div></div></div>
-<div class="note"><b>مختبر المحرك V0.4</b><p>هذه ليست خريطة المدينة. نختبر القيادة فقط: كل سيارة مربوطة بمسار، لا تقطع العشب، وتحافظ على مسافة من السيارة أمامها.</p><p class="ok" id="state">المحاكاة تعمل</p></div>
-<div class="controls"><button class="sig on" id="ns">↕ شمال / جنوب<br><small>أخضر</small></button><button class="sig" id="ew">↔ شرق / غرب<br><small>أحمر</small></button><button class="btn" id="pause">Ⅱ</button><button class="btn" id="reset">↻</button></div>
+<div class="top"><div class="hud"><div class="s"><span>المدينة</span><b>عجمان</b><small>بداية الحملة 🇦🇪</small></div><div class="s"><span>عبرت</span><b id="score">0</b><small>سيارة</small></div><div class="s"><span>المرحلة</span><b id="stage">1</b><small id="lanes">مسار واحد</small></div><div class="s"><span>الطابور</span><b id="queue">0</b><small id="qstate">مستقر</small></div><div class="s"><span>الهدف التالي</span><b id="next">100</b><small>سيارة</small></div></div></div>
+<div class="card"><b>تحدّي عجمان</b><p id="desc">ابدأ بمسار واحد لكل اتجاه. عند 100 سيارة ينفتح المسار الثاني.</p><div class="progress"><i id="prog" style="width:0"></i></div><p id="dangerText">مناطق الخطر عند أطراف الخريطة. إذا وصل الطابور إليها وبقي 8 ثوانٍ تخسر.</p></div>
+<div class="controls"><button class="sig on" id="ns1">تقاطع 1 ↕<br><small>شمال/جنوب</small></button><button class="sig" id="ew1">تقاطع 1 ↔<br><small>شرق/غرب</small></button><button class="sig locked" id="ns2" disabled>تقاطع 2 ↕<br><small>مغلق</small></button><button class="sig locked" id="ew2" disabled>تقاطع 2 ↔<br><small>مغلق</small></button><button class="btn" id="pause">Ⅱ</button><button class="btn" id="reset">↻</button></div>
+<div class="toast" id="toast"></div>
 <script>
 'use strict';
 const C=document.getElementById('c'),X=C.getContext('2d'),$=x=>document.getElementById(x);
-let W=0,H=0,D=1,last=performance.now(),time=0,spawn=0,phase='NS',yellow=0,paused=false,cars=[],next=1,score=0;
+let W=0,H=0,D=1,last=performance.now(),time=0,spawn=0,cars=[],nextId=1,score=0,stage=1,laneCount=1,phase1='NS',phase2='NS',yellow1=0,yellow2=0,paused=false,dangerTimer=0,lost=false;
 const COLORS=['#ed7968','#e6bb61','#5cb6d1','#ece9dd','#70b291','#9e88c8','#ef985f'];
 function resize(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;C.width=W*D;C.height=H*D;C.style.width=W+'px';C.style.height=H+'px';X.setTransform(D,0,0,D,0,0)}addEventListener('resize',resize);resize();
-function geom(){let rw=Math.max(112,Math.min(170,Math.min(W,H)*.23)),cx=W*.5,cy=H*.53,lane=rw*.20,stop=rw*.62;return{rw,cx,cy,lane,stop}}
-function lanePath(dir){let g=geom(),L=Math.max(W,H)+100,o=g.lane*.55;
- if(dir==='N')return [{x:g.cx-o,y:-45},{x:g.cx-o,y:H+45}];
- if(dir==='S')return [{x:g.cx+o,y:H+45},{x:g.cx+o,y:-45}];
- if(dir==='W')return [{x:-45,y:g.cy+o},{x:W+45,y:g.cy+o}];
- return [{x:W+45,y:g.cy-o},{x:-45,y:g.cy-o}]
+function geom(){let rw=Math.max(118,Math.min(180,Math.min(W,H)*.24)),cy=H*.54,cx1=stage<3?W*.5:W*.38,cx2=W*.67,stop=rw*.61;return{rw,cy,cx1,cx2,stop,lw:rw/(laneCount*2+1)}}
+function axisDirs(){return ['N1','S1','W1','E1'].concat(stage>=3?['N2','S2','W2','E2']:[])}
+function lanePath(dir,lane){let g=geom(),vertical=dir[0]==='N'||dir[0]==='S',j=dir.endsWith('2')?2:1,cx=j===1?g.cx1:g.cx2,sign=(dir[0]==='N'||dir[0]==='E')?-1:1,off=sign*((lane+.5)*g.lw),L=60;
+ if(dir[0]==='N')return[{x:cx+off,y:-L},{x:cx+off,y:H+L}];
+ if(dir[0]==='S')return[{x:cx+off,y:H+L},{x:cx+off,y:-L}];
+ if(dir[0]==='W')return[{x:-L,y:g.cy-off},{x:W+L,y:g.cy-off}];
+ return[{x:W+L,y:g.cy-off},{x:-L,y:g.cy-off}]
 }
-function point(path,s){let a=path[0],b=path[1];return{x:a.x+(b.x-a.x)*s,y:a.y+(b.y-a.y)*s,ang:Math.atan2(b.y-a.y,b.x-a.x)}}
-function stopS(dir){let g=geom(),p=lanePath(dir),target;if(dir==='N')target={x:g.cx-g.lane*.55,y:g.cy-g.stop};else if(dir==='S')target={x:g.cx+g.lane*.55,y:g.cy+g.stop};else if(dir==='W')target={x:g.cx-g.stop,y:g.cy+g.lane*.55};else target={x:g.cx+g.stop,y:g.cy-g.lane*.55};let a=p[0],b=p[1],dx=b.x-a.x,dy=b.y-a.y;return((target.x-a.x)*dx+(target.y-a.y)*dy)/(dx*dx+dy*dy)}
-function spawnCar(seed=false){let ds=['N','S','E','W'],d=ds[Math.floor(Math.random()*4)],same=cars.filter(c=>c.dir===d);if(same.length>10)return;let p=lanePath(d),len=Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y),s=seed?Math.random()*.34:0;if(same.some(c=>c.s<.08&&!seed))return;cars.push({id:next++,dir:d,axis:(d==='N'||d==='S')?'NS':'EW',path:p,s,v:seed?.18:0,max:.115+Math.random()*.018,color:COLORS[next%COLORS.length],wait:0,len})}
-function front(c){let best=null,ds=9;for(const o of cars)if(o!==c&&o.dir===c.dir&&o.s>c.s){let d=(o.s-c.s)*c.len;if(d<ds*100){ds=d;best=o}}return best?ds:999}
-function isInside(c){let g=geom(),p=point(c.path,c.s);return Math.abs(p.x-g.cx)<g.stop*.95&&Math.abs(p.y-g.cy)<g.stop*.95}
-function step(dt){time+=dt;spawn+=dt;yellow=Math.max(0,yellow-dt);while(spawn>.58){spawn-=.58;spawnCar(false)}
- // Cars are ordered front-to-back per lane so following is deterministic.
- for(const d of ['N','S','E','W']){let list=cars.filter(c=>c.dir===d).sort((a,b)=>b.s-a.s);for(const c of list){let gap=front(c),target=c.max,ss=stopS(c.dir),dist=(ss-c.s)*c.len,green=phase===c.axis&&yellow<=0,inside=isInside(c);
-   if(!green&&!inside&&dist>0&&dist<170)target=Math.min(target,Math.max(0,(dist-16)/140*c.max));
-   // hard safety envelope + smooth following
-   if(gap<70)target=Math.min(target,Math.max(0,(gap-31)/75*c.max));
-   if(gap<31)target=0;
-   c.v+=(target-c.v)*Math.min(1,dt*(target<c.v?7.5:2.2));
-   let old=c.s;c.s+=c.v*dt;
-   // Never allow a car to penetrate the safety box of the car ahead.
-   let f=front(c);if(f<28){c.s=old;c.v=0}
-   if(c.v<.006&&!inside)c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.5);
- }}
- for(let i=cars.length-1;i>=0;i--)if(cars[i].s>1.02){cars.splice(i,1);score++}
- hud()
+function pt(path,s){let a=path[0],b=path[1];return{x:a.x+(b.x-a.x)*s,y:a.y+(b.y-a.y)*s,ang:Math.atan2(b.y-a.y,b.x-a.x)}}
+function stopS(c){let g=geom(),j=c.dir.endsWith('2')?2:1,cx=j===1?g.cx1:g.cx2,d=c.dir[0],target;if(d==='N')target={x:0,y:g.cy-g.stop};if(d==='S')target={x:0,y:g.cy+g.stop};if(d==='W')target={x:cx-g.stop,y:0};if(d==='E')target={x:cx+g.stop,y:0};let a=c.path[0],b=c.path[1],dx=b.x-a.x,dy=b.y-a.y;return((target.x-a.x)*dx+(target.y-a.y)*dy)/(dx*dx+dy*dy)}
+function spawnCar(seed=false){let ds=axisDirs(),dir=ds[Math.floor(Math.random()*ds.length)],lane=Math.floor(Math.random()*laneCount),same=cars.filter(c=>c.dir===dir&&c.lane===lane);if(same.length>9)return;let path=lanePath(dir,lane),len=Math.hypot(path[1].x-path[0].x,path[1].y-path[0].y),s=seed?Math.random()*.3:0;if(!seed&&same.some(c=>c.s<.075))return;cars.push({id:nextId++,dir,lane,path,len,s,v:seed?.16:0,max:.105+Math.random()*.018,color:COLORS[nextId%COLORS.length],wait:0})}
+function phaseFor(c){let j=c.dir.endsWith('2')?2:1,ax=(c.dir[0]==='N'||c.dir[0]==='S')?'NS':'EW';return{green:(j===1?phase1:phase2)===ax&&((j===1?yellow1:yellow2)<=0),j}}
+function inside(c){let g=geom(),p=pt(c.path,c.s),cx=c.dir.endsWith('2')?g.cx2:g.cx1;return Math.abs(p.x-cx)<g.stop*.92&&Math.abs(p.y-g.cy)<g.stop*.92}
+function front(c){let gap=999;for(const o of cars)if(o!==c&&o.dir===c.dir&&o.lane===c.lane&&o.s>c.s)gap=Math.min(gap,(o.s-c.s)*c.len);return gap}
+function step(dt){if(lost)return;time+=dt;spawn+=dt;yellow1=Math.max(0,yellow1-dt);yellow2=Math.max(0,yellow2-dt);let interval=stage===1?.64:stage===2?.48:stage===3?.40:.34;while(spawn>interval){spawn-=interval;spawnCar(false)}
+ for(const dir of axisDirs())for(let lane=0;lane<laneCount;lane++){let list=cars.filter(c=>c.dir===dir&&c.lane===lane).sort((a,b)=>b.s-a.s);for(const c of list){let target=c.max,gap=front(c),ss=stopS(c),dist=(ss-c.s)*c.len,ph=phaseFor(c);if(!ph.green&&!inside(c)&&dist>0&&dist<175)target=Math.min(target,Math.max(0,(dist-15)/145*c.max));if(gap<72)target=Math.min(target,Math.max(0,(gap-30)/82*c.max));if(gap<30)target=0;c.v+=(target-c.v)*Math.min(1,dt*(target<c.v?7:2.1));let old=c.s;c.s+=c.v*dt;if(front(c)<27){c.s=old;c.v=0}if(c.v<.006&&!inside(c))c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.45)}}
+ for(let i=cars.length-1;i>=0;i--)if(cars[i].s>1.02){cars.splice(i,1);score++;checkUnlock()}
+ let danger=cars.some(c=>c.wait>.8&&c.s<.13);dangerTimer=danger?dangerTimer+dt:Math.max(0,dangerTimer-dt*1.8);if(dangerTimer>=8){lost=true;paused=true;toast('خسرت! الطابور بقي في منطقة الخطر 8 ثوانٍ. اضغط ↻ للمحاولة من جديد.');$('dangerText').className='danger';$('dangerText').textContent='ازدحام كامل — انتهت الجولة'}hud()
 }
-function setPhase(p){if(p===phase||yellow>0)return;phase=p;yellow=.8;sync()}
-function sync(){$('ns').classList.toggle('on',phase==='NS');$('ew').classList.toggle('on',phase==='EW');$('ns').innerHTML='↕ شمال / جنوب<br><small>'+(phase==='NS'&&yellow<=0?'أخضر':'أحمر')+'</small>';$('ew').innerHTML='↔ شرق / غرب<br><small>'+(phase==='EW'&&yellow<=0?'أخضر':'أحمر')+'</small>'}
-$('ns').onclick=()=>setPhase('NS');$('ew').onclick=()=>setPhase('EW');$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};$('reset').onclick=()=>reset();
-function reset(){cars=[];next=1;score=0;spawn=0;phase='NS';yellow=0;for(let i=0;i<12;i++)spawnCar(true);sync();hud()}
-function hud(){let q=cars.filter(c=>c.wait>.8).length,g=999;for(const c of cars)g=Math.min(g,front(c));$('score').textContent=score;$('cars').textContent=cars.length;$('queue').textContent=q;$('gap').textContent=g===999?'--':Math.round(g);$('state').textContent=(g<25?'تحذير: مسافة صغيرة':'المسارات والمسافة تعمل');$('state').style.color=g<25?'#ff806f':'var(--m)'}
-function drawRoad(){let g=geom();X.fillStyle='#b6d1ad';X.fillRect(0,0,W,H);X.fillStyle='#d8c99f';X.fillRect(g.cx-g.rw/2-6,0,g.rw+12,H);X.fillRect(0,g.cy-g.rw/2-6,W,g.rw+12);X.fillStyle='#35464a';X.fillRect(g.cx-g.rw/2,0,g.rw,H);X.fillRect(0,g.cy-g.rw/2,W,g.rw);
- X.strokeStyle='#e9dfae';X.lineWidth=2;X.setLineDash([14,12]);X.beginPath();X.moveTo(g.cx,0);X.lineTo(g.cx,H);X.stroke();X.beginPath();X.moveTo(0,g.cy);X.lineTo(W,g.cy);X.stroke();X.setLineDash([]);
- // stop bars
- X.strokeStyle='#f5f0d5';X.lineWidth=5;for(const [x1,y1,x2,y2] of [[g.cx-g.rw/2,g.cy-g.stop,g.cx+g.rw/2,g.cy-g.stop],[g.cx-g.rw/2,g.cy+g.stop,g.cx+g.rw/2,g.cy+g.stop],[g.cx-g.stop,g.cy-g.rw/2,g.cx-g.stop,g.cy+g.rw/2],[g.cx+g.stop,g.cy-g.rw/2,g.cx+g.stop,g.cy+g.rw/2]]){X.beginPath();X.moveTo(x1,y1);X.lineTo(x2,y2);X.stroke()}
- for(const [x,y,ok] of [[g.cx-g.stop*.9,g.cy-g.stop*.9,phase==='NS'&&yellow<=0],[g.cx+g.stop*.9,g.cy+g.stop*.9,phase==='NS'&&yellow<=0],[g.cx+g.stop*.9,g.cy-g.stop*.9,phase==='EW'&&yellow<=0],[g.cx-g.stop*.9,g.cy+g.stop*.9,phase==='EW'&&yellow<=0]]){X.fillStyle=ok?'#72d58b':'#f07568';X.beginPath();X.arc(x,y,9,0,7);X.fill()}
+function checkUnlock(){if(stage===1&&score>=100){stage=2;laneCount=2;repath();toast('🎉 فتحت المسار الثاني! حركة المرور زادت.')}else if(stage===2&&score>=250){stage=3;laneCount=2;repath();unlock2();toast('🚦 فتحت التقاطع الثاني! صار عندك إشارتان مستقلتان.')}else if(stage===3&&score>=450){stage=4;laneCount=3;repath();toast('🛣️ فتحت المسار الثالث! الآن الزحمة أسرع وأصعب.')}}
+function repath(){for(const c of cars){c.lane=Math.min(c.lane,laneCount-1);c.path=lanePath(c.dir,c.lane);c.len=Math.hypot(c.path[1].x-c.path[0].x,c.path[1].y-c.path[0].y)}}
+function unlock2(){$('ns2').disabled=$('ew2').disabled=false;$('ns2').classList.remove('locked');$('ew2').classList.remove('locked');sync()}
+function setP(j,p){if(j===1){if(yellow1>0||phase1===p)return;phase1=p;yellow1=.65}else{if(stage<3||yellow2>0||phase2===p)return;phase2=p;yellow2=.65}sync()}
+$('ns1').onclick=()=>setP(1,'NS');$('ew1').onclick=()=>setP(1,'EW');$('ns2').onclick=()=>setP(2,'NS');$('ew2').onclick=()=>setP(2,'EW');$('pause').onclick=()=>{if(lost)return;paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};$('reset').onclick=()=>reset();
+function sync(){for(const [id,on] of [['ns1',phase1==='NS'&&yellow1<=0],['ew1',phase1==='EW'&&yellow1<=0],['ns2',phase2==='NS'&&yellow2<=0],['ew2',phase2==='EW'&&yellow2<=0]])$(id).classList.toggle('on',on)}
+function toast(s){let e=$('toast');e.textContent=s;e.classList.add('show');clearTimeout(toast.tm);toast.tm=setTimeout(()=>e.classList.remove('show'),3200)}
+function nextGoal(){return stage===1?100:stage===2?250:stage===3?450:700}
+function hud(){let q=cars.filter(c=>c.wait>.8).length,goal=nextGoal(),prev=stage===1?0:stage===2?100:stage===3?250:450;$('score').textContent=score;$('stage').textContent=stage;$('lanes').textContent=laneCount===1?'مسار واحد':laneCount+' مسارات';$('queue').textContent=q;$('qstate').textContent=dangerTimer>4?'خطر':q>8?'مرتفع':'مستقر';$('next').textContent=goal;$('prog').style.width=Math.max(0,Math.min(100,(score-prev)/(goal-prev)*100))+'%';$('desc').textContent=stage===1?'100 سيارة تفتح المسار الثاني.':stage===2?'250 سيارة تفتح تقاطعًا ثانيًا بإشارة مستقلة.':stage===3?'450 سيارة تفتح المسار الثالث.':'ثلاثة مسارات + تقاطعان. اصمد لأعلى نتيجة.';$('dangerText').textContent=lost?'ازدحام كامل — انتهت الجولة':dangerTimer>0?'⚠️ منطقة خطر: '+dangerTimer.toFixed(1)+' / 8 ثوانٍ':'مناطق الخطر عند أطراف الخريطة. 8 ثوانٍ ممتلئة = خسارة.';$('dangerText').className=dangerTimer>0?'danger':''}
+function drawRoad(){let g=geom();X.fillStyle='#b6d1ad';X.fillRect(0,0,W,H);let xs=stage>=3?[g.cx1,g.cx2]:[g.cx1];X.fillStyle='#d8c99f';for(const cx of xs)X.fillRect(cx-g.rw/2-6,0,g.rw+12,H);X.fillRect(0,g.cy-g.rw/2-6,W,g.rw+12);X.fillStyle='#35464a';for(const cx of xs)X.fillRect(cx-g.rw/2,0,g.rw,H);X.fillRect(0,g.cy-g.rw/2,W,g.rw);
+ X.strokeStyle='#e9dfae';X.lineWidth=1.5;X.setLineDash([12,10]);for(const cx of xs){for(let k=1;k<laneCount*2;k++){let x=cx-g.rw/2+k*g.rw/(laneCount*2);X.beginPath();X.moveTo(x,0);X.lineTo(x,H);X.stroke()}}for(let k=1;k<laneCount*2;k++){let y=g.cy-g.rw/2+k*g.rw/(laneCount*2);X.beginPath();X.moveTo(0,y);X.lineTo(W,y);X.stroke()}X.setLineDash([]);
+ // danger zones
+ X.fillStyle=dangerTimer>0?'#ff746760':'#ff746725';X.fillRect(0,g.cy-g.rw/2,85,g.rw);X.fillRect(W-85,g.cy-g.rw/2,85,g.rw);for(const cx of xs){X.fillRect(cx-g.rw/2,0,g.rw,70);X.fillRect(cx-g.rw/2,H-70,g.rw,70)}
+ // signal dots
+ for(let j=0;j<xs.length;j++){let cx=xs[j],ph=j===0?phase1:phase2,yl=j===0?yellow1:yellow2;for(const [x,y,ok] of [[cx-g.stop*.9,g.cy-g.stop*.9,ph==='NS'&&yl<=0],[cx+g.stop*.9,g.cy+g.stop*.9,ph==='NS'&&yl<=0],[cx+g.stop*.9,g.cy-g.stop*.9,ph==='EW'&&yl<=0],[cx-g.stop*.9,g.cy+g.stop*.9,ph==='EW'&&yl<=0]]){X.fillStyle=ok?'#72d58b':'#f07568';X.beginPath();X.arc(x,y,8,0,7);X.fill()}}
 }
-function drawCar(c){let p=point(c.path,c.s),g=geom(),cw=Math.max(8,g.lane*.26),cl=cw*1.8;X.save();X.translate(p.x,p.y);X.rotate(p.ang);X.fillStyle='#17282c';X.fillRect(-cl/2-1,-cw/2-1,cl+2,cw+2);X.fillStyle=c.color;X.beginPath();if(X.roundRect)X.roundRect(-cl/2,-cw/2,cl,cw,Math.max(2,cw*.22));else X.rect(-cl/2,-cw/2,cl,cw);X.fill();X.fillStyle='#d7e8e9';X.fillRect(-cl*.08,-cw*.39,cl*.28,cw*.78);X.restore()}
+function drawCar(c){let p=pt(c.path,c.s),g=geom(),cw=Math.max(7,g.lw*.28),cl=cw*1.75;X.save();X.translate(p.x,p.y);X.rotate(p.ang);X.fillStyle='#17282c';X.fillRect(-cl/2-1,-cw/2-1,cl+2,cw+2);X.fillStyle=c.color;X.beginPath();if(X.roundRect)X.roundRect(-cl/2,-cw/2,cl,cw,Math.max(2,cw*.2));else X.rect(-cl/2,-cw/2,cl,cw);X.fill();X.fillStyle='#d7e8e9';X.fillRect(-cl*.08,-cw*.38,cl*.28,cw*.76);X.restore()}
 function draw(){drawRoad();cars.forEach(drawCar)}
-function frame(n){requestAnimationFrame(frame);let dt=Math.min(.05,(n-last)/1000);last=n;if(!paused)step(dt);draw();if(yellow>0)sync()}requestAnimationFrame(frame);reset();
+function reset(){time=spawn=score=dangerTimer=0;stage=1;laneCount=1;phase1=phase2='NS';yellow1=yellow2=0;paused=lost=false;cars=[];nextId=1;$('pause').textContent='Ⅱ';$('ns2').disabled=$('ew2').disabled=true;$('ns2').classList.add('locked');$('ew2').classList.add('locked');$('dangerText').className='';for(let i=0;i<10;i++)spawnCar(true);sync();hud()}
+function frame(n){requestAnimationFrame(frame);let dt=Math.min(.05,(n-last)/1000);last=n;if(!paused)step(dt);draw();if(yellow1>0||yellow2>0)sync()}requestAnimationFrame(frame);reset();
 </script></body></html>
