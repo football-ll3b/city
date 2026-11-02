@@ -1,51 +1,102 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#102b34"><title>فك الزحمة | اختبار V0.7</title><style>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#102b34"><title>فك الزحمة | اختبار V0.8</title><style>
 [hidden]{display:none!important}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#b5d0ac;color:#f4faf8;font-family:system-ui,Tahoma,Arial,sans-serif}button{border:0;font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.hud,.toolbar,.panel{position:absolute;background:#102b34f2;border:1px solid #ffffff25;border-radius:17px;box-shadow:0 7px 20px #102b3430}.hud{top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;min-width:min(780px,96%);justify-content:space-around;pointer-events:none}.stat{padding:8px 13px;flex:1;border-left:1px solid #ffffff1a}.stat:last-child{border:0}.stat small{display:block;color:#b3c9ca;font-size:10px}.stat b{font-size:19px}.panel{right:10px;top:calc(90px + env(safe-area-inset-top));width:215px;padding:12px;font-size:12px;line-height:1.6}.panel p{color:#bdd0ce;margin:4px 0}.toolbar{bottom:calc(10px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:7px;padding:7px;align-items:center;max-width:98%;overflow:auto}.toolbar button{background:#294851;border-radius:12px;min-width:52px;min-height:48px;padding:7px 10px;font-size:12px}.toolbar button.active,.toolbar button.change{background:#a1e8c7;color:#102b34}.toolbar button:disabled{opacity:.35}.notice{position:absolute;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#102b34ef;border-radius:11px;padding:8px 13px;font-size:11px;text-align:center;max-width:90%}.overlay{position:absolute;inset:0;background:#092632b8;display:flex;align-items:center;justify-content:center;padding:18px}.modal{background:#102b34;border-radius:20px;padding:24px;max-width:400px;width:100%;line-height:1.7}.modal h2{margin:0 0 8px}.modal p{color:#bdd0ce}.modal button{background:#a1e8c7;color:#102b34;padding:12px;width:100%;border-radius:11px;font-weight:700}@media(max-height:550px){.panel{top:65px;padding:8px}.toolbar{bottom:4px}.toolbar button{min-height:40px}.notice{bottom:62px}}@media(max-width:600px){.hud{min-width:98%}.stat{padding:6px}.stat b{font-size:15px}.panel{width:155px}.toolbar{left:5px;right:5px;transform:none}.toolbar button{padding:5px;min-width:45px}}
-</style></head><body><canvas id="world"></canvas><div class="hud"><div class="stat"><small>المدينة</small><b>عجمان</b></div><div class="stat"><small>عبرت</small><b id="score">0</b></div><div class="stat"><small>المرحلة</small><b id="stage">1</b></div><div class="stat"><small>الطابور</small><b id="queue">0</b></div><div class="stat"><small>الهدف</small><b id="goal">100</b></div></div><div class="panel"><b>تحدّي عجمان</b><p id="detail">مسار واحد، مستقيم فقط.</p><p id="warning">إذا امتلأت منطقة الخطر 8 ثوانٍ تخسر.</p></div><div class="notice" id="notice">اختر التقاطع ثم بدّل اتجاه الأخضر. اسحب الخريطة وحركها بإصبع.</div><div class="toolbar"><button id="choose1" class="active">تقاطع 1</button><button id="choose2" disabled>تقاطع 2</button><button id="toggle" class="change">↕ أخضر<br>بدّل</button><button id="pause">Ⅱ</button><button id="center">⌖</button><button id="restart">↻</button></div><div id="overlay" class="overlay" hidden><div class="modal"><h2 id="endtitle">انتهت الجولة</h2><p id="endtext"></p><button id="again">العب من جديد</button></div></div>
+</style></head><body><canvas id="world"></canvas><div class="hud"><div class="stat"><small>المدينة</small><b>عجمان</b></div><div class="stat"><small>عبرت</small><b id="score">0</b></div><div class="stat"><small>المرحلة</small><b id="stage">1</b></div><div class="stat"><small>الطابور</small><b id="queue">0</b></div><div class="stat"><small>الهدف</small><b id="goal">100</b></div></div><div class="panel"><b>تحدّي عجمان</b><p id="detail">مسار واحد، مستقيم فقط.</p><p id="warning">إذا امتلأت منطقة الخطر 8 ثوانٍ تخسر.</p></div><div class="notice" id="notice">المس الإشارة الملونة بجانب الشارع لتفتحها. اسحب الخريطة أو كبّر بإصبعين.</div><div class="toolbar"><span style="font-size:12px;padding:8px;white-space:nowrap">🚦 اضغط الإشارات على الخريطة</span><button id="pause">Ⅱ</button><button id="center">⌖</button><button id="restart">↻</button></div><div id="overlay" class="overlay" hidden><div class="modal"><h2 id="endtitle">انتهت الجولة</h2><p id="endtext"></p><button id="again">العب من جديد</button></div></div>
 <script>
 'use strict';
 const $=id=>document.getElementById(id),cv=$('world'),ctx=cv.getContext('2d');let W=0,H=0,dpr=1;
 const WX=1900,WY=1160,JX=[490,1410],JY=575,RW=150,LANE=RW/6,STOP=RW/2+19;
-let camera={x:950,y:575,z:.7},touches=new Map(),touchStart=null,paused=false,failed=false,score=0,stage=1,lanes=1,selected=0,signals=['NS','NS'],clearance=[0,0],vehicles=[],spawnTimer=0,clock=0,failTimer=0,vid=0,noticeTime=0;
+let camera={x:950,y:575,z:.7},touches=new Map(),touchStart=null,paused=false,failed=false,score=0,stage=1,lanes=1,signals=[null,null],pending=[null,null],clearance=[0,0],vehicles=[],spawnTimer=0,clock=0,failTimer=0,vid=0,noticeTime=0;const MAX_CARS=12;
 const COLORS=['#ed7e69','#f2c568','#64b6d0','#ecece3','#75b49a','#9b8ed1'];
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);if(!touches.size&&clock===0)resetCamera()}
 function resetCamera(){camera.z=Math.min(W/1700,H/1020,1.1);camera.x=WX/2;camera.y=WY/2}
 addEventListener('resize',resize);resize();
 const dirs={N:{vx:0,vy:1,axis:'NS'},S:{vx:0,vy:-1,axis:'NS'},W:{vx:1,vy:0,axis:'EW'},E:{vx:-1,vy:0,axis:'EW'}};
-function startPoint(d,j,l){let off=(l+.5)*LANE;if(d==='N')return{x:JX[j]-off,y:-80};if(d==='S')return{x:JX[j]+off,y:WY+80};if(d==='W')return{x:-80,y:JY+off};return{x:WX+80,y:JY-off}}
-function exitPoint(d,j,l){let off=(l+.5)*LANE;if(d==='N')return{x:JX[j]-off,y:WY+80};if(d==='S')return{x:JX[j]+off,y:-80};if(d==='W')return{x:WX+80,y:JY+off};return{x:-80,y:JY-off}}
+function startPoint(d,j,l){let off=(l+.5)*LANE;if(d==='N')return{x:JX[j]-off,y:-80};if(d==='S')return{x:JX[j]+off,y:WY+80};if(d==='W')return{x:j===1?(JX[0]+JX[1])/2:-80,y:JY+off};return{x:j===0&&stage>=3?(JX[0]+JX[1])/2:WX+80,y:JY-off}}
+function exitPoint(d,j,l){let off=(l+.5)*LANE;if(d==='N')return{x:JX[j]-off,y:WY+80};if(d==='S')return{x:JX[j]+off,y:-80};if(d==='W')return{x:j===0&&stage>=3?(JX[0]+JX[1])/2:WX+80,y:JY+off};return{x:j===1?(JX[0]+JX[1])/2:-80,y:JY-off}}
 function line(a,b,n=1){return Array.from({length:n+1},(_,i)=>({x:a.x+(b.x-a.x)*i/n,y:a.y+(b.y-a.y)*i/n}))}
 function turnDir(d,m){const right={N:'W',S:'E',W:'S',E:'N'},left={N:'E',S:'W',W:'N',E:'S'};return m==='right'?right[d]:left[d]}
 function pointApproach(d,j,l){const o=(l+.5)*LANE,c=JX[j];if(d==='N')return{x:c-o,y:JY-STOP};if(d==='S')return{x:c+o,y:JY+STOP};if(d==='W')return{x:c-STOP,y:JY+o};return{x:c+STOP,y:JY-o}}
 function pointExit(d,j,l){const o=(l+.5)*LANE,c=JX[j];if(d==='N')return{x:c-o,y:JY+STOP};if(d==='S')return{x:c+o,y:JY-STOP};if(d==='W')return{x:c+STOP,y:JY+o};return{x:c-STOP,y:JY-o}}
-function buildPath(d,j,l,m){const a=startPoint(d,j,l),stop=pointApproach(d,j,l),pts=[a,stop],stopIndex=1;
- if(m==='straight'){const end=exitPoint(d,j,l);pts.push(pointExit(d,j,l),end)}else{const out=turnDir(d,m),outLane=m==='right'?lanes-1:0,b=pointExit(out,j,outLane),control={x:JX[j],y:JY};for(let i=1;i<=12;i++){let t=i/12;pts.push({x:(1-t)*(1-t)*stop.x+2*(1-t)*t*control.x+t*t*b.x,y:(1-t)*(1-t)*stop.y+2*(1-t)*t*control.y+t*t*b.y})}pts.push(exitPoint(out,j,outLane))}
- const marks=[0];for(let i=1;i<pts.length;i++)marks.push(marks[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y));return{pts,marks,length:marks.at(-1),stop:marks[stopIndex],junction:j,axis:dirs[d].axis,turn:m};}
+function buildPath(d,j,l,m){
+ const a=startPoint(d,j,l),stop=pointApproach(d,j,l),pts=[a,stop];
+ if(m==='straight'){pts.push(pointExit(d,j,l),exitPoint(d,j,l))}
+ else{
+  const out=turnDir(d,m),outLane=m==='right'?Math.min(l,lanes-1):0,b=pointExit(out,j,outLane),end=exitPoint(out,j,outLane);
+  const vi=dirs[d],vo=dirs[out],span=m==='right'?STOP*.78:STOP*1.28;
+  const c1={x:stop.x+vi.vx*span,y:stop.y+vi.vy*span},c2={x:b.x-vo.vx*span,y:b.y-vo.vy*span};
+  for(let i=1;i<=24;i++){let t=i/24,u=1-t;pts.push({x:u*u*u*stop.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*b.x,y:u*u*u*stop.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*b.y})}
+  pts.push(end)
+ }
+ const marks=[0];for(let i=1;i<pts.length;i++)marks.push(marks[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y));
+ return{pts,marks,length:marks[marks.length-1],stop:marks[1],junction:j,axis:dirs[d].axis,turn:m};
+}
 function pos(route,s){let i=1;while(i<route.marks.length-1&&route.marks[i]<s)i++;let a=route.pts[i-1],b=route.pts[i],len=route.marks[i]-route.marks[i-1]||1,u=Math.max(0,Math.min(1,(s-route.marks[i-1])/len));return{x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u,ang:Math.atan2(b.y-a.y,b.x-a.x)}}
-function spawnVehicle(seed=false){let d=['N','S','W','E'][Math.floor(Math.random()*4)],j=stage>=3?Math.floor(Math.random()*2):0,l=Math.floor(Math.random()*lanes),m='straight',r=Math.random();if(stage>=3)m=r<.19?'left':r<.47?'right':'straight';else if(stage>=2)m=r<.3?'right':'straight';if(stage>=4&&m==='right')l=lanes-1;if(stage>=4&&m==='left')l=0;let route=buildPath(d,j,l,m),s=seed?Math.random()*Math.min(190,route.stop-45):0,group=d+':'+j+':'+l;
- if(vehicles.some(c=>c.group===group&&Math.abs(c.s-s)<42))return false;vehicles.push({id:++vid,d,j,l,m,group,route,s,v:seed?22:0,max:56+Math.random()*8,wait:0,color:COLORS[vid%COLORS.length],entered:false});return true}
-function preceding(c){let gap=Infinity;for(const o of vehicles)if(o!==c&&o.group===c.group&&o.s>c.s&&o.s-c.s<gap)gap=o.s-c.s;return gap}
-function hasGreen(c){return signals[c.j]===c.route.axis&&clearance[c.j]<=0}
-function withinJunction(c){return c.s>=c.route.stop+4&&c.s<c.route.stop+2*STOP+22}
-function canEnter(c){if(!hasGreen(c))return false;for(const o of vehicles){if(o===c||o.j!==c.j||!withinJunction(o))continue;if(o.route.axis!==c.route.axis)return false;if(c.m==='left'||o.m==='left')return false}return true}
-function tick(dt){clock+=dt;clearance=clearance.map(x=>Math.max(0,x-dt));spawnTimer+=dt;let interval=stage===1?.72:stage===2?.57:stage===3?.46:.38;while(spawnTimer>=interval){spawnTimer-=interval;spawnVehicle()}
- for(const c of vehicles){let gap=preceding(c),dist=c.route.stop-c.s,target=c.max;if(!c.entered&&dist>=0){if(!canEnter(c)){target=Math.min(target,Math.max(0,(dist-14)*2));if(dist<15)target=0}}
- if(gap<75)target=Math.min(target,Math.max(0,(gap-29)*1.5));if(c.m!=='straight'&&Math.abs(dist)<2*STOP)target=Math.min(target,34);
- let acceleration=target<c.v?120:34;c.v+=Math.max(-acceleration*dt,Math.min(acceleration*dt,target-c.v));let move=c.v*dt;
- if(!c.entered&&dist>=0&&!canEnter(c))move=Math.min(move,Math.max(0,dist-14));if(gap<31)move=Math.min(move,Math.max(0,gap-29));c.s+=Math.max(0,move);if(!c.entered&&c.s>c.route.stop+3)c.entered=true;
- if(c.v<3&&dist>0)c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.5)}
+function spawnVehicle(seed=false,forced=null){
+ if(vehicles.length>=MAX_CARS)return false;
+ let d=forced?.d||['N','S','W','E'][Math.floor(Math.random()*4)],j=forced?.j??(stage>=3?Math.floor(Math.random()*2):0),l=forced?.l??Math.floor(Math.random()*lanes),m=forced?.m||'straight',r=Math.random();
+ if(!forced){if(stage>=3)m=r<.16?'left':r<.42?'right':'straight';else if(stage>=2)m=r<.28?'right':'straight'}
+ if(stage>=4&&m==='right')l=lanes-1;if(stage>=4&&m==='left')l=0;
+ let route=buildPath(d,j,l,m),s=forced?.s??(seed?Math.random()*Math.min(190,route.stop-48):0),group=d+':'+j+':'+l;
+ if(vehicles.some(c=>c.group===group&&Math.abs(c.s-s)<40))return false;
+ vehicles.push({id:++vid,d,j,l,m,group,route,s,v:seed?16:0,max:50+Math.random()*7,wait:0,color:COLORS[vid%COLORS.length],entered:false});return true
+}
+function preceding(c){let gap=Infinity;for(const o of vehicles)if(o!==c&&o.group===c.group&&o.s>c.s)gap=Math.min(gap,o.s-c.s);return gap}
+function withinJunction(c){let p=pos(c.route,c.s);return Math.abs(p.x-JX[c.j])<STOP+10&&Math.abs(p.y-JY)<STOP+10&&c.s>c.route.stop-3}
+function junctionBusy(j,except){return vehicles.some(o=>o!==except&&withinJunction(o))}
+function hasGreen(c){return signals[c.j]===c.d&&clearance[c.j]<=0}
+function canEnter(c){return hasGreen(c)&&!junctionBusy(c.j,c)}
+function requestSignal(j,d){if(j>= (stage>=3?2:1))return;
+ if(signals[j]===d&&pending[j]===null){pending[j]=null;signals[j]=null;clearance[j]=.6;return}
+ pending[j]=d;signals[j]=null;clearance[j]=.65;message('تم طلب الأخضر لاتجاه '+({N:'الشمال',S:'الجنوب',E:'الشرق',W:'الغرب'}[d]))
+}
+function updateSignals(dt){for(let j=0;j<2;j++){
+ clearance[j]=Math.max(0,clearance[j]-dt);
+ if(pending[j]&&clearance[j]===0&&!junctionBusy(j,null)){signals[j]=pending[j];pending[j]=null}
+}}
+function tick(dt){clock+=dt;updateSignals(dt);spawnTimer+=dt;
+ let interval=stage===1?2.0:stage===2?1.8:stage===3?1.65:1.5;
+ if(spawnTimer>=interval){spawnTimer=0;spawnVehicle()}
+ for(const c of [...vehicles].sort((a,b)=>b.s-a.s)){
+  let gap=preceding(c),dist=c.route.stop-c.s,target=c.max;
+  if(!c.entered&&dist>=0&&!canEnter(c)){target=Math.min(target,Math.max(0,(dist-12)*1.8));if(dist<14)target=0}
+  if(gap<70)target=Math.min(target,Math.max(0,(gap-30)*1.3));
+  if(c.m!=='straight'&&c.s>c.route.stop-6&&c.s<c.route.stop+230)target=Math.min(target,25);
+  const accel=target<c.v?105:31;c.v+=Math.max(-accel*dt,Math.min(accel*dt,target-c.v));
+  let move=c.v*dt;
+  if(!c.entered&&dist>=0&&!canEnter(c))move=Math.min(move,Math.max(0,dist-12));
+  if(gap<33)move=Math.min(move,Math.max(0,gap-30));
+  // A junction is reserved for one car at a time, including all turn paths.
+  if(!c.entered&&c.s<c.route.stop-12&&c.s+move>=c.route.stop-12&&!canEnter(c))move=Math.max(0,c.route.stop-12-c.s);
+  c.s+=Math.max(0,move);
+  if(!c.entered&&c.s>c.route.stop-9&&canEnter(c))c.entered=true;
+  if(c.v<3&&dist>0)c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.5)
+ }
  for(let i=vehicles.length-1;i>=0;i--)if(vehicles[i].s>=vehicles[i].route.length){vehicles.splice(i,1);score++;unlock()}
- let waiting=vehicles.filter(c=>c.wait>.7).length,overflow=vehicles.some(c=>c.wait>1.2&&c.s<105);failTimer=overflow?failTimer+dt:Math.max(0,failTimer-1.5*dt);if(failTimer>=8){failed=paused=true;$('endtitle').textContent='الزحمة غلبتك';$('endtext').textContent='مرّرت '+score+' سيارة. وصل الطابور إلى منطقة الخطر لمدة 8 ثوانٍ.';$('overlay').hidden=false}hud(waiting)}
-function unlock(){if(stage===1&&score>=100){stage=2;lanes=2;message('فتح المسار الثاني والانعطاف يمين')}else if(stage===2&&score>=250){stage=3;$('choose2').disabled=false;message('فتح التقاطع الثاني والانعطاف يسار')}else if(stage===3&&score>=450){stage=4;lanes=3;message('فتح المسار الثالث ومسارات الانعطاف')} }
+ let waiting=vehicles.filter(c=>c.wait>.7).length,overflow=vehicles.some(c=>c.wait>1.2&&c.s<90);
+ failTimer=overflow?failTimer+dt:Math.max(0,failTimer-1.5*dt);
+ if(failTimer>=8){failed=paused=true;$('endtitle').textContent='الزحمة غلبتك';$('endtext').textContent='مرّرت '+score+' سيارة. استمر الطابور في منطقة الخطر 8 ثوانٍ.';$('overlay').hidden=false}
+ hud(waiting)
+}
+function unlock(){if(stage===1&&score>=100){stage=2;lanes=2;message('فتح المسار الثاني والانعطاف يمين')}else if(stage===2&&score>=250){stage=3;message('فتح التقاطع الثاني والانعطاف يسار')}else if(stage===3&&score>=450){stage=4;lanes=3;message('فتح المسار الثالث ومسارات الانعطاف')}}
 function message(s){$('notice').textContent=s;noticeTime=clock+4}
-function hud(q=vehicles.filter(c=>c.wait>.7).length){$('score').textContent=score;$('stage').textContent=stage;$('queue').textContent=q;$('goal').textContent=stage===1?100:stage===2?250:stage===3?450:'∞';$('detail').textContent=stage===1?'مسار واحد ومستقيم فقط.':stage===2?'مساران، والانعطاف يمين متاح.':stage===3?'تقاطعان مستقلان والانعطاف يسار.':'3 مسارات وتحديات أصعب.';$('warning').textContent=failTimer>0?'⚠️ منطقة الخطر '+failTimer.toFixed(1)+' / 8 ثوانٍ':'إذا امتلأت منطقة الخطر 8 ثوانٍ تخسر.';$('choose1').classList.toggle('active',selected===0);$('choose2').classList.toggle('active',selected===1);$('toggle').innerHTML=(signals[selected]==='NS'?'↕ شمال/جنوب':'↔ شرق/غرب')+' أخضر<br>بدّل'}
-$('choose1').onclick=()=>{selected=0;hud()};$('choose2').onclick=()=>{if(stage>=3){selected=1;hud()}};$('toggle').onclick=()=>{if(clearance[selected]>0)return;signals[selected]=signals[selected]==='NS'?'EW':'NS';clearance[selected]=1.2;hud()};$('pause').onclick=()=>{if(failed)return;paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};$('center').onclick=resetCamera;$('restart').onclick=$('again').onclick=reset;
-function reset(){vehicles=[];score=clock=spawnTimer=failTimer=0;stage=lanes=1;selected=0;signals=['NS','NS'];clearance=[0,0];paused=failed=false;$('choose2').disabled=true;$('overlay').hidden=true;$('pause').textContent='Ⅱ';resetCamera();for(let i=0;i<12;i++)spawnVehicle(true);hud()}
+function hud(q=vehicles.filter(c=>c.wait>.7).length){$('score').textContent=score;$('stage').textContent=stage;$('queue').textContent=q;$('goal').textContent=stage===1?100:stage===2?250:stage===3?450:'∞';$('detail').textContent='اختبار حركة هادئة: 8 إلى 12 سيارة كحد أقصى. المس كل إشارة على الخريطة.';$('warning').textContent=failTimer>0?'⚠️ منطقة الخطر '+failTimer.toFixed(1)+' / 8 ثوانٍ':'كل إشارة مستقلة. التبديل ينتظر خلو التقاطع.'}
+$('pause').onclick=()=>{if(failed)return;paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};$('center').onclick=resetCamera;$('restart').onclick=$('again').onclick=reset;
+function reset(){vehicles=[];score=clock=spawnTimer=failTimer=0;stage=lanes=1;signals=[null,null];pending=[null,null];clearance=[0,0];paused=failed=false;$('overlay').hidden=true;$('pause').textContent='Ⅱ';resetCamera();for(let i=0,tries=0;i<9&&tries<90;tries++)if(spawnVehicle(true))i++;hud()}
+function signalLocation(d,j){let p=pointApproach(d,j,0),v=dirs[d],side=27;return{x:p.x-v.vy*side,y:p.y+v.vx*side}}
+function signalHit(x,y){let best=null;for(let j=0;j<(stage>=3?2:1);j++)for(const d of ['N','S','E','W']){let p=signalLocation(d,j),sx=(p.x-camera.x)*camera.z+W/2,sy=(p.y-camera.y)*camera.z+H/2,dist=Math.hypot(x-sx,y-sy);if(dist<28&&(!best||dist<best.dist))best={j,d,dist}}return best}
 function draw(){ctx.clearRect(0,0,W,H);ctx.save();ctx.translate(W/2,H/2);ctx.scale(camera.z,camera.z);ctx.translate(-camera.x,-camera.y);ctx.fillStyle='#b5d0ac';ctx.fillRect(-2000,-2000,6000,6000);const xs=stage>=3?JX:[JX[0]];ctx.fillStyle='#d8c99f';for(const x of xs)ctx.fillRect(x-RW/2-6,-150,RW+12,WY+300);ctx.fillRect(-150,JY-RW/2-6,WX+300,RW+12);ctx.fillStyle='#34474b';for(const x of xs)ctx.fillRect(x-RW/2,-150,RW,WY+300);ctx.fillRect(-150,JY-RW/2,WX+300,RW);
- ctx.strokeStyle='#e7deb3';ctx.lineWidth=1.5;ctx.setLineDash([13,11]);for(const x of xs)for(let i=1;i<lanes*2;i++){let xx=x-RW/2+i*RW/(lanes*2);ctx.beginPath();ctx.moveTo(xx,-150);ctx.lineTo(xx,WY+150);ctx.stroke()}for(let i=1;i<lanes*2;i++){let yy=JY-RW/2+i*RW/(lanes*2);ctx.beginPath();ctx.moveTo(-150,yy);ctx.lineTo(WX+150,yy);ctx.stroke()}ctx.setLineDash([]);
+ ctx.strokeStyle='#e7deb3';ctx.lineWidth=1.5;ctx.setLineDash([13,11]);for(const x of xs)for(let i=1;i<lanes*2;i++){let xx=x+(i-lanes)*LANE;ctx.beginPath();ctx.moveTo(xx,-150);ctx.lineTo(xx,WY+150);ctx.stroke()}for(let i=1;i<lanes*2;i++){let yy=JY+(i-lanes)*LANE;ctx.beginPath();ctx.moveTo(-150,yy);ctx.lineTo(WX+150,yy);ctx.stroke()}ctx.setLineDash([]);
  ctx.fillStyle=failTimer>0?'#fa6b665c':'#fa6b6620';ctx.fillRect(-100,JY-RW/2,190,RW);ctx.fillRect(WX-90,JY-RW/2,190,RW);for(const x of xs){ctx.fillRect(x-RW/2,-100,RW,190);ctx.fillRect(x-RW/2,WY-90,RW,190)}
- for(let j=0;j<xs.length;j++){const x=xs[j],ns=signals[j]==='NS'&&clearance[j]<=0,ew=signals[j]==='EW'&&clearance[j]<=0;for(const [px,py,green] of [[x-STOP,JY-STOP,ns],[x+STOP,JY+STOP,ns],[x+STOP,JY-STOP,ew],[x-STOP,JY+STOP,ew]]){ctx.fillStyle=green?'#75d58c':'#f07568';ctx.beginPath();ctx.arc(px,py,9,0,Math.PI*2);ctx.fill()}}
+ for(let j=0;j<xs.length;j++)for(const d of ['N','S','E','W']){
+ const p=signalLocation(d,j),green=signals[j]===d&&clearance[j]===0,queued=pending[j]===d;
+ ctx.fillStyle='#102b34';ctx.beginPath();ctx.arc(p.x,p.y,16/camera.z,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=green?'#6ce69a':queued?'#f2c568':'#f07568';ctx.beginPath();ctx.arc(p.x,p.y,10/camera.z,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#ffffffaa';ctx.lineWidth=1.5/camera.z;ctx.beginPath();ctx.arc(p.x,p.y,16/camera.z,0,Math.PI*2);ctx.stroke()
+ }
  for(const c of vehicles){const p=pos(c.route,c.s),w=10,l=18;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.ang);ctx.fillStyle='#152a2e';ctx.fillRect(-l/2-1,-w/2-1,l+2,w+2);ctx.fillStyle=c.color;ctx.fillRect(-l/2,-w/2,l,w);ctx.fillStyle='#d7e8e9';ctx.fillRect(-2,-w*.4,5,w*.8);ctx.restore()}ctx.restore()}
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===1)touchStart={kind:'pan',x:e.clientX,y:e.clientY,cx:camera.x,cy:camera.y};else if(touches.size===2){const [a,b]=[...touches.values()];touchStart={kind:'pinch',d:Math.hypot(a.x-b.x,a.y-b.y),z:camera.z}}});cv.addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touchStart?.kind==='pan'&&touches.size===1){camera.x=touchStart.cx-(e.clientX-touchStart.x)/camera.z;camera.y=touchStart.cy-(e.clientY-touchStart.y)/camera.z}else if(touchStart?.kind==='pinch'&&touches.size===2){const[a,b]=[...touches.values()];camera.z=Math.max(.35,Math.min(2,touchStart.z*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,touchStart.d)))}});for(const event of ['pointerup','pointercancel'])cv.addEventListener(event,e=>{touches.delete(e.pointerId);touchStart=null});
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===1)touchStart={kind:'pan',x:e.clientX,y:e.clientY,cx:camera.x,cy:camera.y,moved:false};else if(touches.size===2){const[a,b]=[...touches.values()];touchStart={kind:'pinch',d:Math.hypot(a.x-b.x,a.y-b.y),z:camera.z}}});
+cv.addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touchStart?.kind==='pan'&&touches.size===1){if(Math.hypot(e.clientX-touchStart.x,e.clientY-touchStart.y)>9)touchStart.moved=true;camera.x=touchStart.cx-(e.clientX-touchStart.x)/camera.z;camera.y=touchStart.cy-(e.clientY-touchStart.y)/camera.z}else if(touchStart?.kind==='pinch'&&touches.size===2){const[a,b]=[...touches.values()];camera.z=Math.max(.35,Math.min(2,touchStart.z*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,touchStart.d)))}});
+cv.addEventListener('pointerup',e=>{if(touches.size===1&&touchStart?.kind==='pan'&&!touchStart.moved){const hit=signalHit(e.clientX,e.clientY);if(hit)requestSignal(hit.j,hit.d)}touches.delete(e.pointerId);touchStart=null});cv.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);touchStart=null});
 let prev=performance.now();function frame(now){let dt=Math.min(.05,(now-prev)/1000);prev=now;if(!paused)tick(dt);draw();requestAnimationFrame(frame)}reset();requestAnimationFrame(frame);
-window.__test={get state(){return{score,stage,lanes,signals:[...signals],clearance:[...clearance],cars:vehicles.map(c=>({d:c.d,j:c.j,l:c.l,m:c.m,s:c.s,stop:c.route.stop,entered:c.entered,wait:c.wait,v:c.v,x:pos(c.route,c.s).x,y:pos(c.route,c.s).y})),failTimer,paused}},setStage(n){stage=n;lanes=n>=4?3:n>=2?2:1;$('choose2').disabled=n<3;vehicles=[];hud()},setSignal(j,s){signals[j]=s;clearance[j]=0},spawn(d,j,l,m){const route=buildPath(d,j,l,m);vehicles.push({id:++vid,d,j,l,m,group:d+':'+j+':'+l,route,s:route.stop-100,v:0,max:60,wait:0,color:'#ed7e69',entered:false})},clear(){vehicles=[]},step(dt){tick(dt)},pause(v){paused=v}};
+window.__test={get state(){return{score,stage,lanes,signals:[...signals],pending:[...pending],clearance:[...clearance],cars:vehicles.map(c=>({id:c.id,d:c.d,j:c.j,l:c.l,m:c.m,s:c.s,stop:c.route.stop,entered:c.entered,wait:c.wait,v:c.v,x:pos(c.route,c.s).x,y:pos(c.route,c.s).y,ang:pos(c.route,c.s).ang})),failTimer,paused}},setStage(n){stage=n;lanes=n>=4?3:n>=2?2:1;vehicles=[];hud()},setSignal(j,d){requestSignal(j,d)},forceSignal(j,d){signals[j]=d;pending[j]=null;clearance[j]=0},spawn(d,j,l,m,s){return spawnVehicle(false,{d,j,l,m,s})},clear(){vehicles=[]},step(dt){tick(dt)},pause(v){paused=v},hit(d,j){const p=signalLocation(d,j);return{x:(p.x-camera.x)*camera.z+W/2,y:(p.y-camera.y)*camera.z+H/2}},get positions(){return vehicles.map(c=>pos(c.route,c.s))}};
 </script></body></html>
