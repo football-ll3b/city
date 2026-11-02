@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>حرب الجزر 3D — المدن V0.5</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071a2a;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}#view{position:absolute;inset:0;touch-action:none}#ui{position:absolute;top:12px;right:12px;left:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}#ui>*{pointer-events:auto}button,select{background:#143a53;color:white;border:1px solid #477c9a;border-radius:10px;padding:10px 13px;font-size:15px}button:active{background:#276184}#info{background:#071a2acb;padding:10px 14px;border-radius:10px;font-size:13px}#hint{position:absolute;bottom:12px;right:12px;left:12px;text-align:center;font-size:12px;background:#071a2ab8;padding:8px;border-radius:10px}#cityPanel{position:absolute;left:12px;bottom:58px;min-width:220px;max-width:310px;background:#08283dec;border:1px solid #477c9a;border-radius:14px;padding:14px;display:none;z-index:5;box-shadow:0 8px 28px #0019}#cityPanel h3{margin:0 0 8px}#cityPanel p{margin:7px 0}#cityPanel button{width:100%;margin-top:8px}#cityPanel .close{width:auto;float:left;padding:3px 9px}#error{position:absolute;top:45%;width:100%;text-align:center;color:#ffdbb0;display:none}.tag{font-weight:700}</style></head><body><div id="view"></div><div id="ui"><select id="size"><option value="small">صغيرة (15–25 مدينة)</option><option value="medium" selected>متوسطة (30–45 مدينة)</option><option value="large">كبيرة (50–80 مدينة)</option></select><button id="generate">خريطة جديدة</button><button id="reset">إعادة الكاميرا</button><button id="pause">إيقاف مؤقت</button><button id="export">تصدير بيانات الخريطة</button><div id="info">جارٍ التحميل...</div></div><div id="cityPanel"><button class="close" id="closeCity">×</button><h3 id="cityTitle"></h3><p id="cityStats"></p><p id="cityCost"></p><button id="upgradeCity">تطوير المدينة</button></div><div id="hint">اسحب بإصبع لتدوير الخريطة • إصبعان للتحريك والتقريب • اضغط مدينة لعرض الجنود وتطوير مدينتك</div><div id="error">تعذر تحميل محرك 3D. افتح الملف مع اتصال بالإنترنت في Safari.</div><script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script><script>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>حرب الجزر 3D — الجسور والقلاع V0.6</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071a2a;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}#view{position:absolute;inset:0;touch-action:none}#ui{position:absolute;top:12px;right:12px;left:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}#ui>*{pointer-events:auto}button,select{background:#143a53;color:white;border:1px solid #477c9a;border-radius:10px;padding:10px 13px;font-size:15px}button:active{background:#276184}#info{background:#071a2acb;padding:10px 14px;border-radius:10px;font-size:13px}#hint{position:absolute;bottom:12px;right:12px;left:12px;text-align:center;font-size:12px;background:#071a2ab8;padding:8px;border-radius:10px}#cityPanel{position:absolute;left:12px;bottom:58px;min-width:220px;max-width:310px;background:#08283dec;border:1px solid #477c9a;border-radius:14px;padding:14px;display:none;z-index:5;box-shadow:0 8px 28px #0019}#cityPanel h3{margin:0 0 8px}#cityPanel p{margin:7px 0}#cityPanel button{width:100%;margin-top:8px}#cityPanel .close{width:auto;float:left;padding:3px 9px}#error{position:absolute;top:45%;width:100%;text-align:center;color:#ffdbb0;display:none}.tag{font-weight:700}</style></head><body><div id="view"></div><div id="ui"><select id="size"><option value="small">صغيرة (15–25 قلعة)</option><option value="medium" selected>متوسطة (30–45 قلعة)</option></select><button id="generate">خريطة جديدة</button><button id="reset">إعادة الكاميرا</button><button id="pause">إيقاف مؤقت</button><button id="export">تصدير بيانات الخريطة</button><div id="info">جارٍ التحميل...</div></div><div id="cityPanel"><button class="close" id="closeCity">×</button><h3 id="cityTitle"></h3><p id="cityStats"></p><p id="cityCost"></p><button id="upgradeCity">تطوير المدينة</button></div><div id="hint">اسحب بإصبع لتدوير الخريطة • إصبعان للتحريك والتقريب • اضغط قلعة لعرض الجنود • الغزو لاحقًا سيكون عبر الجسور والقلاع المتصلة فقط</div><div id="error">تعذر تحميل محرك 3D. افتح الملف مع اتصال بالإنترنت في Safari.</div><script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script><script>
 (()=>{'use strict';if(!window.THREE){document.getElementById('error').style.display='block';return;}const T=THREE,view=document.getElementById('view'),info=document.getElementById('info');const scene=new T.Scene();scene.background=new T.Color(0x91d9ed);scene.fog=new T.FogExp2(0x91d9ed,.0008);const camera=new T.PerspectiveCamera(48,innerWidth/innerHeight,.1,1000),renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;view.appendChild(renderer.domElement);scene.add(new T.HemisphereLight(0xe7faff,0x4d6751,2.3));const sun=new T.DirectionalLight(0xffedc0,2.4);sun.position.set(-60,90,30);scene.add(sun);const ocean=new T.Mesh(new T.PlaneGeometry(1200,1200),new T.MeshStandardMaterial({color:0x177eaa,roughness:.38,metalness:.12}));ocean.rotation.x=-Math.PI/2;ocean.position.y=-1.2;scene.add(ocean);let group=new T.Group();scene.add(group);let mapData=null,labels=[],pickable=[],selectedCity=null,paused=false;const COLORS=[0x287bff,0xe64b4b,0x8f5ae6,0x36b76b,0xe6ac37,0xd4dce5];let seed=1;function rand(){seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296}function between(a,b){return a+(b-a)*rand()}function mat(c){return new T.MeshStandardMaterial({color:c,roughness:.86,flatShading:true})}const wallMat=mat(0xece2cb),roofMat=mat(0x7a5651),neutralMat=mat(0x8995a1);function mesh(geo,material,x,y,z,parent=group){let m=new T.Mesh(geo,material);m.position.set(x,y,z);parent.add(m);return m}function box(w,h,d,material,x,y,z,parent){return mesh(new T.BoxGeometry(w,h,d),material,x,y,z,parent)}function island(cx,cz,rx,rz,biome){
  const colors={tropical:[0x477d55,0x91c779],desert:[0xb79b66,0xf1d18a],snow:[0x91b3bc,0xe6f2f2]}[biome];
  // One solid extruded shoreline, no overlapping raised caps or white patches.
@@ -15,10 +15,10 @@
  }
 }
 function city(c){
- const color=c.owner===null?0x929da6:COLORS[c.owner];
+ const color=c.isFortress?0xc18a30:(c.owner===null?0x929da6:COLORS[c.owner]);
  const base=mesh(new T.CylinderGeometry(1.55,1.75,.6,8),mat(color),c.x,2.2,c.z);base.userData.city=c;pickable.push(base);
- const tower=mesh(new T.CylinderGeometry(.85,1,1.9,6),wallMat,c.x,3.45,c.z);c.tower=tower;tower.userData.city=c;pickable.push(tower);
- const roof=mesh(new T.ConeGeometry(1.15,1.15,6),mat(color),c.x,4.95,c.z);c.roof=roof;roof.userData.city=c;pickable.push(roof);
+ const tower=mesh(new T.CylinderGeometry(c.isFortress?1.65:.85,c.isFortress?1.9:1,c.isFortress?3.7:1.9,6),wallMat,c.x,c.isFortress?4.35:3.45,c.z);c.tower=tower;tower.userData.city=c;pickable.push(tower);
+ const roof=mesh(new T.ConeGeometry(c.isFortress?2.1:1.15,c.isFortress?2:1.15,6),mat(color),c.x,c.isFortress?7.25:4.95,c.z);c.roof=roof;roof.userData.city=c;pickable.push(roof);
  // A city marker updates as troops are produced; labels appear when zoomed in.
  const canvas=document.createElement('canvas');canvas.width=256;canvas.height=96;const ctx=canvas.getContext('2d');
  const sprite=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(canvas),depthTest:false,transparent:true}));sprite.position.set(c.x,7,c.z);sprite.scale.set(4.7,1.76,1);group.add(sprite);labels.push(sprite);c.labelCanvas=canvas;c.labelCtx=ctx;c.sprite=sprite;updateCityVisual(c);
@@ -28,64 +28,75 @@ function upgradeCost(c){return 8+c.level*8+Math.floor(c.level*c.level*1.5)}
 function updateCityVisual(c){
  if(!c.labelCtx)return;
  const ctx=c.labelCtx,canvas=c.labelCanvas;ctx.clearRect(0,0,256,96);ctx.fillStyle='#08283de8';ctx.beginPath();ctx.roundRect(8,8,240,80,15);ctx.fill();ctx.strokeStyle=c.owner===null?'#cbd5e1':'#ffffff';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 28px system-ui';ctx.textAlign='center';ctx.fillText(c.troops+'  |  Lv'+c.level,128,61);c.sprite.material.map.needsUpdate=true;
- c.tower.scale.y=1+(c.level-1)*.13;c.tower.position.y=3.45+(c.level-1)*.125;c.roof.position.y=4.95+(c.level-1)*.25;
- c.sprite.position.y=7+(c.level-1)*.25;
+ c.tower.scale.y=1+(c.level-1)*.13;c.tower.position.y=(c.isFortress?4.35:3.45)+(c.level-1)*.125;c.roof.position.y=(c.isFortress?7.25:4.95)+(c.level-1)*.25;
+ c.sprite.position.y=(c.isFortress?10:7)+(c.level-1)*.25;
 }
-function showCity(c){selectedCity=c;const panel=document.getElementById('cityPanel');panel.style.display='block';document.getElementById('cityTitle').textContent='مدينة '+c.id+' — '+(c.owner===null?'محايدة':c.owner===0?'مدينتك':'كمبيوتر '+c.owner);refreshPanel()}
-function refreshPanel(){if(!selectedCity)return;const c=selectedCity;document.getElementById('cityStats').textContent='المستوى '+c.level+' / 10 • الجنود: '+c.troops+(c.owner===null?' • القوة: '+({weak:'ضعيفة',medium:'متوسطة',strong:'قوية'}[c.strength]):' • إنتاج: '+(c.level/3).toFixed(2)+' جندي/ثانية');const cost=upgradeCost(c);document.getElementById('cityCost').textContent=c.owner===0?(c.level===10?'وصلت للحد الأعلى':'تكلفة التطوير: '+cost+' جندي'):'التطوير متاح لمدنك فقط';const b=document.getElementById('upgradeCity');b.style.display=c.owner===0?'block':'none';b.disabled=c.level>=10||c.troops<cost||paused;b.textContent=c.level>=10?'الحد الأقصى':c.troops<cost?'تحتاج '+cost+' جندي':'تطوير إلى المستوى '+(c.level+1)}
+function showCity(c){selectedCity=c;const panel=document.getElementById('cityPanel');panel.style.display='block';document.getElementById('cityTitle').textContent='قلعة '+c.id+' — '+(c.owner===null?'محايدة':c.owner===0?'مدينتك':'كمبيوتر '+c.owner);refreshPanel()}
+function refreshPanel(){if(!selectedCity)return;const c=selectedCity;document.getElementById('cityStats').textContent='المستوى '+c.level+' / 10 • الجنود: '+c.troops+(c.owner===null?' • القوة: '+({weak:'ضعيفة',medium:'متوسطة',strong:'قوية',fortress:'القلعة الكبرى'}[c.strength]):' • إنتاج: '+(c.level/3).toFixed(2)+' جندي/ثانية');const cost=upgradeCost(c);document.getElementById('cityCost').textContent=c.owner===0?(c.level===10?'وصلت للحد الأعلى':'تكلفة التطوير: '+cost+' جندي'):'التطوير متاح لمدنك فقط';const b=document.getElementById('upgradeCity');b.style.display=c.owner===0?'block':'none';b.disabled=c.level>=10||c.troops<cost||paused;b.textContent=c.level>=10?'الحد الأقصى':c.troops<cost?'تحتاج '+cost+' جندي':'تطوير إلى المستوى '+(c.level+1)}
 function updateTroops(dt){if(paused||!mapData)return;let changed=false;for(const c of mapData.cities){if(c.owner===null)continue;c.productionProgress+=dt*c.level/3;const produced=Math.floor(c.productionProgress);if(produced){c.productionProgress-=produced;c.troops+=produced;updateCityVisual(c);changed=true}}if(changed)refreshPanel()}
+function bridge(a,b){
+ // Solid raised stone causeway between island shores, visible above sea level.
+ const dx=b.x-a.x,dz=b.z-a.z,length=Math.hypot(dx,dz),ux=dx/length,uz=dz/length;
+ const start={x:a.x+ux*(Math.min(a.rx,a.rz)*.74),z:a.z+uz*(Math.min(a.rx,a.rz)*.74)};
+ const end={x:b.x-ux*(Math.min(b.rx,b.rz)*.74),z:b.z-uz*(Math.min(b.rx,b.rz)*.74)};
+ const span=Math.hypot(end.x-start.x,end.z-start.z);
+ if(span<1)return;
+ const deck=box(3.6,.65,span,mat(0xb8a18a),(start.x+end.x)/2,1.85,(start.z+end.z)/2);
+ deck.rotation.y=Math.atan2(dx,dz);
+ for(const side of [-1,1]){const rail=box(.35,.85,span,mat(0x6c7378),(start.x+end.x)/2+side*1.65*uz,2.45,(start.z+end.z)/2-side*1.65*ux);rail.rotation.y=deck.rotation.y;}
+}
 function generate(){
  seed=(Date.now()>>>0)||1234;
  const size=document.getElementById('size').value;
- const cfg={small:[15,25,6,29],medium:[30,45,8,40],large:[50,80,12,55]}[size];
- const count=Math.floor(between(cfg[0],cfg[1]+1)),n=cfg[2],radius=cfg[3];
- scene.remove(group);group=new T.Group();scene.add(group);pickable=[];labels=[];selectedCity=null;document.getElementById('cityPanel').style.display='none';
- // Place cities in a hexagonal layout within each landmass. Islands are spaced
- // using their full bounding radii to prevent coplanar terrain overlap / white seams.
- const islands=[];
- for(let i=0;i<n;i++){
-  const angle=2*Math.PI*i/n+between(-.055,.055);
-  const ring=radius*(size==='large'?1.38:1.20);
-  islands.push({x:Math.cos(angle)*ring,z:Math.sin(angle)*ring*.85,rx:12,rz:12,
-   biome:['tropical','desert','snow'][Math.floor(rand()*3)]});
+ const count=Math.floor(between(size==='small'?15:30,size==='small'?26:46));
+ scene.remove(group);group=new T.Group();scene.add(group);pickable=[];labels=[];selectedCity=null;
+ document.getElementById('cityPanel').style.display='none';
+ // Five large outer islands around one central fortress island.
+ const islands=[];const ring=size==='small'?43:54;
+ for(let i=0;i<5;i++){
+  const angle=-Math.PI/2+i*Math.PI*2/5;
+  islands.push({x:Math.cos(angle)*ring,z:Math.sin(angle)*ring,rx:size==='small'?17:21,rz:size==='small'?17:21,biome:['tropical','desert','snow'][i%3]});
  }
- const quotas=Array(n).fill(Math.floor(count/n));for(let i=0;i<count%n;i++)quotas[i]++;
- const cities=[];
- for(let i=0;i<n;i++){
-  const q=quotas[i],isl=islands[i],spacing=8.6;
-  // A compact hex lattice: no cities outside the island's interior ellipse.
-  const slots=[];
-  for(let row=-7;row<=7;row++)for(let col=-7;col<=7;col++){
-   let x=(col+(Math.abs(row)%2)*.5)*spacing,z=row*spacing*.866;
-   slots.push({x,z,r:x*x+z*z});
+ islands.push({x:0,z:0,rx:size==='small'?17:20,rz:size==='small'?17:20,biome:'desert'});
+ const cities=[],outer=count-1;
+ const quotas=Array(5).fill(Math.floor(outer/5));for(let i=0;i<outer%5;i++)quotas[i]++;
+ for(let i=0;i<5;i++){
+  const isl=islands[i],q=quotas[i],slots=[];
+  for(let row=-5;row<=5;row++)for(let col=-5;col<=5;col++){
+   let x=(col+(Math.abs(row)%2)*.5)*7.5,z=row*6.5;
+   if((x*x)/(isl.rx-4)**2+(z*z)/(isl.rz-4)**2<.95)slots.push({x,z,r:x*x+z*z});
   }
   slots.sort((a,b)=>a.r-b.r);
+  // Grow island enough to fit all city locations without overlap.
   const picked=slots.slice(0,q);
-  const maxX=Math.max(...picked.map(v=>Math.abs(v.x))),maxZ=Math.max(...picked.map(v=>Math.abs(v.z)));
-  isl.rx=Math.max(13,maxX+7);isl.rz=Math.max(13,maxZ+7);
-  for(const pos of picked)cities.push({id:cities.length+1,x:0,z:0,ox:pos.x,oz:pos.z,island:i,owner:null,level:1,strength:['weak','medium','strong'][Math.floor(rand()*3)],troops:0,productionProgress:0});
+  if(picked.length<q){for(let k=picked.length;k<q;k++){let t=2*Math.PI*k/q;picked.push({x:Math.cos(t)*15,z:Math.sin(t)*15});}}
+  for(const pos of picked)cities.push({id:cities.length+1,x:isl.x+pos.x,z:isl.z+pos.z,island:i,owner:null,level:1,strength:['weak','medium','strong'][Math.floor(rand()*3)],troops:0,productionProgress:0,isFortress:false});
  }
- // Collision-free islands, checked as ellipses in X/Z with a shoreline margin.
- for(let iteration=0;iteration<250;iteration++){
-  let movedAny=false;
-  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
-   let a=islands[i],b=islands[j],dx=b.x-a.x,dz=b.z-a.z;
-   let rx=a.rx+b.rx+2.5,rz=a.rz+b.rz+2.5;
-   let metric=Math.hypot(dx/rx,dz/rz);
-   if(metric<1){
-    if(metric<.00001){dx=.01;dz=.01;metric=.0001;}
-    let amount=(1-metric)*.54;
-    a.x-=dx*amount;a.z-=dz*amount;b.x+=dx*amount;b.z+=dz*amount;movedAny=true;
-   }
-  }
-  if(!movedAny)break;
- }
- for(const c of cities){const isl=islands[c.island];c.x=+(isl.x+c.ox).toFixed(2);c.z=+(isl.z+c.oz).toFixed(2);delete c.ox;delete c.oz;}
+ const fort={id:cities.length+1,x:0,z:0,island:5,owner:null,level:10,strength:'fortress',troops:120,productionProgress:0,isFortress:true};cities.push(fort);
  islands.forEach(i=>island(i.x,i.z,i.rx,i.rz,i.biome));
- const chosen=[],used=new Set();while(chosen.length<6){let best=-1,score=-1;for(let i=0;i<cities.length;i++){let c=cities[i];if(used.has(c.island))continue;let d=chosen.length?Math.min(...chosen.map(j=>Math.hypot(c.x-cities[j].x,c.z-cities[j].z))):Math.hypot(c.x,c.z);if(d>score){score=d;best=i}}if(best<0)break;chosen.push(best);used.add(cities[best].island)}
- chosen.forEach((i,player)=>{cities[i].owner=player;cities[i].strength='starting'});cities.forEach(c=>{c.troops=c.owner!==null?10:({weak:5,medium:12,strong:22}[c.strength]);city(c)});
- mapData={format:'harb-aljuzur-map-v5',seed,size,cityCount:cities.length,islands,cities,playerCount:6,startingCityIds:chosen.map(i=>cities[i].id),rules:{neutralProduction:false,neutralStrengths:['weak','medium','strong'],startingCitiesPerPlayer:1}};
- info.textContent=`${cities.length} مدينة • ${islands.length} جزر • 6 مواقع بداية`;
+ // Bridges connect each outer island to the central fortress and adjacent islands.
+ const connections=[];
+ for(let i=0;i<5;i++){connections.push([i,5]);connections.push([i,(i+1)%5]);}
+ connections.forEach(([i,j])=>bridge(islands[i],islands[j]));
+ // Six starting positions distributed over five outer islands; center remains neutral.
+ const chosen=[];for(let i=0;i<5;i++)chosen.push(cities.findIndex(c=>c.island===i));
+ const extra=cities.findIndex(c=>c.island===0&&c.id!==cities[chosen[0]].id);if(extra>=0)chosen.push(extra);
+ chosen.forEach((idx,player)=>{cities[idx].owner=player;cities[idx].strength='starting'});
+ cities.forEach(c=>{if(!c.isFortress)c.troops=c.owner!==null?10:({weak:5,medium:12,strong:22}[c.strength]);city(c)});
+ // Gate for future attack system: a target must be connected by a bridge to an owned island,
+ // and conquest within an island must proceed through the nearest unconquered city.
+ function canAttack(player,targetId){const target=cities.find(c=>c.id===targetId);if(!target||target.owner===player)return false;
+  const owned=cities.filter(c=>c.owner===player);if(!owned.length)return false;
+  const same=owned.filter(c=>c.island===target.island);
+  if(same.length){const pending=cities.filter(c=>c.island===target.island&&c.owner!==player);if(!pending.length)return false;
+   const closest=Math.min(...pending.map(c=>Math.min(...same.map(o=>Math.hypot(c.x-o.x,c.z-o.z)))));
+   return Math.min(...same.map(o=>Math.hypot(target.x-o.x,target.z-o.z)))<=closest+.01;
+  }
+  return owned.some(o=>connections.some(([a,b])=>(a===o.island&&b===target.island)||(b===o.island&&a===target.island)));
+ }
+ mapData={format:'harb-aljuzur-map-v06',seed,size,cityCount:cities.length,islands,cities,connections,playerCount:6,startingCityIds:chosen.map(i=>cities[i].id),rules:{neutralProduction:false,neutralStrengths:['weak','medium','strong'],startingCitiesPerPlayer:1,centralFortressId:fort.id,centralFortressTroops:120,bridgesOnly:true,conquestOrder:'nearest-connected-first'}};
+ window.harbAlJuzurCanAttack=canAttack;
+ info.textContent=`${cities.length} قلعة • 5 جزر خارجية + قلعة مركزية • 6 لاعبين`;
  resetCamera();
 }
 let target=new T.Vector3(),yaw=.65,pitch=.95,dist=175;function resetCamera(){yaw=.65;pitch=.95;{let bounds=mapData.islands.reduce((b,i)=>({minX:Math.min(b.minX,i.x-i.rx),maxX:Math.max(b.maxX,i.x+i.rx),minZ:Math.min(b.minZ,i.z-i.rz),maxZ:Math.max(b.maxZ,i.z+i.rz)}),{minX:Infinity,maxX:-Infinity,minZ:Infinity,maxZ:-Infinity});target.set((bounds.minX+bounds.maxX)/2,0,(bounds.minZ+bounds.maxZ)/2);const width=bounds.maxX-bounds.minX,depth=bounds.maxZ-bounds.minZ;const aspect=innerWidth/innerHeight;dist=Math.max(width/(2*Math.tan(camera.fov*Math.PI/360)*aspect),depth/(2*Math.tan(camera.fov*Math.PI/360)))*1.30+15;}updateCamera()}function updateCamera(){pitch=Math.max(.2,Math.min(1.48,pitch));dist=Math.max(20,Math.min(450,dist));camera.position.set(target.x+dist*Math.sin(pitch)*Math.cos(yaw),target.y+dist*Math.cos(pitch),target.z+dist*Math.sin(pitch)*Math.sin(yaw));camera.lookAt(target)}const pointers=new Map();let lastPinch=0,lastMid=null,moved=false;renderer.domElement.addEventListener('pointerdown',e=>{renderer.domElement.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false});renderer.domElement.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const old=pointers.get(e.pointerId);let dx=e.clientX-old.x,dy=e.clientY-old.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(Math.abs(dx)+Math.abs(dy)>2)moved=true;if(pointers.size===1){yaw-=dx*.007;pitch-=dy*.006}else if(pointers.size===2){let ps=[...pointers.values()],d=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y),mid={x:(ps[0].x+ps[1].x)/2,y:(ps[0].y+ps[1].y)/2};if(lastPinch)dist*=lastPinch/d;if(lastMid){let right=new T.Vector3().setFromMatrixColumn(camera.matrix,0);let forward=new T.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();target.addScaledVector(right,-(mid.x-lastMid.x)*dist/750);target.addScaledVector(forward,(mid.y-lastMid.y)*dist/750)}lastPinch=d;lastMid=mid}updateCamera()});renderer.domElement.addEventListener('pointerup',e=>{if(!moved&&pointers.size===1){let p=new T.Vector2(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1),ray=new T.Raycaster();ray.setFromCamera(p,camera);let hit=ray.intersectObjects(pickable)[0];if(hit){let c=hit.object.userData.city;showCity(c);info.textContent=`مدينة ${c.id} • ${c.owner===null?'محايدة / '+({weak:'ضعيفة',medium:'متوسطة',strong:'قوية'}[c.strength]):c.owner===0?'مدينتك':'كمبيوتر '+c.owner} • المستوى ${c.level}`}}pointers.delete(e.pointerId);lastPinch=0;lastMid=null});renderer.domElement.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);lastPinch=0;lastMid=null});renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();dist*=Math.exp(e.deltaY*.001);updateCamera()},{passive:false});document.getElementById('closeCity').onclick=()=>{selectedCity=null;document.getElementById('cityPanel').style.display='none'};document.getElementById('upgradeCity').onclick=()=>{const c=selectedCity;if(!c||c.owner!==0||c.level>=10||paused)return;const cost=upgradeCost(c);if(c.troops<cost)return;c.troops-=cost;c.level++;updateCityVisual(c);refreshPanel()};document.getElementById('pause').onclick=()=>{paused=!paused;document.getElementById('pause').textContent=paused?'استئناف':'إيقاف مؤقت';refreshPanel()};document.getElementById('generate').onclick=generate;document.getElementById('size').onchange=generate;document.getElementById('reset').onclick=resetCamera;document.getElementById('export').onclick=()=>{if(!mapData)return;let blob=new Blob([JSON.stringify(mapData,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='harb-aljuzur-'+mapData.size+'-'+mapData.seed+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)};window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(mapData)resetCamera()});generate();let previous=performance.now();(function animate(now){requestAnimationFrame(animate);let dt=Math.min(.1,(now-previous)/1000);previous=now;updateTroops(dt);labels.forEach(l=>{l.visible=dist<105});renderer.render(scene,camera)})(performance.now())})();
