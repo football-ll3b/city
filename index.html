@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="مدينتي: لعبة بناء مدينة ومرور صغيرة تعمل داخل المتصفح، دون مكتبات أو اتصال خارجي.">
-<title>V0.4 | مدينتي | V0.5 Road Rules Test</title>
+<title>V0.4 | مدينتي | V0.5 Ramp Rules Test</title>
 <style>
 :root{--ink:#ecf5f5;--muted:#9eb5b9;--panel:#112b35;--mint:#9ee9c7;--amber:#f6cb7d;--line:rgba(218,245,239,.13);--bad:#ff9e92;--safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px);--safeL:env(safe-area-inset-left,0px);--safeR:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -1462,9 +1462,9 @@ function city3_buildRoadGraph(){
  const net=G.network,paths=new Map(),cuts=new Map();let length=0;
  for(const r of net.roads){const p=pathInfo(r.points);paths.set(r.id,p);cuts.set(r.id,[0,p.length,...zoneCuts(r,p)]);length+=p.length}
  for(let i=0;i<net.roads.length;i++){const r=net.roads[i],p=paths.get(r.id);for(let j=i+1;j<net.roads.length;j++){const s=net.roads[j],q=paths.get(s.id);
-  for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){const A=p.points[a-1],B=p.points[a],C=q.points[b-1],D=q.points[b];if(Math.max(A.x,B.x)+.001<Math.min(C.x,D.x)||Math.max(C.x,D.x)+.001<Math.min(A.x,B.x)||Math.max(A.y,B.y)+.001<Math.min(C.y,D.y)||Math.max(C.y,D.y)+.001<Math.min(A.y,B.y))continue;const hit=lineIntersection(A,B,C,D);if(hit){const ps=p.marks[a-1]+hit.t*(p.marks[a]-p.marks[a-1]),qs=q.marks[b-1]+hit.u*(q.marks[b]-q.marks[b-1]);if(Math.abs(roadHeight(r,ps,p)-roadHeight(s,qs,q))<.025&&legalSameLevelConnection(r,s)){cuts.get(r.id).push(ps);cuts.get(s.id).push(qs)}}}
-  for(const e of [0,p.length]){const endpoint=atDistance(p,e),hit=projectPath(endpoint,q);if(hit.d<.02&&Math.abs(roadHeight(r,e,p)-roadHeight(s,hit.s,q))<.025&&legalSameLevelConnection(r,s))cuts.get(s.id).push(hit.s)}
-  for(const e of [0,q.length]){const endpoint=atDistance(q,e),hit=projectPath(endpoint,p);if(hit.d<.02&&Math.abs(roadHeight(s,e,q)-roadHeight(r,hit.s,p))<.025&&legalSameLevelConnection(r,s))cuts.get(r.id).push(hit.s)}
+  for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){const A=p.points[a-1],B=p.points[a],C=q.points[b-1],D=q.points[b];if(Math.max(A.x,B.x)+.001<Math.min(C.x,D.x)||Math.max(C.x,D.x)+.001<Math.min(A.x,B.x)||Math.max(A.y,B.y)+.001<Math.min(C.y,D.y)||Math.max(C.y,D.y)+.001<Math.min(A.y,B.y))continue;const hit=lineIntersection(A,B,C,D);if(hit){const ps=p.marks[a-1]+hit.t*(p.marks[a]-p.marks[a-1]),qs=q.marks[b-1]+hit.u*(q.marks[b]-q.marks[b-1]);if(Math.abs(roadHeight(r,ps,p)-roadHeight(s,qs,q))<.025&&legalSameLevelConnection(r,s)){let ok=true;if(rampHighwayPair(r,s)){const ramp=isRampRoad(r)?r:s,rp=isRampRoad(r)?p:q,rs=isRampRoad(r)?ps:qs,hw=isRampRoad(r)?s:r,hp=isRampRoad(r)?q:p,hs=isRampRoad(r)?qs:ps;const rt=atDistance(rp,rs),ht=atDistance(hp,hs);ok=(rs<.11||rp.length-rs<.11)&&Math.abs(rt.dx*ht.dx+rt.dy*ht.dy)>.82}if(ok){cuts.get(r.id).push(ps);cuts.get(s.id).push(qs)}}}}
+  for(const e of [0,p.length]){const endpoint=atDistance(p,e),hit=projectPath(endpoint,q);if(hit.d<.02&&Math.abs(roadHeight(r,e,p)-roadHeight(s,hit.s,q))<.025&&legalSameLevelConnection(r,s)){const a=atDistance(p,e),b=atDistance(q,hit.s);if(!rampHighwayPair(r,s)||Math.abs(a.dx*b.dx+a.dy*b.dy)>.82)cuts.get(s.id).push(hit.s)}}
+  for(const e of [0,q.length]){const endpoint=atDistance(q,e),hit=projectPath(endpoint,p);if(hit.d<.02&&Math.abs(roadHeight(s,e,q)-roadHeight(r,hit.s,p))<.025&&legalSameLevelConnection(r,s)){const a=atDistance(q,e),b=atDistance(p,hit.s);if(!rampHighwayPair(r,s)||Math.abs(a.dx*b.dx+a.dy*b.dy)>.82)cuts.get(r.id).push(hit.s)}}
  }}
  const candidates=new Map();
  for(const b of buildings){const p=xy(b),center={x:p.x+.5,y:p.y+.5},list=[];for(const r of net.roads){if(!isGround(r))continue;const hit=projectPath(center,paths.get(r.id));if(hit.d<=1.05+roadRadius(r)&&drivewayClear(center,hit,b)){cuts.get(r.id).push(hit.s);list.push({...hit,road:r.id})}}candidates.set(b,list)}
@@ -1713,7 +1713,12 @@ function laneFor(c,from,to){const arc=RN.arcs.get(from+':'+to);if(!arc)return 0;
 }
 function laneOffset(c,arc){const r=RN.roads.get(arc.road),lane=laneFor(c,arc.a,arc.b);return r.oneWay?(lane-(r.lanes-1)/2)*.14:(lane+.5)*.14}
 function isHighwayRoad(r){return !!r&&(r.protected===true||r.roadClass==='highway'||(r.kind!=='exit'&&r.lanes>=6))}
-function legalSameLevelConnection(a,b){if(!a||!b)return true;if(a.kind==='exit'||b.kind==='exit')return true;if(isHighwayRoad(a)||isHighwayRoad(b))return isHighwayRoad(a)&&isHighwayRoad(b);return true}
+function isRampRoad(r){return !!r&&r.kind==='exit'}
+function rampHighwayPair(a,b){return isRampRoad(a)&&isHighwayRoad(b)||isRampRoad(b)&&isHighwayRoad(a)}
+function legalSameLevelConnection(a,b){if(!a||!b)return true;if(rampHighwayPair(a,b))return true;if(isRampRoad(a)||isRampRoad(b))return !isHighwayRoad(a)&&!isHighwayRoad(b);if(isHighwayRoad(a)||isHighwayRoad(b))return isHighwayRoad(a)&&isHighwayRoad(b);return true}
+function rampEndpointInfo(r,other){const p=pathInfo(r.points),q=RN.paths.get(other.id)||pathInfo(other.points),hits=[];for(const e of [0,p.length]){const pt=atDistance(p,e),h=projectPath(pt,q);if(h.d<.10&&Math.abs(roadHeight(r,e,p)-roadHeight(other,h.s,q))<.04){const tan=unit(atDistance(p,Math.max(0,e-.22)),atDistance(p,Math.min(p.length,e+.22))),hq=atDistance(q,h.s),dot=Math.abs(tan.x*hq.dx+tan.y*hq.dy);hits.push({end:e===0?0:1,s:h.s,d:h.d,dot})}}return hits}
+function invalidRampConnection(r,existing=null){if(!isRampRoad(r))return '';const p=pathInfo(r.points);if(p.length<2.2)return 'المخرج قصير. مدده أكثر حتى يكون الاندماج سلسًا.';let highwayTouches=0;for(const other of G.network.roads){if(other.id===existing||!isHighwayRoad(other))continue;const q=RN.paths.get(other.id)||pathInfo(other.points),ends=rampEndpointInfo(r,other);highwayTouches+=ends.length;if(ends.some(h=>h.dot<.82))return 'زاوية المخرج حادة. خلّ المخرج موازيًا للطريق السريع عند نقطة الاندماج.';for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){const h=lineIntersection(p.points[a-1],p.points[a],q.points[b-1],q.points[b]);if(!h)continue;const ps=p.marks[a-1]+h.t*(p.marks[a]-p.marks[a-1]),qs=q.marks[b-1]+h.u*(q.marks[b]-q.marks[b-1]);if(Math.abs(roadHeight(r,ps,p)-roadHeight(other,qs,q))<.03&&ps>.10&&ps<p.length-.10)return 'المخرج لا يجوز أن يقطع الطريق السريع. يجب أن يندمج معه من طرف المخرج فقط.'}}
+ if(highwayTouches>1)return 'المخرج يجب أن يتصل بطريق سريع واحد فقط عند طرف واحد.';return ''}
 function illegalHighwayConnection(r,existing=null){
  const p=pathInfo(r.points);
  for(const other of G.network.roads){if(other.id===existing)continue;if(legalSameLevelConnection(r,other))continue;const q=RN.paths.get(other.id)||pathInfo(other.points);
@@ -1722,6 +1727,7 @@ function illegalHighwayConnection(r,existing=null){
  }return false;
 }
 function roadGeometryError(r,existing=null){
+ const rampError=invalidRampConnection(r,existing);if(rampError)return rampError;
  if(illegalHighwayConnection(r,existing))return 'لا يمكن ربط شارع عادي مباشرة بالطريق السريع. استخدم مخرج/مدخل Ramp، أو اعبر فوقه بجسر.';
  if(r.kind==='round'&&(r.lanes>2||r.radius<.45))return U.roundTooWide;
  if(r.laneZone){const z=r.laneZone;if(!Number.isFinite(z.from)||!Number.isFinite(z.to)||z.to-z.from<.08||z.from<.02||z.to>.98||![1,2,3,4,5,6].includes(z.lanes)||(!r.oneWay&&z.lanes<2))return U.badSave;if(pathInfo(r.points).length<4)return U.zoneShort}
