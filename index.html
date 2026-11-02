@@ -3,113 +3,117 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#102a32">
-<title>شبكة المدينة | تجربة 0.1</title>
+<title>فك الزحمة | V0.1</title>
 <style>
-:root{--p:#102a32;--mint:#a7efd0;--txt:#f3faf8;--mut:#a8bdbe;--line:#ffffff20;--safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#b9d8b0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--txt)}
-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
-.ui{position:absolute;inset:0;pointer-events:none}.ui>*{pointer-events:auto}
-.top{position:absolute;top:calc(10px + var(--safeT));left:12px;right:12px;display:flex;gap:8px;align-items:stretch}
-.brand,.stats,.panel,.speeds,.tools{background:#102a32ee;border:1px solid var(--line);box-shadow:0 8px 28px #183f4030}
-.brand{border-radius:17px;padding:10px 16px;min-width:160px}.brand b{font-size:22px}.brand small{display:block;color:var(--mint);font-size:9px;letter-spacing:2px}
-.stats{border-radius:17px;display:flex;flex:1;max-width:720px}.stat{flex:1;padding:9px 14px;border-left:1px solid var(--line)}.stat:last-child{border:0}.stat span{font-size:9px;color:var(--mut)}.stat b{display:block;font-size:20px;direction:ltr;text-align:right}.stat em{font-style:normal;font-size:9px;color:var(--mint)}
-.speeds{position:absolute;top:calc(91px + var(--safeT));left:12px;border-radius:14px;padding:5px;display:flex;direction:ltr}.speeds button,.tool,.action{border:0;color:var(--txt);font:inherit;background:transparent}.speeds button{width:42px;height:36px;border-radius:10px;font-weight:800}.speeds button.on{background:var(--mint);color:#102a32}
-.panel{position:absolute;top:calc(91px + var(--safeT));right:12px;width:230px;border-radius:17px;padding:14px}.panel h3{margin:0 0 7px;font-size:15px}.panel p{margin:0;color:var(--mut);font-size:11px;line-height:1.7}.meter{height:5px;background:#29464c;border-radius:10px;margin:10px 0;overflow:hidden}.meter i{height:100%;display:block;background:var(--mint)}
-.tools{position:absolute;bottom:calc(12px + var(--safeB));left:50%;transform:translateX(-50%);border-radius:19px;padding:7px;display:flex;gap:4px;max-width:calc(100% - 24px);overflow:auto}
-.tool{min-width:74px;border-radius:13px;padding:8px 9px}.tool b{display:block;font-size:11px}.tool small{font-size:9px;color:var(--mut)}.tool.on{background:var(--mint);color:#102a32}.tool.on small{color:#345950}
-.tip{position:absolute;bottom:calc(102px + var(--safeB));left:50%;transform:translateX(-50%);background:#102a32e8;border-radius:12px;padding:9px 14px;font-size:11px;white-space:nowrap}
-.toast{position:absolute;top:calc(145px + var(--safeT));left:50%;transform:translateX(-50%);background:#102a32;padding:10px 16px;border-radius:12px;opacity:0;transition:.2s;font-size:11px}.toast.show{opacity:1}
-.overlay{position:absolute;inset:0;background:#0b2738aa;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}.card{background:#102a32;border:1px solid #ffffff2a;border-radius:24px;width:440px;max-width:100%;padding:25px}.card h1{font-size:42px;margin:5px 0}.card p{color:var(--mut);line-height:1.8;font-size:13px}.action{width:100%;background:var(--mint);color:#102a32;border-radius:13px;padding:14px;font-weight:800;margin-top:8px}.bad{color:#ffae9f!important}
-@media(max-width:650px){.brand{display:none}.stat{padding:8px}.stat b{font-size:16px}.panel{width:190px}.tools{left:8px;right:8px;transform:none}.tool{min-width:64px}.tip{bottom:calc(100px + var(--safeB));max-width:90%;white-space:normal;text-align:center}}
-@media(max-height:550px) and (orientation:landscape){.top{top:calc(5px + var(--safeT))}.stats{max-width:600px}.speeds,.panel{top:calc(67px + var(--safeT))}.panel{width:190px;padding:10px}.tools{bottom:calc(6px + var(--safeB));padding:5px}.tool{padding:5px}.tip{bottom:calc(80px + var(--safeB))}}
-</style>
-</head>
+:root{--ink:#f4faf8;--panel:#102a32;--mint:#9ce9c7;--muted:#a9bdbe;--red:#ff806f;--amber:#f1c768;--safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#a9cba4;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}button{font:inherit;border:0;color:inherit;touch-action:manipulation}canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.ui{position:absolute;inset:0;pointer-events:none}.ui>*{pointer-events:auto}
+.top{position:absolute;top:calc(10px + var(--safeT));left:12px;right:12px;display:flex;gap:8px}.brand,.stats,.panel,.controls{background:#102a32ee;border:1px solid #ffffff1f;box-shadow:0 7px 25px #173b3d25}.brand{border-radius:17px;padding:9px 15px;min-width:145px}.brand b{font-size:21px}.brand small{display:block;color:var(--mint);font-size:8px;letter-spacing:2px}.stats{display:flex;flex:1;max-width:720px;border-radius:17px}.stat{flex:1;padding:8px 13px;border-left:1px solid #ffffff18}.stat:last-child{border:0}.stat span{font-size:9px;color:var(--muted)}.stat b{display:block;font-size:20px;direction:ltr;text-align:right}.stat small{font-size:9px;color:var(--mint)}
+.panel{position:absolute;top:calc(88px + var(--safeT));right:12px;width:215px;border-radius:16px;padding:13px}.panel h3{font-size:14px;margin:0 0 6px}.panel p{font-size:10px;line-height:1.65;color:var(--muted);margin:0}.bar{height:5px;background:#29454b;border-radius:9px;margin:10px 0;overflow:hidden}.bar i{display:block;height:100%;background:var(--mint);width:0%}
+.controls{position:absolute;bottom:calc(12px + var(--safeB));left:50%;transform:translateX(-50%);border-radius:20px;padding:8px;display:flex;gap:7px;align-items:center}.sig{min-width:116px;height:58px;border-radius:14px;background:#26454c;font-weight:800;font-size:12px}.sig.on{background:var(--mint);color:#102a32}.pause,.restart{width:54px;height:54px;border-radius:14px;background:#26454c}.hint{position:absolute;bottom:calc(88px + var(--safeB));left:50%;transform:translateX(-50%);background:#102a32e9;border-radius:12px;padding:8px 13px;font-size:10px;white-space:nowrap}.toast{position:absolute;top:calc(145px + var(--safeT));left:50%;transform:translateX(-50%);background:#102a32;border-radius:12px;padding:10px 15px;font-size:11px;opacity:0;transition:.2s}.toast.show{opacity:1}
+.overlay{position:absolute;inset:0;z-index:20;background:#0b2739a8;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px}.card{width:430px;max-width:100%;background:#102a32;border:1px solid #ffffff26;border-radius:24px;padding:25px}.card h1{font-size:45px;margin:5px 0}.card p{font-size:13px;color:var(--muted);line-height:1.8}.action{width:100%;padding:14px;border-radius:13px;background:var(--mint);color:#102a32;font-weight:800;margin-top:8px}
+@media(max-width:650px){.brand{display:none}.stat{padding:7px}.stat b{font-size:16px}.panel{width:185px}.controls{left:8px;right:8px;transform:none;justify-content:center}.sig{min-width:105px}.hint{max-width:90%;white-space:normal;text-align:center}}
+@media(max-height:550px) and (orientation:landscape){.top{top:calc(5px + var(--safeT))}.panel{top:calc(65px + var(--safeT));padding:9px;width:185px}.controls{bottom:calc(5px + var(--safeB));padding:5px}.sig{height:48px}.pause,.restart{height:48px}.hint{bottom:calc(66px + var(--safeB))}}
+</style></head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="game"></canvas>
 <div class="ui" id="ui" hidden>
- <div class="top"><div class="brand"><b>شبكة المدينة</b><small>CITY NETWORK</small></div><div class="stats">
-  <div class="stat"><span>الأسبوع</span><b id="week">1</b><em id="day">اليوم 1</em></div>
-  <div class="stat"><span>التوصيلات</span><b id="score">0</b><em>رحلة ناجحة</em></div>
-  <div class="stat"><span>الطلبات</span><b id="pending">0</b><em id="risk">مستقر</em></div>
-  <div class="stat"><span>رصيد الطرق</span><b id="budget">34</b><em>وصلة متاحة</em></div>
+ <div class="top"><div class="brand"><b>فك الزحمة 🚦</b><small>TRAFFIC BREAK</small></div><div class="stats">
+  <div class="stat"><span>النقاط</span><b id="score">0</b><small>سيارة عبرت</small></div>
+  <div class="stat"><span>الوقت</span><b id="time">0:00</b><small id="level">المستوى 1</small></div>
+  <div class="stat"><span>الطابور</span><b id="queue">0</b><small id="qtext">ممتاز</small></div>
+  <div class="stat"><span>أفضل نتيجة</span><b id="best">0</b><small>على هذا الجهاز</small></div>
  </div></div>
- <div class="speeds"><button data-s="0">Ⅱ</button><button data-s="1" class="on">1×</button><button data-s="2">2×</button><button data-s="3">3×</button></div>
- <div class="panel"><h3>تحدّي الشبكة</h3><p id="mission">اضغط عقدتين متجاورتين لبناء وصلة. وصّل البيت بالشركة التي تحمل نفس اللون.</p><div class="meter"><i id="meter" style="width:10%"></i></div><p id="status">لونان في البداية · الصعوبة تزيد تدريجيًا</p></div>
- <div class="tip" id="tip">اختر «طريق»، ثم المس نقطتين متجاورتين.</div>
- <div class="tools">
-  <button class="tool on" data-tool="road"><b>طريق</b><small>1 رصيد</small></button>
-  <button class="tool" data-tool="upgrade"><b>توسعة</b><small>1 → 4 مسارات</small></button>
-  <button class="tool" data-tool="round"><b>دوّار</b><small>تقاطع</small></button>
-  <button class="tool" data-tool="signal"><b>إشارة</b><small>تقاطع</small></button>
-  <button class="tool" data-tool="bridge"><b>جسر</b><small>4 أرصدة</small></button>
-  <button class="tool" data-tool="erase"><b>إزالة</b><small>استرداد</small></button>
+ <div class="panel"><h3>إدارة التقاطع</h3><p>شغّل اتجاهًا واحدًا في كل مرة. السيارات تفرمل عند الأحمر وتتسارع تدريجيًا عند الأخضر.</p><div class="bar"><i id="danger"></i></div><p id="status">الزحمة تحت السيطرة</p></div>
+ <div class="hint">بدّل الإشارة قبل ما يطول أحد الطوابير. لا تغيّر بسرعة والسيارات داخل التقاطع.</div>
+ <div class="controls">
+  <button class="sig on" id="ns">↕ شمال / جنوب<br><small>أخضر</small></button>
+  <button class="sig" id="ew">↔ شرق / غرب<br><small>أحمر</small></button>
+  <button class="pause" id="pause" aria-label="إيقاف">Ⅱ</button>
+  <button class="restart" id="restart" aria-label="إعادة">↻</button>
  </div>
  <div class="toast" id="toast"></div>
 </div>
-<div class="overlay" id="start"><div class="card"><small style="color:var(--mint)">تجربة جديدة · 0.1</small><h1>شبكة المدينة</h1><p>المدينة تبني البيوت والشركات تلقائيًا، وأنت تصمم شبكة المرور. الطرق تتصل بعُقد ثابتة، لذلك ما فيه تقاطعات سوداء أو مخارج ملتصقة بشكل عشوائي.</p><p>ابدأ بلونين. مع تقدم الأسابيع تظهر ألوان ومبانٍ أكثر وتزداد الطلبات. وسّع الوصلات أو حوّل التقاطعات إلى دوارات وإشارات.</p><button class="action" id="go">ابدأ التجربة</button></div></div>
+<div class="overlay" id="start"><div class="card"><small style="color:var(--mint)">نسخة تجريبية 0.1</small><h1>فك الزحمة</h1><p>تحكم بإشارة تقاطع مزدحم ومرّر أكبر عدد ممكن من السيارات. كل دقيقة تزداد حركة المرور، والطوابير الطويلة تقرّبك من الخسارة.</p><p>السيارات تتحرك تلقائيًا. مهمتك الوحيدة اختيار من يحصل على الأخضر وفي أي وقت.</p><button class="action" id="go">ابدأ اللعب</button></div></div>
+<div class="overlay" id="over" style="display:none"><div class="card"><small style="color:var(--red)">انتهت الجولة</small><h1>الزحمة غلبتك!</h1><p id="result"></p><button class="action" id="again">حاول مرة ثانية</button></div></div>
 <script>
 'use strict';
-const C=document.getElementById('c'),X=C.getContext('2d'),$=id=>document.getElementById(id);
-let W,H,D=1,tool='road',speed=1,sel=null,t=0,week=1,score=0,budget=34,spawnT=0,demandT=0;
-const COL=['#ed7f68','#53b9df','#e9bd54','#9b82d0','#70bc87'];
-const nodes=[], edges=new Map(), buildings=[], cars=[];
-const NX=9,NY=7;
-function key(a,b){return a<b?a+'-'+b:b+'-'+a}
-function node(x,y){return nodes[y*NX+x]}
-for(let y=0;y<NY;y++)for(let x=0;x<NX;x++)nodes.push({id:y*NX+x,x,y,round:false,signal:false});
-function E(a,b){return edges.get(key(a,b))}
-function addEdge(a,b,lanes=1,bridge=false){if(a===b||E(a,b))return false;edges.set(key(a,b),{a,b,lanes,bridge,load:0});return true}
-function neighbors(id){const n=nodes[id],out=[];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let x=n.x+dx,y=n.y+dy;if(x>=0&&y>=0&&x<NX&&y<NY)out.push(node(x,y).id)}return out}
-function path(a,b){const q=[a],prev=new Map([[a,-1]]);for(let i=0;i<q.length;i++){let v=q[i];if(v===b)break;for(const n of neighbors(v)){if(!E(v,n)||prev.has(n))continue;prev.set(n,v);q.push(n)}}if(!prev.has(b))return null;let p=[b];while(p[0]!==a)p.unshift(prev.get(p[0]));return p}
-function site(type,color,id){buildings.push({type,color,node:id,pending:type==='company'?1:0,alarm:0})}
-site('home',0,node(1,1).id);site('home',0,node(1,3).id);site('company',0,node(7,2).id);
-site('home',1,node(2,5).id);site('home',1,node(4,5).id);site('company',1,node(7,5).id);
-addEdge(node(0,3).id,node(1,3).id,2); addEdge(node(1,3).id,node(2,3).id,2);
+const C=document.getElementById('game'),X=C.getContext('2d'),$=id=>document.getElementById(id);
+let W=0,H=0,D=1,running=false,paused=false,phase='NS',phaseLock=0,t=0,score=0,nextId=1,spawn=0,cars=[],last=0,gameOver=false;
+let best=0;try{best=+(localStorage.getItem('fak_alzahma_best')||0)}catch(e){}
+$('best').textContent=best;
+const dirs={
+ N:{dx:0,dy:1,lane:-1,axis:'NS'},S:{dx:0,dy:-1,lane:1,axis:'NS'},
+ W:{dx:1,dy:0,lane:1,axis:'EW'},E:{dx:-1,dy:0,lane:-1,axis:'EW'}
+};
+const colors=['#e87968','#e7bd62','#65b8d0','#e8e6d3','#78ad93','#9b8fc0'];
 function resize(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;C.width=W*D;C.height=H*D;C.style.width=W+'px';C.style.height=H+'px';X.setTransform(D,0,0,D,0,0)}
 addEventListener('resize',resize);resize();
-function proj(n){const sx=Math.min(W*.68,850)/(NX-1),sy=Math.min(H*.68,620)/(NY-1),s=Math.min(sx,sy),ox=W/2-(NX-1)*s/2,oy=H/2-(NY-1)*s/2+25;return{x:ox+n.x*s,y:oy+n.y*s,s}}
-function pick(px,py){let best=null;for(const n of nodes){const p=proj(n),d=Math.hypot(px-p.x,py-p.y);if(d<24&&(!best||d<best.d))best={id:n.id,d}}return best?.id??null}
-function buildingAt(id){return buildings.find(b=>b.node===id)}
-function toast(s,bad=false){let e=$('toast');e.textContent=s;e.className='toast show'+(bad?' bad':'');clearTimeout(toast.tm);toast.tm=setTimeout(()=>e.className='toast',1600)}
-function clickNode(id){
- if(tool==='road'||tool==='bridge'){if(sel===null){sel=id;toast('اختر العقدة الثانية')}else{if(!neighbors(sel).includes(id)){toast('اختر نقطة متجاورة فقط',true);sel=null;return}let cost=tool==='bridge'?4:1;if(budget<cost){toast('رصيد الطرق غير كافٍ',true);sel=null;return}if(addEdge(sel,id,1,tool==='bridge')){budget-=cost;toast(tool==='bridge'?'تم بناء جسر':'تم بناء الوصلة')}else toast('الوصلة موجودة مسبقًا',true);sel=null}}
- else if(tool==='upgrade'){let es=[...edges.values()].filter(e=>e.a===id||e.b===id);if(!es.length)return toast('لا توجد وصلة عند هذه النقطة',true);let e=es.sort((a,b)=>b.load-a.load)[0];if(e.lanes<4&&budget>0){e.lanes++;budget--;toast('تمت التوسعة إلى '+e.lanes+' مسارات')}else toast('وصلت للحد الأقصى أو الرصيد غير كافٍ',true)}
- else if(tool==='round'){nodes[id].round=!nodes[id].round;nodes[id].signal=false;toast(nodes[id].round?'تم تركيب دوّار':'تمت إزالة الدوّار')}
- else if(tool==='signal'){nodes[id].signal=!nodes[id].signal;nodes[id].round=false;toast(nodes[id].signal?'تم تركيب إشارة':'تمت إزالة الإشارة')}
- else if(tool==='erase'){let es=[...edges.values()].filter(e=>e.a===id||e.b===id);if(es.length){let e=es[0];edges.delete(key(e.a,e.b));budget+=e.bridge?2:1;toast('تمت إزالة الوصلة')}else toast('لا توجد وصلة هنا',true)}
- update();
+function center(){return{x:W*.5,y:H*.51,road:Math.max(90,Math.min(150,Math.min(W,H)*.19))}}
+function toast(s){let e=$('toast');e.textContent=s;e.classList.add('show');clearTimeout(toast.tm);toast.tm=setTimeout(()=>e.classList.remove('show'),1100)}
+function setPhase(p){if(phase===p||phaseLock>0||gameOver)return;phase=p;phaseLock=1.15;syncButtons()}
+function syncButtons(){$('ns').classList.toggle('on',phase==='NS');$('ew').classList.toggle('on',phase==='EW');$('ns').innerHTML='↕ شمال / جنوب<br><small>'+(phase==='NS'?'أخضر':'أحمر')+'</small>';$('ew').innerHTML='↔ شرق / غرب<br><small>'+(phase==='EW'?'أخضر':'أحمر')+'</small>'}
+$('ns').onclick=()=>setPhase('NS');$('ew').onclick=()=>setPhase('EW');
+$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ';toast(paused?'متوقف':'استمرار')};
+$('restart').onclick=()=>reset(true);$('again').onclick=()=>{ $('over').style.display='none';reset(true)};
+$('go').onclick=()=>{$('start').style.display='none';$('ui').hidden=false;reset(true)};
+function reset(startNow){cars=[];t=0;score=0;spawn=0;nextId=1;phase='NS';phaseLock=0;gameOver=false;paused=false;$('pause').textContent='Ⅱ';syncButtons();updateHUD();running=startNow;last=performance.now()}
+function spawnCar(){
+ const keys=Object.keys(dirs),d=keys[Math.floor(Math.random()*keys.length)],v=dirs[d],c=center(),L=Math.max(W,H)*.75;
+ const same=cars.filter(a=>a.dir===d&&!a.done);if(same.length>13)return;
+ let x=c.x-v.dx*L,y=c.y-v.dy*L;
+ const off=v.lane*c.road*.18;x+=-v.dy*off;y+=v.dx*off;
+ cars.push({id:nextId++,dir:d,axis:v.axis,dx:v.dx,dy:v.dy,x,y,v:0,max:.72+Math.random()*.15,color:colors[Math.floor(Math.random()*colors.length)],done:false,wait:0});
 }
-C.addEventListener('pointerup',e=>{let id=pick(e.clientX,e.clientY);if(id!==null)clickNode(id)});
-document.querySelectorAll('.tool').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;sel=null;document.querySelectorAll('.tool').forEach(x=>x.classList.toggle('on',x===b));$('tip').textContent=tool==='road'?'المس نقطتين متجاورتين لبناء طريق':tool==='upgrade'?'المس عقدة على طريق لتوسعة أكثر وصلة ازدحامًا':tool==='round'?'المس تقاطعًا لإضافة/إزالة دوّار':tool==='signal'?'المس تقاطعًا لإضافة/إزالة إشارة':tool==='bridge'?'المس نقطتين متجاورتين لبناء جسر':'المس عقدة لإزالة وصلة متصلة بها'});
-document.querySelectorAll('.speeds button').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.speeds button').forEach(x=>x.classList.toggle('on',x===b))});
-$('go').onclick=()=>{$('start').style.display='none';$('ui').hidden=false;last=performance.now()};
-function dispatch(){
- const companies=buildings.filter(b=>b.type==='company'&&b.pending>0).sort((a,b)=>b.pending-a.pending);
- for(const d of companies){const hs=buildings.filter(b=>b.type==='home'&&b.color===d.color);for(const h of hs){if(cars.filter(c=>c.home===h).length>=1)continue;let p=path(h.node,d.node);if(p&&p.length>1){cars.push({home:h,company:d,path:p,i:0,u:0,returning:false,color:COL[d.color],v:.22});return}}}
+function distToStop(c){
+ const m=center(), stop=m.road*.62;
+ if(c.dir==='N')return (m.y-stop)-c.y;
+ if(c.dir==='S')return c.y-(m.y+stop);
+ if(c.dir==='W')return (m.x-stop)-c.x;
+ return c.x-(m.x+stop);
 }
-function carStep(c,dt){
- let a=c.path[c.i],b=c.path[c.i+1];if(b===undefined)return true;let e=E(a,b);if(!e)return true;
- let congestion=e.load/Math.max(1,e.lanes),target=.32/(1+congestion*.3);if(nodes[b].round)target*=.78;if(nodes[b].signal&&Math.floor(t/3)%2)target*=.18;
- c.v+=(target-c.v)*Math.min(1,dt*2.2);c.u+=c.v*dt;e.load++;
- if(c.u>=1){c.u=0;c.i++;if(c.i>=c.path.length-1){if(!c.returning){if(c.company.pending>0){c.company.pending--;score++}let back=path(c.company.node,c.home.node);if(back){c.path=back;c.i=0;c.returning=true}else return true}else return true}}
- return false
+function ahead(c){
+ let best=null,bd=1e9;
+ for(const o of cars){if(o===c||o.dir!==c.dir||o.done)continue;let along=(o.x-c.x)*c.dx+(o.y-c.y)*c.dy;if(along>0&&along<bd){bd=along;best=o}}
+ return best?bd:1e9
 }
-function grow(){
- let colors=Math.min(5,2+Math.floor((week-1)/2)),companies=buildings.filter(b=>b.type==='company');
- if(week%2===1&&companies.length<colors){let c=companies.length,id=node(7-Math.min(c,2),1+c).id;if(!buildingAt(id))site('company',c,id)}
- let c=Math.floor(Math.random()*colors),spots=nodes.filter(n=>!buildingAt(n.id)&&n.x>0&&n.x<6),n=spots[Math.floor(Math.random()*spots.length)];if(n)site('home',c,n.id)
+function step(dt){
+ t+=dt;if(phaseLock>0)phaseLock=Math.max(0,phaseLock-dt);
+ let level=1+Math.floor(t/45),interval=Math.max(.48,1.45-level*.12);spawn+=dt;
+ while(spawn>interval){spawn-=interval;spawnCar()}
+ let m=center(),cross=m.road*.75;
+ for(const c of cars){
+  let stop=distToStop(c),inCross=Math.abs(c.x-m.x)<cross&&Math.abs(c.y-m.y)<cross,green=phase===c.axis&&phaseLock<=0;
+  let gap=ahead(c),target=c.max;
+  if(!green&&!inCross&&stop>0&&stop<150)target=Math.min(target,Math.max(0,(stop-9)/120));
+  if(gap<58)target=Math.min(target,Math.max(0,(gap-25)/80));
+  c.v+=(target-c.v)*Math.min(1,dt*(target<c.v?5.2:1.8));
+  let px=180;c.x+=c.dx*c.v*dt*px;c.y+=c.dy*c.v*dt*px;
+  if(c.v<.06&&!inCross)c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.4);
+  if((c.x<-100||c.x>W+100||c.y<-100||c.y>H+100)&&!c.done){c.done=true;score++}
+ }
+ cars=cars.filter(c=>!c.done);
+ let waiting=cars.filter(c=>c.wait>.8).length,maxWait=Math.max(0,...cars.map(c=>c.wait));
+ if(waiting>=18||maxWait>23)endGame();
+ updateHUD();
 }
-function sim(dt){t+=dt;spawnT+=dt;demandT+=dt;for(const e of edges.values())e.load=0;if(spawnT>1.2){spawnT=0;dispatch()}if(demandT>5.5){demandT=0;let cs=buildings.filter(b=>b.type==='company');if(cs.length)cs[Math.floor(Math.random()*cs.length)].pending++;if(Math.floor(t/28)+1>week){week++;budget+=6;grow();toast('أسبوع جديد · +6 رصيد طرق')}}for(let i=cars.length-1;i>=0;i--)if(carStep(cars[i],dt))cars.splice(i,1);update()}
-function update(){let p=buildings.filter(b=>b.type==='company').reduce((s,b)=>s+b.pending,0);$('week').textContent=week;$('day').textContent='اليوم '+(1+Math.floor((t%28)/4));$('score').textContent=score;$('pending').textContent=p;$('budget').textContent=budget;$('risk').textContent=p>12?'ازدحام مرتفع':p>7?'انتبه للطلبات':'مستقر';$('meter').style.width=Math.min(100,p*6)+'%';$('status').textContent=Math.min(5,2+Math.floor((week-1)/2))+' ألوان متاحة · '+cars.length+' مركبة تتحرك'}
-function draw(){
- X.clearRect(0,0,W,H);X.fillStyle='#b7d7ae';X.fillRect(0,0,W,H);
- // subtle grid
- X.strokeStyle='#ffffff18';X.lineWidth=1;for(const n of nodes){let p=proj(n);X.beginPath();X.arc(p.x,p.y,2,0,7);X.stroke()}
- for(const e of edges.values()){let a=proj(nodes[e.a]),b=proj(nodes[e.b]),w=7+e.lanes*5;X.lineCap='round';X.strokeStyle=e.bridge?'#d9c8a0':'#d7c9a5';X.lineWidth=w+6;X.beginPath();X.moveTo(a.x,a.y);X.lineTo(b.x,b.y);X.stroke();X.strokeStyle='#33464b';X.lineWidth=w;X.stroke();X.strokeStyle='#e8e2b5';X.lineWidth=1.4;X.setLineDash([8,8]);for(let k=1;k<e.lanes;k++){let off=(k/e.lanes-.5)*w*.72,dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy),ox=-dy/L*off,oy=dx/L*off;X.beginPath();X.moveTo(a.x+ox,a.y+oy);X.lineTo(b.x+ox,b.y+oy);X.stroke()}X.setLineDash([])}
- for(const n of nodes){let p=proj(n);if(n.round){X.fillStyle='#789f73';X.beginPath();X.arc(p.x,p.y,15,0,7);X.fill();X.strokeStyle='#edf0d0';X.lineWidth=4;X.stroke()}else if(n.signal){X.fillStyle='#efc45e';X.fillRect(p.x-6,p.y-6,12,12)}else{X.fillStyle=sel===n.id?'#a7efd0':'#ecf2d9';X.beginPath();X.arc(p.x,p.y,5,0,7);X.fill()}}
- for(const b of buildings){let p=proj(nodes[b.node]);X.save();X.translate(p.x,p.y-23);X.fillStyle='#f5f0dd';X.fillRect(-15,-13,30,25);X.fillStyle=COL[b.color];if(b.type==='home'){X.beginPath();X.moveTo(-18,-13);X.lineTo(0,-27);X.lineTo(18,-13);X.fill()}else{X.fillRect(-18,-22,36,10);X.fillStyle='#17323a';X.font='bold 11px sans-serif';X.textAlign='center';X.fillText(b.pending,0,-28)}X.restore()}
- for(const c of cars){let a=proj(nodes[c.path[c.i]]),b=proj(nodes[c.path[c.i+1]]),x=a.x+(b.x-a.x)*c.u,y=a.y+(b.y-a.y)*c.u,ang=Math.atan2(b.y-a.y,b.x-a.x);X.save();X.translate(x,y);X.rotate(ang);X.fillStyle=c.color;X.beginPath();X.roundRect(-8,-4,16,8,3);X.fill();X.fillStyle='#dcebed';X.fillRect(-2,-3,5,6);X.restore()}
+function endGame(){gameOver=true;running=false;if(score>best){best=score;try{localStorage.setItem('fak_alzahma_best',best)}catch(e){}}$('best').textContent=best;$('result').textContent='مرّرت '+score+' سيارة خلال '+fmt(t)+'. أفضل نتيجة: '+best+'.';$('over').style.display='flex'}
+function fmt(s){let m=Math.floor(s/60),q=Math.floor(s%60);return m+':'+String(q).padStart(2,'0')}
+function updateHUD(){let waiting=cars.filter(c=>c.wait>.8).length,maxWait=Math.max(0,...cars.map(c=>c.wait));$('score').textContent=score;$('time').textContent=fmt(t);$('level').textContent='المستوى '+(1+Math.floor(t/45));$('queue').textContent=waiting;$('qtext').textContent=waiting<5?'ممتاز':waiting<10?'متوسط':'خطر';let danger=Math.min(100,Math.max(waiting/18,maxWait/23)*100);$('danger').style.width=danger+'%';$('danger').style.background=danger>70?'var(--red)':danger>40?'var(--amber)':'var(--mint)';$('status').textContent=danger>70?'الطوابير قريبة من الحد!':danger>40?'ابدأ بتفريغ الاتجاه المزدحم':'الزحمة تحت السيطرة'}
+function road(){
+ const m=center(),r=m.road;X.fillStyle='#a9cba4';X.fillRect(0,0,W,H);
+ X.fillStyle='#d7c89f';X.fillRect(m.x-r*.58-7,0,r*1.16+14,H);X.fillRect(0,m.y-r*.58-7,W,r*1.16+14);
+ X.fillStyle='#35464a';X.fillRect(m.x-r*.58,0,r*1.16,H);X.fillRect(0,m.y-r*.58,W,r*1.16);
+ X.strokeStyle='#e9dfae';X.lineWidth=2;X.setLineDash([15,13]);
+ for(const f of [-.19,.19]){X.beginPath();X.moveTo(m.x+r*f,0);X.lineTo(m.x+r*f,H);X.stroke();X.beginPath();X.moveTo(0,m.y+r*f);X.lineTo(W,m.y+r*f);X.stroke()}X.setLineDash([]);
+ X.strokeStyle='#f5f0d5';X.lineWidth=5;
+ X.beginPath();X.moveTo(m.x-r*.58,m.y-r*.67);X.lineTo(m.x+r*.58,m.y-r*.67);X.stroke();
+ X.beginPath();X.moveTo(m.x-r*.58,m.y+r*.67);X.lineTo(m.x+r*.58,m.y+r*.67);X.stroke();
+ X.beginPath();X.moveTo(m.x-r*.67,m.y-r*.58);X.lineTo(m.x-r*.67,m.y+r*.58);X.stroke();
+ X.beginPath();X.moveTo(m.x+r*.67,m.y-r*.58);X.lineTo(m.x+r*.67,m.y+r*.58);X.stroke();
+ // lights
+ const greenNS=phase==='NS'&&phaseLock<=0;for(const [x,y,g] of [[m.x-r*.72,m.y-r*.72,greenNS],[m.x+r*.72,m.y+r*.72,greenNS],[m.x+r*.72,m.y-r*.72,!greenNS&&phaseLock<=0],[m.x-r*.72,m.y+r*.72,!greenNS&&phaseLock<=0]]){X.fillStyle=g?'#77d58d':'#f16f62';X.beginPath();X.arc(x,y,8,0,7);X.fill()}
 }
-let last=performance.now();function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/1000);last=now;if(speed)sim(dt*speed);draw()}requestAnimationFrame(frame);update();
-</script>
-</body></html>
+function drawCar(c){X.save();X.translate(c.x,c.y);X.rotate(Math.atan2(c.dy,c.dx));X.fillStyle='#172a2e';X.fillRect(-10,-6,20,12);X.fillStyle=c.color;X.beginPath();X.roundRect(-9,-5,18,10,3);X.fill();X.fillStyle='#cfe3e4';X.fillRect(-2,-4,6,8);X.fillStyle='#1d292b';X.fillRect(-7,-6,4,2);X.fillRect(3,-6,4,2);X.fillRect(-7,4,4,2);X.fillRect(3,4,4,2);X.restore()}
+function draw(){road();for(const c of cars)drawCar(c)}
+function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/1000);last=now;if(running&&!paused&&!gameOver)step(dt);draw()}requestAnimationFrame(frame);
+</script></body></html>
