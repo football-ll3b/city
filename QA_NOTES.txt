@@ -1,0 +1,16 @@
+Madinti / City Flow v0.2 Roads
+
+58 automated checks passed; 0 failed.
+Engine: headless system Chromium.
+Viewport tests: iPad landscape and portrait, iPhone landscape and portrait, small iPhone.
+Input tests include mouse, native browser touch events, and two-finger pinch.
+Tested: freeform roads, curves, roundabout connectivity, one-way routing, lane changes, parking, previews, costs, undo, protected entrance, building collision prevention, save serialization, validation, v0.1 conversion, simulation stability and responsive layout.
+
+Limits of verification:
+- No physical iPhone, iPad or Safari/WebKit testing was performed.
+- Functional storage tests used an in-memory Storage adapter in the test harness because navigation was restricted in the test environment. Native localStorage persistence was not tested.
+- Storage denial was tested and failed safely.
+- No hosted/public play URL has been created.
+- The shipped HTML contains the actual browser storage implementation, not the test adapter.
+
+This is a simplified prototype, not a full Trafficity or Cities: Skylines simulation.

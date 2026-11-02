@@ -1,0 +1,1383 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#112b35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="مدينتي: لعبة بناء مدينة ومرور صغيرة تعمل داخل المتصفح، دون مكتبات أو اتصال خارجي.">
+<title>مدينتي | City Flow</title>
+<style>
+:root{--ink:#ecf5f5;--muted:#9eb5b9;--panel:#112b35;--mint:#9ee9c7;--amber:#f6cb7d;--line:rgba(218,245,239,.13);--bad:#ff9e92;--safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px);--safeL:env(safe-area-inset-left,0px);--safeR:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#112b35;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;overscroll-behavior:none}
+button,input{font:inherit}button{color:inherit;cursor:pointer;border:0;touch-action:manipulation}button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}button:disabled{opacity:.4;cursor:default}
+[hidden]{display:none!important}svg{width:22px;height:22px;flex-shrink:0;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#world{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;position:absolute;inset:0}
+#ui{position:absolute;inset:0;pointer-events:none}#ui>*{pointer-events:auto}
+.top{position:absolute;top:calc(14px + var(--safeT));left:calc(16px + var(--safeL));right:calc(16px + var(--safeR));display:flex;gap:10px;align-items:stretch}
+.brand{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:9px 14px;min-width:120px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 4px 14px #0a283518}
+.brand strong{font-size:21px;letter-spacing:-1px}.brand span{font-size:9px;color:var(--mint);letter-spacing:3px;direction:ltr;text-align:right;font-weight:700}
+.stats{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:10px 8px;display:flex;flex:1;max-width:660px;box-shadow:0 4px 14px #0a283518}
+.stat{padding:0 16px;border-left:1px solid var(--line);min-width:90px;flex:1;display:flex;justify-content:center;flex-direction:column;gap:2px}.stat:last-child{border:0}.stat label{font-size:10px;color:var(--muted);white-space:nowrap}.stat b{font-size:21px;font-variant-numeric:tabular-nums;direction:ltr;text-align:right;line-height:1.2}.stat small{font-size:9px;display:block;color:var(--mint);white-space:nowrap}
+.iconbtn{width:44px;height:44px;border-radius:13px;background:var(--panel);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.iconbtn:hover{background:#21434b}.iconbtn.active{background:var(--mint);color:#112b35}
+.menuBtn{align-self:center;margin-right:auto;width:48px;height:48px}
+.leftControls{position:absolute;bottom:calc(150px + var(--safeB));left:calc(16px + var(--safeL));display:flex;flex-direction:column;gap:6px}
+.controlsRow{display:flex;gap:5px;padding:5px;border-radius:15px;background:var(--panel)}
+.speedControls{position:absolute;top:calc(102px + var(--safeT));left:calc(16px + var(--safeL));display:flex;flex-direction:column;gap:8px}
+.speed{font-weight:800;font-size:12px;width:38px;height:34px;border-radius:10px;background:transparent;color:var(--muted)}.speed.on{background:var(--mint);color:#112b35}
+.day{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;gap:16px;background:var(--panel);border-radius:12px;font-size:11px}.day span:last-child{color:var(--mint)}
+#goals{position:absolute;top:calc(102px + var(--safeT));right:calc(16px + var(--safeR));width:224px;background:var(--panel);border:1px solid var(--line);border-radius:17px;overflow:hidden;box-shadow:0 8px 25px #143b3512}
+.goalHead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;background:transparent;width:100%;font-weight:700;font-size:12px}
+.goalHead span{color:var(--mint);font-size:10px}.goalBody{padding:0 14px 13px}.goalBody h3{font-size:15px;margin:0 0 8px}.goalBody p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}.progress{height:4px;background:#2c464d;border-radius:10px;margin:10px 0 8px;overflow:hidden}.progress i{display:block;height:100%;background:var(--mint);transition:width .3s}.reward{color:var(--amber);font-size:11px}
+#inspector{position:absolute;right:calc(16px + var(--safeR));top:calc(286px + var(--safeT));width:224px;border-radius:17px;background:var(--panel);padding:14px;border:1px solid var(--line)}
+#inspector h3{margin:0 0 9px;font-size:15px}#inspector p{font-size:11px;color:var(--muted);line-height:1.8;margin:7px 0}.close{background:transparent;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;float:left;border-radius:8px}
+#inspector .action{width:100%;margin-top:6px;font-size:11px;padding:10px}
+.legend{display:flex;gap:5px;align-items:center;font-size:9px;color:var(--muted);justify-content:center;background:var(--panel);padding:9px 10px;border-radius:10px}.legend i{width:12px;height:4px;border-radius:2px}
+#buildBar{position:absolute;bottom:calc(18px + var(--safeB));left:50%;transform:translateX(-50%);max-width:calc(100% - 32px - var(--safeL) - var(--safeR));background:var(--panel);border:1px solid var(--line);border-radius:21px;padding:8px;display:flex;gap:5px;box-shadow:0 8px 30px #12332835;overflow-x:auto;scrollbar-width:none;direction:rtl;-webkit-overflow-scrolling:touch}
+#buildBar::-webkit-scrollbar{display:none}.tool{background:transparent;border:1px solid transparent;border-radius:14px;min-width:68px;padding:9px 6px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}.tool svg{width:25px;height:25px}.tool strong{font-size:10px;white-space:nowrap}.tool small{font-size:9px;color:var(--muted);direction:ltr}.tool:hover{background:#ffffff0b}.tool.active{background:var(--mint);color:#112b35}.tool.active small{color:#30554d}.tool[data-tool="home"] svg{color:#9de8c4}.tool[data-tool="shop"] svg{color:#9cd3eb}.tool[data-tool="factory"] svg{color:#f4c37c}.tool[data-tool="park"] svg{color:#c2e69b}.tool.active svg{color:#112b35}
+#toolTip{position:absolute;bottom:calc(127px + var(--safeB));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--panel);padding:9px 14px;border-radius:13px;max-width:calc(100% - 150px);font-size:11px;white-space:nowrap;box-shadow:0 3px 14px #12332815}
+#toolTip span{color:var(--muted)}.chip{background:#25444a;color:var(--ink);padding:7px 11px;border-radius:8px;font-size:11px;white-space:nowrap}.chip.on{background:var(--mint);color:#112b35}
+#notice{position:absolute;top:calc(104px + var(--safeT));left:50%;transform:translateX(-50%) translateY(-8px);background:var(--panel);padding:12px 20px;border-radius:13px;font-size:12px;text-align:center;max-width:400px;border:1px solid #6ab998;opacity:0;transition:.2s;pointer-events:none;z-index:10;box-shadow:0 8px 30px #12332825;line-height:1.7}
+#notice.show{opacity:1;transform:translateX(-50%) translateY(0)}#notice.error{border-color:var(--bad);color:#ffd9d1}
+#buildCost{position:absolute;border-radius:10px;background:#112b35ee;color:var(--mint);padding:7px 10px;font-size:12px;pointer-events:none;white-space:nowrap;z-index:8}
+#watermark{position:absolute;left:calc(18px + var(--safeL));bottom:calc(7px + var(--safeB));font-size:8px;color:#16454a88;letter-spacing:1.8px;pointer-events:none;direction:ltr}
+.overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--safeT)) 24px calc(24px + var(--safeB));background:#0a202d60;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.dialog{background:#112b35;color:var(--ink);border:1px solid #416067;border-radius:25px;box-shadow:0 20px 80px #061c3f45;width:440px;max-width:100%;max-height:100%;overflow:auto;padding:26px;scrollbar-width:thin}
+.dialog h2{margin:5px 0 13px;font-size:25px;letter-spacing:-.8px}.dialog p{line-height:1.8;color:var(--muted);font-size:13px;margin:9px 0 16px}.dialog h3{font-size:14px;margin:22px 0 8px}.dialog ul{font-size:12px;color:var(--muted);padding-right:19px;line-height:2}
+.eyebrow{color:var(--mint);font-size:10px;letter-spacing:3px;text-transform:uppercase;direction:ltr;text-align:right;font-weight:700}
+.action{padding:13px 17px;border-radius:12px;background:#25454d;font-weight:700;font-size:13px;display:flex;justify-content:center;align-items:center;gap:10px}.action.primary{background:var(--mint);color:#112b35}.action.danger{color:#ffc4ba;background:#573a3c}.action:hover{filter:brightness(1.08)}.actionRow{display:flex;gap:9px;margin-top:10px}.actionRow>*{flex:1}.wide{width:100%}
+#startScreen{backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(270deg,#0d2839f8 0%,#0c283ee8 30%,#0e364e48 70%,#09273810 100%);justify-content:flex-start;direction:rtl}
+.startCard{width:420px;max-width:100%;margin-right:5vw;padding:24px 0;text-shadow:0 1px 2px #08253220}
+.startCard h1{font-size:76px;line-height:1.1;letter-spacing:-5px;margin:17px 0 12px;font-weight:800}.startCard h1 em{font-style:normal;color:var(--mint)}
+.startCard .english{font-size:11px;color:#b0ccd2;letter-spacing:6px;direction:ltr;text-align:right;margin-bottom:20px}
+.startCard>p{font-size:16px;line-height:1.9;color:#c1d7da;max-width:350px;margin:0 0 24px}
+.startTags{display:flex;gap:8px;margin:20px 0 28px}.startTags span{border:1px solid #91b4c942;border-radius:20px;padding:7px 12px;font-size:11px;color:#cee3e7;display:flex;gap:6px;align-items:center}.startTags svg{width:16px;height:16px}
+.startButtons{max-width:350px;display:flex;flex-direction:column;gap:9px}.startButtons .action{min-height:50px}.startButtons small{font-size:10px;color:#a2bec6;line-height:1.8;margin:4px 3px}.startBottom{font-size:10px;color:#8facb9;margin-top:24px}
+.dialog .guideItem{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}.guideItem>svg{color:var(--mint);width:28px;height:28px}.guideItem b{font-size:12px}.guideItem p{font-size:11px;margin:2px 0;line-height:1.7}
+.setting{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}.setting small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+.toggle{background:#29454c;border-radius:30px;width:46px;height:28px;padding:4px;display:flex;align-items:center;justify-content:flex-end}.toggle:after{content:"";display:block;width:20px;height:20px;border-radius:50%;background:#b5c6c8}.toggle.on{background:#519c7c;justify-content:flex-start}.toggle.on:after{background:#cff6e5}
+#saveStatus{font-size:10px;text-align:center;color:var(--muted);margin:13px 0 0}
+#milestone{position:absolute;inset:0;z-index:30;display:flex;justify-content:center;align-items:center;pointer-events:none;background:radial-gradient(ellipse,#97f5cc33,transparent 65%);opacity:0;transition:opacity .35s}
+#milestone.show{opacity:1}.achievement{background:var(--panel);border:1px solid var(--mint);border-radius:23px;padding:26px 36px;text-align:center;box-shadow:0 15px 80px #0e3b5260}.achievement svg{width:40px;height:40px;color:var(--amber)}.achievement h2{font-size:24px;margin:12px 0 6px}.achievement p{margin:0;color:var(--mint);font-size:14px}
+#rotateHint{display:none}
+@media(min-width:1250px){#buildBar{padding:10px;gap:8px}.tool{min-width:78px}.top{left:24px;right:24px}}
+@media(max-width:760px){
+.top{top:calc(8px + var(--safeT));left:calc(8px + var(--safeL));right:calc(8px + var(--safeR));gap:6px}.brand{min-width:80px;padding:7px 10px;border-radius:13px}.brand strong{font-size:18px}.brand span{font-size:7px;letter-spacing:1.7px}
+.stats{padding:7px 3px;border-radius:13px}.stat{min-width:0;padding:0 9px}.stat b{font-size:17px}.stat label{font-size:9px}.stat small{font-size:8px}.menuBtn{width:40px;height:40px;border-radius:12px}
+.speedControls{top:calc(83px + var(--safeT));left:calc(8px + var(--safeL));gap:5px}.speed{width:30px;height:29px;font-size:10px}.day{font-size:10px;padding:8px 10px}
+#goals{top:calc(83px + var(--safeT));right:calc(8px + var(--safeR));width:182px;border-radius:13px}.goalHead{padding:10px 12px;font-size:11px}.goalBody{padding:0 12px 10px}.goalBody h3{font-size:13px}.goalBody p{font-size:10px}
+#inspector{top:calc(254px + var(--safeT));right:calc(8px + var(--safeR));width:182px;border-radius:13px;padding:12px}
+#buildBar{bottom:calc(10px + var(--safeB));max-width:calc(100% - 16px - var(--safeL) - var(--safeR));padding:6px;border-radius:17px;gap:2px}.tool{min-width:58px;padding:8px 5px 6px;border-radius:11px}.tool svg{width:23px;height:23px}.tool strong{font-size:9px}.tool small{font-size:8px}
+#toolTip{bottom:calc(111px + var(--safeB));font-size:10px;padding:8px 10px;max-width:calc(100% - 100px);gap:6px}#toolTip span{white-space:normal}.chip{font-size:10px;padding:6px 8px}
+.leftControls{bottom:calc(141px + var(--safeB));left:calc(8px + var(--safeL));gap:5px}.leftControls .iconbtn{width:36px;height:36px;border-radius:11px}.leftControls svg{width:18px;height:18px}
+#notice{top:calc(78px + var(--safeT));font-size:11px;max-width:85vw;width:max-content;padding:10px 14px}
+.startCard{margin-right:3vw;width:360px}.startCard h1{font-size:65px}.startCard>p{font-size:15px}
+}
+@media(max-width:520px) and (orientation:portrait){
+.brand{display:none}.stats{flex:1}.stat{padding:0 8px}.stat b{font-size:18px}.stat small{font-size:8px}
+#goals{width:172px;top:calc(91px + var(--safeT))}.goalBody{display:none}#goals.expanded .goalBody{display:block}.goalHead{padding:12px 10px;font-size:10px}
+.speedControls{top:calc(91px + var(--safeT))}.day{padding:7px 10px}.speed{width:28px}
+#inspector{top:auto;bottom:calc(158px + var(--safeB));right:calc(8px + var(--safeR));width:194px}
+#toolTip{bottom:calc(112px + var(--safeB));max-width:calc(100% - 24px);width:max-content;white-space:normal;justify-content:center}
+#buildBar{left:8px;right:8px;transform:none;max-width:unset}.tool{min-width:57px}.leftControls{bottom:calc(158px + var(--safeB))}
+#startScreen{background:linear-gradient(180deg,#0b273cf2,#0b273cae 65%,#0b273c70);align-items:center;justify-content:center;padding:24px}.startCard{margin:0;width:100%;max-width:355px;padding:10px 0}.startCard h1{font-size:70px;margin-top:12px}.startCard>p{font-size:15px}.startTags{margin:18px 0 24px}.startBottom{margin-top:17px;font-size:9px}
+#rotateHint{display:inline}.overlay{padding:calc(15px + var(--safeT)) 15px calc(15px + var(--safeB))}.dialog{padding:21px;border-radius:20px}.dialog h2{font-size:23px}
+}
+@media(max-height:540px) and (orientation:landscape){
+.top{top:calc(6px + var(--safeT))}.brand{padding:6px 12px}.brand strong{font-size:17px}.stats{padding:6px}.stat b{font-size:17px}.stat small{display:none}.stat label{font-size:9px}.menuBtn{width:38px;height:38px}
+.speedControls,#goals{top:calc(68px + var(--safeT))}.goalBody{display:none}#goals.expanded .goalBody{display:block}#goals{width:175px}
+#buildBar{bottom:calc(7px + var(--safeB));padding:5px}.tool{min-width:58px;padding:5px;gap:3px}.tool svg{width:20px;height:20px}.tool strong{font-size:9px}.tool small{font-size:8px}
+#toolTip{bottom:calc(88px + var(--safeB));padding:7px 10px;font-size:10px}
+.leftControls{bottom:calc(116px + var(--safeB));flex-direction:row}.leftControls .iconbtn{width:34px;height:34px}.leftControls svg{width:18px;height:18px}
+#inspector{top:calc(114px + var(--safeT));max-height:calc(100% - 225px);overflow:auto;width:200px;padding:10px}#inspector h3{font-size:12px}#inspector p{font-size:10px;line-height:1.5}#inspector .action{font-size:10px;padding:6px}
+.startCard{width:390px;padding:4px 0;margin-right:4vw}.startCard h1{font-size:48px;margin:8px 0}.startCard .english{margin-bottom:10px}.startCard>p{font-size:12px;margin-bottom:11px}.startTags{margin:8px 0 12px}.startTags span{padding:4px 9px;font-size:10px}.startButtons{gap:6px}.startButtons .action{min-height:38px;padding:9px 14px;font-size:11px}.startButtons small{display:none}.startBottom{margin-top:12px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+#roadPanel{position:absolute;bottom:calc(126px + var(--safeB));left:50%;transform:translateX(-50%);width:524px;max-width:calc(100% - 28px - var(--safeL) - var(--safeR));padding:12px 14px;background:#112b35f7;border:1px solid #648f83;border-radius:19px;box-shadow:0 14px 40px #143b3540;z-index:5}
+.roadHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.roadHead b{font-size:12px;color:#d3f6e5}.roadHead small{font-size:10px;color:var(--amber);font-variant-numeric:tabular-nums}
+.roadModes{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px}.roadModes button{min-height:38px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px}.roadModes svg{width:19px;height:19px}
+.roadProps{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.roadProps .chip{min-height:36px;font-size:10px;padding:6px 9px}.roadLaneGroup{display:flex;align-items:center;gap:3px;border-left:1px solid var(--line);padding-left:8px}.roadLaneGroup span{font-size:10px;color:var(--muted);padding-left:4px}.roadLaneGroup .chip{min-width:32px;padding:6px}.roadProps .chip.on{background:#365e58;color:#c9f5de;border:1px solid #73ad97}
+.roadFoot{display:flex;gap:8px;align-items:center;margin-top:9px;border-top:1px solid var(--line);padding-top:8px}.roadFoot p{flex:1;font-size:10px;line-height:1.6;margin:0;color:var(--muted)}.roadFoot p.invalid{color:var(--bad)}.roadFoot .action{font-size:11px;padding:9px 13px;min-height:38px}.roadFoot .cancel{padding:8px;background:#26474d}
+#inspectText{white-space:pre-line}.roads-open #goals{opacity:.8}.roads-open .leftControls{bottom:calc(154px + var(--safeB))}
+#roadDirection:disabled,#roadReverse:disabled{opacity:.4}
+@media(max-width:760px){#roadPanel{bottom:calc(112px + var(--safeB));padding:10px 11px;width:510px}.roadModes{gap:4px}.roadHead{margin-bottom:7px}.roadProps .chip{min-height:35px}}
+@media(max-width:520px) and (orientation:portrait){#roadPanel{left:8px;right:8px;transform:none;width:auto;max-width:unset;bottom:calc(108px + var(--safeB));padding:10px;border-radius:16px}.roadModes button{font-size:10px;gap:4px;min-height:38px}.roadProps{gap:4px}.roadProps .chip{font-size:9px;padding:5px 7px}.roadLaneGroup{padding-left:5px}.roadLaneGroup .chip{min-width:30px}.roadLaneGroup span{display:none}.roadHead small{font-size:9px}.roadFoot .action{padding:9px 12px}.roads-open .leftControls{bottom:calc(315px + var(--safeB));gap:4px}.roads-open #inspector{bottom:calc(310px + var(--safeB))}.roadFoot p{font-size:9px}}
+@media(max-height:540px) and (orientation:landscape){#roadPanel{left:auto;right:calc(12px + var(--safeR));transform:none;bottom:calc(88px + var(--safeB));width:390px;padding:8px 10px;border-radius:15px}.roadHead{margin-bottom:5px}.roadHead b{font-size:10px}.roadHead small{font-size:9px}.roadModes{margin-bottom:5px}.roadModes button{min-height:32px;font-size:10px}.roadModes svg{width:16px;height:16px}.roadProps{gap:4px}.roadProps .chip{min-height:32px;font-size:9px;padding:5px 7px}.roadLaneGroup span{display:none}.roadLaneGroup .chip{min-width:28px}.roadFoot{margin-top:6px;padding-top:5px}.roadFoot p{font-size:9px}.roadFoot .action{min-height:32px;padding:6px 10px;font-size:10px}.roads-open .leftControls{bottom:calc(116px + var(--safeB))}.roads-open #goals{display:none}}
+@media(max-width:375px){.roadProps{gap:3px}.roadProps .chip{padding:5px 6px}.roadHead small{font-size:8px}}
+
+</style>
+</head>
+<body>
+<canvas id="world" aria-label="خريطة المدينة. اختر أداة ثم المس الخريطة للبناء. اسحب بإصبعين للتحريك والتكبير."></canvas>
+<div id="ui" hidden>
+ <header class="top">
+  <div class="brand"><strong>مدينتي<span style="color:#9ee9c7;font-size:20px;display:inline;letter-spacing:0">.</span></strong><span>CITY FLOW</span></div>
+  <div class="stats">
+   <div class="stat"><label>الميزانية</label><b id="money">14,000</b><small id="income">+0 / يوم</small></div>
+   <div class="stat"><label>السكان</label><b id="population">0</b><small id="jobs">0 وظيفة</small></div>
+   <div class="stat"><label>انسيابية المرور</label><b id="flow">100%</b><small id="cars">0 مركبة</small></div>
+   <div class="stat"><label>السعادة</label><b id="happy">80%</b><small id="shops">مدينة جديدة</small></div>
+  </div>
+  <button class="iconbtn menuBtn" id="openMenu" title="القائمة والحفظ" aria-label="القائمة والحفظ"></button>
+ </header>
+ <div class="speedControls">
+  <div class="day"><span id="day">اليوم 1</span><span id="modeTag">مدينة</span></div>
+  <div class="controlsRow" aria-label="سرعة المحاكاة">
+   <button class="speed" data-speed="0" aria-label="إيقاف مؤقت">Ⅱ</button>
+   <button class="speed on" data-speed="1">1×</button>
+   <button class="speed" data-speed="2">2×</button>
+   <button class="speed" data-speed="3">3×</button>
+  </div>
+  <div class="legend" id="heatLegend" hidden><i style="background:#66c99c"></i>سالك<i style="background:#f3c26b"></i>مزدحم<i style="background:#eb7e68"></i>متوقف</div>
+ </div>
+ <section id="goals"><button class="goalHead" id="toggleGoals"><b>دليل تطوير المدينة</b><span id="goalCount" dir="ltr">1 / 4</span></button><div class="goalBody"><h3 id="goalTitle"></h3><p id="goalText"></p><div class="progress"><i id="goalFill"></i></div><div class="reward" id="goalReward"></div></div></section>
+ <aside id="inspector" hidden><button class="close" id="closeInspector" aria-label="إغلاق">×</button><h3 id="inspectTitle"></h3><p id="inspectText"></p><div id="inspectActions"></div></aside>
+ <div class="leftControls">
+  <button class="iconbtn" id="zoomIn" aria-label="تكبير" title="تكبير"></button>
+  <button class="iconbtn" id="zoomOut" aria-label="تصغير" title="تصغير"></button>
+  <button class="iconbtn" id="center" aria-label="توسيط المدينة" title="توسيط المدينة"></button>
+  <button class="iconbtn" id="heatBtn" aria-label="خريطة الازدحام" title="خريطة الازدحام"></button>
+  <button class="iconbtn" id="undoBtn" aria-label="التراجع عن البناء" title="تراجع عن آخر تعديل" disabled></button>
+ </div>
+ <div id="toolTip"><b id="toolName">استكشاف</b><span id="toolHelp">اسحب لتحريك المدينة · اضغط على مبنى لتفاصيله</span><div id="toolOptions" style="display:flex;gap:4px"></div></div>
+<section id="roadPanel" aria-label="أدوات الطرق" hidden>
+ <div class="roadHead"><b id="roadTitle">محرّر الشوارع</b><small id="roadMetrics"></small></div>
+ <div class="roadModes"><button class="chip" data-road-mode="line" aria-label="مستقيم"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20L21 4M8 21L22 7"/><path d="M9 15l2-2m4-4 2-2"/></svg>مستقيم</button><button class="chip" data-road-mode="curve" aria-label="منحني"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V13A10 10 0 0 1 13 3h8M8 21V13a5 5 0 0 1 5-5h8"/></svg>منحني</button><button class="chip" data-road-mode="round" aria-label="دوّار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 1v4m11 7h-4M12 23v-4M1 12h4"/></svg>دوّار</button><button class="chip" data-road-mode="edit" aria-label="تعديل"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 12-12 4 4L8 20H4v-4ZM14 6l4 4M11 21h10"/></svg>تعديل</button></div>
+ <div class="roadProps"><div class="roadLaneGroup"><span>المسارات</span><button class="chip" data-lanes="2" aria-label="2 مسارات">٢</button><button class="chip" data-lanes="4" aria-label="4 مسارات">٤</button><button class="chip" data-lanes="6" aria-label="6 مسارات">٦</button></div><button class="chip" id="roadDirection"></button><button class="chip" id="roadReverse">عكس الاتجاه</button><button class="chip" id="roadPark"></button></div>
+ <div class="roadFoot"><p id="roadStatus"></p><button class="action cancel" id="roadCancel" hidden>إلغاء</button><button class="action primary" id="roadApply" hidden>تطبيق</button></div>
+</section>
+ <nav id="buildBar" aria-label="أدوات بناء المدينة"></nav>
+ <div id="buildCost" hidden></div><div id="watermark">CITY FLOW / V0.2 ROAD STUDIO</div>
+</div>
+<div id="notice" role="status" aria-live="polite"></div>
+<div id="startScreen" class="overlay">
+ <div class="startCard">
+  <div class="eyebrow">A SMALL CITY. YOUR BIG IDEAS.</div>
+  <h1>مدينتـ<em>ي.</em></h1>
+  <div class="english">C I T Y &nbsp; F L O W</div>
+  <p>شوارع ترسمها بطريقتك.<br>خطّط المسار، عدّل الانحناء، وخلّ مدينتك تتحرّك.</p>
+  <div class="startTags"><span id="tagBuild">بناء مدينة</span><span id="tagTraffic">محاكاة مرور</span><span id="tagTouch">باللمس</span></div>
+  <div class="startButtons">
+   <button class="action primary" id="resumeBtn" hidden>أكمل مدينتي</button>
+   <button class="action primary" id="startBtn">ابدأ بمدينة جاهزة</button>
+   <div class="actionRow" style="margin:0"><button class="action" id="emptyBtn">أرض فاضية</button><button class="action" id="sandboxBtn">بناء حر ∞</button></div>
+   <small>بدون حساب، وبدون متجر تطبيقات. الحفظ على هذا المتصفح.<br><span id="rotateHint">الوضع الأفقي يعطيك مساحة أوسع للبناء.</span></small>
+  </div>
+  <div class="startBottom">تحديث الشوارع 0.2 · رسم حر ومنحنيات وتعديل المسارات</div>
+ </div>
+</div>
+<div class="overlay" id="menuOverlay" hidden>
+ <div class="dialog">
+  <button class="close" id="closeMenu" aria-label="إغلاق القائمة">×</button>
+  <div class="eyebrow">YOUR CITY, YOUR WAY</div><h2>إدارة مدينتي</h2>
+  <div class="setting"><div>الأصوات<small>مؤثرات خفيفة عند البناء والإنجاز</small></div><button class="toggle" id="soundToggle" aria-label="تفعيل الأصوات" aria-pressed="false"></button></div>
+  <div class="setting"><div>شبكة البناء<small>إظهار حدود مربعات الأرض</small></div><button class="toggle on" id="gridToggle" aria-label="إظهار شبكة البناء" aria-pressed="true"></button></div>
+  <div class="setting"><div>تخفيف التفاصيل<small>عدد مركبات أقل للأجهزة الأقدم</small></div><button class="toggle" id="qualityToggle" aria-label="تخفيف التفاصيل" aria-pressed="false"></button></div>
+  <div class="actionRow"><button class="action primary" id="saveBtn">احفظ الآن</button><button class="action" id="helpBtn">طريقة اللعب</button></div>
+  <div class="actionRow"><button class="action" id="exportBtn">نسخة احتياطية</button><button class="action" id="importBtn">استعادة مدينة</button></div>
+  <button class="action wide" id="grantBtn" style="margin-top:10px" hidden>دعم طارئ +5,000</button>
+  <button class="action wide danger" id="newBtn" style="margin-top:20px">مدينة جديدة</button>
+  <p id="saveStatus">الحفظ التلقائي كل 15 ثانية. لا توجد مزامنة بين الأجهزة.</p>
+ </div>
+</div>
+<div class="overlay" id="helpOverlay" hidden>
+ <div class="dialog">
+  <button class="close" id="closeHelp" aria-label="إغلاق المساعدة">×</button><div class="eyebrow">A QUICK START</div><h2>من شارع… إلى مدينة</h2>
+  <div class="guideItem"><span data-icon="hand"></span><div><b>حرّك الخريطة</b><p>بأداة الاستكشاف اسحب بإصبع واحد. إصبعان للتحريك والتكبير في أي أداة. على الكمبيوتر: عجلة الفأرة للتكبير. اسحب شريط الأدوات أفقيًا لرؤية بقية الأدوات على الجوال.</p></div></div>
+  <div class="guideItem"><span data-icon="road"></span><div><b>ارسم شارعك</b><p>اختر طريقًا مستقيمًا أو منحنيًا، واسحب بين البداية والنهاية. اسحب المقابض لتعديل الشكل، ثم اضغط تطبيق. الطرق لا تلتزم بمربعات الأرض. من محرّر الشوارع اختر تعديل، ثم المس الطريق. غيّر عدد المسارات أو اتجاه السير أو الوقوف، وطبّق التعديل. الدوّار يُرسم بالسحب من مركزه للخارج ويقص الطرق داخل حلقته.</p></div></div>
+  <div class="guideItem"><span data-icon="home"></span><div><b>وازن الأحياء والوظائف</b><p>السكن يجلب السكان. التجارة والصناعة توفران الوظائف. المصانع أو بوابة المدينة ترسل البضائع للمحلات. الحدائق ترفع السعادة.</p></div></div>
+  <div class="guideItem"><span data-icon="signal"></span><div><b>راقب المرور</b><p>السيارات تتبع هندسة الطرق واتجاهاتها، وتقف خلف المركبات وعند الإشارات. الدوّارات باتجاه واحد. المحاكاة مبسطة وليست نسخة من Trafficity.</p></div></div>
+  <div class="guideItem"><span data-icon="parking"></span><div><b>تحكّم في المواقف</b><p>بأداة «منع وقوف» اضغط على مقطع طريق لتبديل الوقوف الجانبي. المواقف العامة توفر بديلًا للمباني القريبة. هذه محاكاة مبسطة، وليست نظام مواقف واقعيًا كاملًا.</p></div></div>
+  <div class="guideItem"><span data-icon="save"></span><div><b>احفظ تعبك</b><p>يمكن استعادة حفظ النسخة 0.1؛ تتحول شوارعها إلى الشبكة الجديدة. يبقى الحفظ القديم منفصلًا. صدّر نسخة احتياطية قبل تغيير الموقع أو الجهاز.</p></div></div>
+  <button class="action primary wide" id="gotIt" style="margin-top:18px">تمام، خلّنا نبني</button>
+ </div>
+</div>
+<div class="overlay" id="confirmOverlay" hidden><div class="dialog"><h2 id="confirmTitle"></h2><p id="confirmText"></p><div class="actionRow"><button class="action primary" id="confirmYes">تأكيد</button><button class="action" id="confirmNo">إلغاء</button></div></div></div>
+<div id="milestone"><div class="achievement"><span data-icon="trophy"></span><h2 id="achievementTitle"></h2><p id="achievementText"></p></div></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<script>
+"use strict";
+(() => {
+const VERSION=2, SIZE=24, TW=66, TH=34, DAY=35, STORE="cityflow_v02_save";
+const $=id=>document.getElementById(id), canvas=$("world"), ctx=canvas.getContext("2d",{alpha:false});
+const ICONS={
+hand:'<path d="M8 12V6a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v7-4a2 2 0 0 1 4 0v8c0 4-3 7-7 7h-1c-3 0-5-2-6-4l-3-5a2 2 0 0 1 3-2l2 2"/>',
+road:'<path d="m6 2-4 20M18 2l4 20M12 3v4m0 4v3m0 4v3"/>',
+home:'<path d="m3 10 9-7 9 7M5 9v12h14V9M10 21v-7h4v7M8 10h1m6 0h1"/>',
+shop:'<path d="M4 10v11h16V10M3 5h18l1 5c-2 3-4 3-5 0-2 3-4 3-5 0-2 3-4 3-5 0-2 3-4 3-5 0l1-5ZM9 21v-7h6v7"/>',
+factory:'<path d="M3 21V10l6 3V8l6 4V3h5l1 18H3ZM7 17h1m4 0h1m4 0h1"/>',
+park:'<path d="M12 22v-6M12 2l-5 6h3l-6 8h16l-6-8h3l-5-6ZM7 22h10"/>',
+parking:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+noParking:'<circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9M5 5l14 14"/>',
+signal:'<rect x="7" y="2" width="10" height="17" rx="3"/><path d="M12 19v3"/><circle cx="12" cy="6" r="1"/><circle cx="12" cy="10.5" r="1"/><circle cx="12" cy="15" r="1"/>',
+bulldoze:'<path d="m4 16 5-9h6l3 9M11 7V3h5M2 16h18v6H2zM21 12v10M6 19h1m4 0h1m4 0h1"/>',
+menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
+center:'<path d="M3 8V3h5m8 0h5v5M3 16v5h5m8 0h5v-5"/><circle cx="12" cy="12" r="3"/>',
+heat:'<path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5ZM9 3v16m6-14v16"/>',
+undo:'<path d="M3 10h11a6 6 0 0 1 0 12M3 10l5-5M3 10l5 5" transform="translate(0 -2)"/>',
+save:'<path d="M3 3h15l3 3v15H3V3ZM7 3v6h9V3M7 21v-8h10v8"/>',
+trophy:'<path d="M7 3h10v7a5 5 0 0 1-10 0V3ZM7 5H3v3a5 5 0 0 0 5 5m9-8h4v3a5 5 0 0 1-5 5M12 15v5M7 22h10"/>',
+car:'<path d="m5 8 2-5h10l2 5M3 8h18v11H3V8ZM6 19v3m12-3v3M6 12h2m8 0h2M3 16h18"/>'
+};
+const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[name]||ICONS.home)+'</svg>';
+const TOOLS=[
+{id:"hand",label:"استكشاف",price:0,help:"اسحب للتحريك · اضغط على مبنى لتفاصيله"},
+{id:"road",label:"طريق",price:110,help:"اسحب لرسم طريق · إصبعان لتحريك الخريطة"},
+{id:"home",label:"سكن",price:350,help:"المس أرضًا فارغة بجانب طريق"},
+{id:"shop",label:"تجارة",price:500,help:"تحتاج طريقًا وبضائع · توفر 14 وظيفة"},
+{id:"factory",label:"صناعة",price:750,help:"توفر 25 وظيفة وبضائع · أبعدها عن السكن"},
+{id:"park",label:"حديقة",price:240,help:"ترفع سعادة المنازل في نطاق 4 مربعات"},
+{id:"parking",label:"مواقف",price:320,help:"8 مواقف مشتركة للمباني القريبة"},
+{id:"signal",label:"إشارة",price:120,help:"المس تقاطعًا من 3 اتجاهات أو أكثر"},
+{id:"noParking",label:"منع وقوف",price:0,help:"المس الطريق لتبديل السماح بالوقوف الجانبي"},
+{id:"bulldoze",label:"إزالة",price:0,help:"المس ما تريد إزالته · تسترد ربع تكلفة البناء"}
+];
+const COST=Object.fromEntries(TOOLS.map(t=>[t.id,t.price]));
+const LABEL={grass:"أرض متاحة",water:"مياه الساحل",sand:"شاطئ",road:"طريق",home:"حي سكني",shop:"متجر",factory:"مصنع",park:"حديقة عامة",parking:"مواقف عامة"};
+const COLORS={home:"#91dcba",shop:"#91cbe4",factory:"#e9b97c",park:"#b8d88f",parking:"#ccd5cd",road:"#bbc7c6"};
+let G, stats={}, roads=[], buildings=[], connected=new Set(), compMap=[], routeCache=new Map(), density={}, incoming=new Map();
+let cars=[],nextCar=1,clock=0,spawnClock=0,metricClock=0,autoSaveClock=0,frameNow=0;
+let tool="hand",roadWide=false,speed=1,started=false,heat=false,selected=-1,history=[],pendingConfirm=null,saveAvailable=false;
+let W=innerWidth,H=innerHeight,DPR=1,cam={x:0,y:0,z:.65},pointer=new Map(),gesture=null,preview=[],hover=-1;
+let settings={sound:false,grid:false,low:false},audio=null,noticeTimeout=0,achievementTimeout=0;
+let visible=true,pausedByHidden=false,lastTime=0,saveStamp="",inspectionStamp="",needsBase=true;
+const base=document.createElement("canvas"),bc=base.getContext("2d"),OX=SIZE*TW/2+90,OY=100;
+base.width=SIZE*TW+180;base.height=SIZE*TH+210;
+const idx=(x,y)=>y*SIZE+x, xy=i=>({x:i%SIZE,y:Math.floor(i/SIZE)}), valid=(x,y)=>x>=0&&y>=0&&x<SIZE&&y<SIZE;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), fmt=n=>Math.round(n).toLocaleString("en-US");
+const hash=(x,y,s=0)=>{let n=(x*374761393+y*668265263+s*1442695041)|0;n=(n^(n>>>13))*1274126177;return ((n^(n>>>16))>>>0)/4294967295};
+const iso=(x,y,z=0)=>({x:(x-y)*TW/2,y:(x+y)*TH/2-z});
+const dist=(a,b)=>{const A=xy(a),B=xy(b);return Math.abs(A.x-B.x)+Math.abs(A.y-B.y)};
+function around(i){const {x,y}=xy(i);return [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(p=>valid(p[0],p[1])).map(p=>idx(...p))}
+function isRoad(i){return i>=0&&i<G.grid.length&&G.grid[i].type==="road"}
+function terrain(x,y){if(x<2||y>21||(x<4&&y>19))return "water";if(x===2||y===21||(x===4&&y>=19)||(x===3&&y===19))return "sand";return "grass"}
+function newTile(type,x,y){return {type,variant:Math.floor(hash(x,y,2)*5),level:1,people:0,goods:type==="shop"?35:0,wide:false,noPark:false,signal:false,signalOffset:0}}
+function roadCell(x,y,wide=false){G.grid[idx(x,y)]={...newTile("road",x,y),wide}}
+function legacyInitCity(mode="starter"){
+ G={version:VERSION,size:SIZE,grid:[],money:14000,day:1,dayProgress:0,delivered:0,trips:0,lostTrips:0,goals:[false,false,false,false],sandbox:mode==="sandbox",grant:false,seed:4231,created:Date.now()};
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)G.grid.push(newTile(terrain(x,y),x,y));
+ roadCell(3,11,true);roadCell(4,11,true);roadCell(5,11,true);
+ if(mode!=="empty"){
+  for(let x=6;x<=19;x++)roadCell(x,11,x<=8);
+  for(let y=6;y<=17;y++){roadCell(8,y);roadCell(16,y)}
+  for(let x=8;x<=16;x++){roadCell(x,6);roadCell(x,17)}
+  const place=(t,arr)=>arr.forEach(([x,y,l])=>{let c=newTile(t,x,y);c.level=l||1;c.people=t==="home"?(l===2?30:18):0;G.grid[idx(x,y)]=c});
+  place("home",[[7,7],[9,7],[7,9],[9,9],[7,13],[9,13],[7,16],[9,16]]);
+  place("shop",[[11,10],[13,10],[11,12],[14,12]]);
+  place("factory",[[17,7],[17,9],[17,14]]);
+  place("park",[[10,7],[10,9],[12,12]]);
+  place("parking",[[15,10],[15,12]]);
+  G.grid[idx(8,11)].signal=true;G.grid[idx(16,11)].signal=true;
+ }
+ cars=[];nextCar=1;clock=0;spawnClock=0;history=[];selected=-1;routeCache.clear();
+ rebuild();recalculate();needsBase=true;resetCamera();updateHUD();updateGoals();$("undoBtn").disabled=true;
+ for(let n=0;n<20;n++)spawnVehicle(true);
+ recalculate();updateHUD();
+}
+function legacyRebuild(){
+ roads=[];buildings=[];G.grid.forEach((c,i)=>{if(c.type==="road")roads.push(i);else if(["home","shop","factory","park","parking"].includes(c.type))buildings.push(i)});
+ compMap=Array(SIZE*SIZE).fill(-1);let component=0;
+ for(const r of roads){if(compMap[r]!==-1)continue;let q=[r];compMap[r]=component;for(let qi=0;qi<q.length;qi++){for(const j of around(q[qi]))if(isRoad(j)&&compMap[j]===-1){compMap[j]=component;q.push(j)}}component++}
+ const main=compMap[idx(3,11)];connected=new Set(roads.filter(r=>compMap[r]===main));
+ for(const i of buildings){const c=G.grid[i];let rs=around(i).filter(isRoad);c.access=rs.find(r=>connected.has(r))??rs[0]??-1;c.connected=c.access>=0&&connected.has(c.access)}
+ cars=cars.filter(c=>c.path.every(isRoad)&&G.grid[c.dest]?.type===c.destType);
+ routeCache.clear();needsBase=true;
+}
+function near(i,type,radius){return buildings.filter(b=>G.grid[b].type===type&&dist(i,b)<=radius)}
+function legacyParkingNear(i){let spots=near(i,"parking",3).filter(j=>G.grid[j].connected).length*8;const access=G.grid[i].access;if(access>=0){spots+=around(access).concat(access).filter(r=>isRoad(r)&&!G.grid[r].noPark).length*2}return spots}
+function recalculate(){
+ const homes=buildings.filter(i=>G.grid[i].type==="home"),shops=buildings.filter(i=>G.grid[i].type==="shop"),factories=buildings.filter(i=>G.grid[i].type==="factory");
+ let pop=0,jobs=0,happySum=0,active=0,roadConnected=0,revenue=0,expenses=Math.round(RN.length*2),goodsSum=0;
+ for(const i of buildings){
+  const c=G.grid[i];if(c.type==="home"){pop+=c.people;let happiness=66+(c.connected?10:-40)+Math.min(18,near(i,"park",4).length*6)-near(i,"factory",3).length*10+(parkingNear(i)>1?4:-8);c.happy=clamp(happiness,8,100);happySum+=c.happy*Math.max(1,c.people);revenue+=c.connected?c.people*3:0;roadConnected+=c.connected?1:0;expenses+=8+c.level*3;}
+  if(c.type==="shop"){jobs+=c.connected?14*c.level:0;goodsSum+=c.goods;active+=c.connected&&c.goods>0?1:0;revenue+=c.connected&&c.goods>0?75*c.level:0;expenses+=15*c.level}
+  if(c.type==="factory"){jobs+=c.connected?25*c.level:0;revenue+=c.connected?115*c.level:0;expenses+=30*c.level}
+  if(c.type==="park")expenses+=12;
+  if(c.type==="parking")expenses+=6;
+ }
+ const demandWorkers=Math.round(pop*.52),employment=demandWorkers?Math.min(1,jobs/demandWorkers):1;
+ let flow=cars.length?Math.round(cars.reduce((a,c)=>a+Math.max(0,1-c.waitSmooth/2),0)/cars.length*100):100;
+ flow=clamp(flow,5,100);const happy=clamp(Math.round((pop?happySum/pop:78)-(1-employment)*22-Math.max(0,70-flow)*.18+(shops.length&&active===0?-10:0)),5,100);
+ revenue=Math.round(revenue*(.7+.3*employment));expenses+=Math.round(pop*.6);
+ stats={pop,jobs,happy,flow,income:revenue-expenses,revenue,expenses,homes:homes.length,shops:shops.length,active,factories:factories.length,parks:near(idx(12,12),"park",100).length,parking:buildings.filter(i=>G.grid[i].type==="parking").length,roadConnected,employment};
+}
+function newDay(){
+ G.day++;let changed=false;
+ for(const i of buildings){
+  const c=G.grid[i];if(c.type==="home"){const cap=18+(c.level-1)*14;let delta=c.connected&&stats.happy>=45&&stats.jobs>=stats.pop*.4?Math.ceil(cap*.22):-2;if(c.people<cap&&delta>0){c.people=Math.min(cap,c.people+delta);changed=true}else if(!c.connected&&c.people>0)c.people=Math.max(0,c.people-3)}
+  if(c.type==="shop")c.goods=Math.max(0,c.goods-(c.connected?9*c.level:0));
+ }
+ recalculate();if(!G.sandbox)G.money+=stats.income;
+ if(G.money<0){G.money=0;notify("الميزانية منخفضة. خفّف المصاريف أو اطلب الدعم من القائمة.",true)}
+ if(G.day%4===0&&stats.happy<50)notify("السعادة منخفضة: راجع الوظائف والحدائق واتصال الأحياء.");
+ if(changed)needsBase=true;checkGoals();updateHUD();if(selected>=0)inspect(selected);
+}
+const GOALS=[
+{title:"أول حي نابض",text:()=>`${Math.min(stats.pop,180)} / 180 ساكن · ${Math.min(stats.active,4)} / 4 متاجر تعمل`,progress:()=>Math.min(stats.pop/180,stats.active/4,1),done:()=>stats.pop>=180&&stats.active>=4,reward:2000},
+{title:"مدينة تتحرّك",text:()=>`${Math.min(G.delivered,20)} / 20 شحنة وصلت · انسيابية ${stats.flow}% (المطلوب 65%)`,progress:()=>Math.min(G.delivered/20,stats.flow/65,1),done:()=>G.delivered>=20&&stats.flow>=65,reward:2500},
+{title:"مساحة للتنفّس",text:()=>`${Math.min(stats.parks,5)} / 5 حدائق · السعادة ${stats.happy}% (المطلوب 75%)`,progress:()=>Math.min(stats.parks/5,stats.happy/75,1),done:()=>stats.parks>=5&&stats.happy>=75,reward:3000},
+{title:"مدينة متوازنة",text:()=>`${Math.min(stats.pop,400)} / 400 ساكن · انسيابية ${stats.flow}% (المطلوب 70%)`,progress:()=>Math.min(stats.pop/400,stats.flow/70,1),done:()=>stats.pop>=400&&stats.flow>=70,reward:5000}
+];
+function updateGoals(){const n=G.goals.findIndex(x=>!x);$("goalCount").textContent=n<0?"4 / 4":`${n+1} / 4`;if(n<0){$("goalTitle").textContent="مدينتك على الطريق الصحيح";$("goalText").textContent="أنجزت كل الأهداف. كمل التوسع وصمّم مدينة أحلامك.";$("goalFill").style.width="100%";$("goalReward").textContent="كل الأهداف مكتملة ✓";return}const g=GOALS[n];$("goalTitle").textContent=g.title;$("goalText").textContent=g.text();$("goalFill").style.width=(g.progress()*100)+"%";$("goalReward").textContent="مكافأة +"+fmt(g.reward)}
+function checkGoals(){const n=G.goals.findIndex(x=>!x);if(n>=0&&GOALS[n].done()){G.goals[n]=true;if(!G.sandbox)G.money+=GOALS[n].reward;celebrate(GOALS[n].title,"أنجزت الهدف! +"+fmt(GOALS[n].reward));save(false)}updateGoals()}
+function updateHUD(){
+ $("money").textContent=G.sandbox?"∞":fmt(G.money);$("income").textContent=G.sandbox?"بناء بلا حدود":(stats.income>=0?"+":"−")+fmt(Math.abs(stats.income))+" / يوم";$("income").style.color=stats.income<0&&!G.sandbox?"var(--bad)":"var(--mint)";
+ $("population").textContent=fmt(stats.pop);$("jobs").textContent=fmt(stats.jobs)+" وظيفة";$("flow").textContent=stats.flow+"%";$("flow").style.color=stats.flow<45?"var(--bad)":stats.flow<70?"var(--amber)":"var(--ink)";
+ $("cars").textContent=cars.length+" مركبة";$("happy").textContent=stats.happy+"%";$("shops").textContent=stats.active+" / "+stats.shops+" متاجر تعمل";$("day").textContent="اليوم "+G.day;$("modeTag").textContent=G.sandbox?"حر ∞":"مدينة";$("grantBtn").hidden=G.sandbox||G.grant||G.money>1000;
+}
+function legacyRoute(start,end){
+ if(start<0||end<0||compMap[start]!==compMap[end])return null;if(start===end)return null;
+ const key=start+":"+end,cache=routeCache.get(key);if(cache&&clock-cache.time<4)return cache.path.slice();
+ const cost=new Map([[start,0]]),prev=new Map(),open=[start],done=new Set();let found=false;
+ while(open.length){let bi=0;for(let k=1;k<open.length;k++)if(cost.get(open[k])+dist(open[k],end)*.8<cost.get(open[bi])+dist(open[bi],end)*.8)bi=k;
+  const v=open.splice(bi,1)[0];if(v===end){found=true;break}if(done.has(v))continue;done.add(v);
+  for(const n of around(v)){if(!isRoad(n)||done.has(n))continue;const c=G.grid[n],weight=(c.wide?.82:1)+(density[n]||0)*.35+(c.signal?.15:0);const d=cost.get(v)+weight;if(!cost.has(n)||d<cost.get(n)){cost.set(n,d);prev.set(n,v);open.push(n)}}
+ }
+ if(!found)return null;let path=[end];while(path[0]!==start){let p=prev.get(path[0]);if(p===undefined)return null;path.unshift(p)}
+ routeCache.set(key,{time:clock,path});if(routeCache.size>600)routeCache.clear();return path;
+}
+function choose(a){return a.length?a[Math.floor(Math.random()*a.length)]:null}
+function edgeKey(a,b,lane=0){return a+":"+b+":"+lane}
+function legacyLaneFor(c,from,to){return G.grid[from]?.wide&&G.grid[to]?.wide?(c.id%2):0}
+function legacySpawnVehicle(seed=false){
+ const cap=settings.low?65:150;if(cars.length>=cap)return;
+ const homes=buildings.filter(i=>G.grid[i].type==="home"&&G.grid[i].people>0&&G.grid[i].connected);
+ const shops=buildings.filter(i=>G.grid[i].type==="shop"&&G.grid[i].connected);
+ const factories=buildings.filter(i=>G.grid[i].type==="factory"&&G.grid[i].connected);
+ let source,dest,truck=Math.random()<.28,from,to,type;
+ if(truck){const need=shops.filter(i=>G.grid[i].goods<85&&cars.filter(c=>c.truck&&c.dest===i).length<2);dest=choose(need);if(dest==null)return;source=choose(factories);from=source==null?idx(3,11):G.grid[source].access;to=G.grid[dest].access;type="shop"}
+ else {source=choose(homes);if(source==null)return;dest=choose(shops.concat(factories));if(dest==null)return;from=G.grid[source].access;to=G.grid[dest].access;type=G.grid[dest].type}
+ const path=route(from,to);if(!path||path.length<2)return;
+ const id=nextCar++,lane=G.grid[path[0]].wide&&G.grid[path[1]].wide?id%2:0;
+ if(!seed&&cars.some(c=>c.path[c.seg]===path[0]&&c.path[c.seg+1]===path[1]&&laneFor(c,path[0],path[1])===lane&&c.t<.32))return;
+ const colors=["#f5eecc","#e7b27b","#7bbdce","#d9e2e0","#d57f69","#75b7a6","#526b91"];
+ let seg=0,t=0;
+ if(seed){seg=Math.floor(Math.random()*(path.length-1));t=Math.random()*.8;const a=path[seg],b=path[seg+1],seedLane=G.grid[a].wide&&G.grid[b].wide?id%2:0;if(cars.some(c=>c.path[c.seg]===a&&c.path[c.seg+1]===b&&laneFor(c,a,b)===seedLane&&Math.abs(c.t-t)<.34))return}
+ cars.push({id,path,seg,t,source,dest,destType:type,truck,color:truck?"#edc77e":choose(colors),wait:0,waitSmooth:0,age:0,returning:false,finish:false,stall:0,speed:truck?.78:.98});
+}
+function legacySignalGreen(i,from){
+ const c=G.grid[i];if(!c?.signal||around(i).filter(isRoad).length<3)return true;
+ const p=(clock+c.signalOffset)%12.8;if(p>5.6&&p<6.4||p>12)return false;
+ const A=xy(from),B=xy(i),horizontal=A.y===B.y;return horizontal?p<5.6:(p>=6.4&&p<12);
+}
+function legacyFinishCar(c){
+ if(c.truck){if(G.grid[c.dest]?.type==="shop"){G.grid[c.dest].goods=Math.min(100,G.grid[c.dest].goods+22);G.delivered++}c.finish=true;return}
+ G.trips++;
+ if(!c.returning&&c.source!=null&&G.grid[c.source]?.type==="home"){
+  const back=route(c.path[c.path.length-1],G.grid[c.source].access);
+  if(back&&back.length>1){const original=c.source;c.path=back;c.seg=0;c.t=0;c.returning=true;c.dest=original;c.destType="home";c.age=0;c.wait=0;return}
+ }
+ c.finish=true;
+}
+function legacyStepTraffic(dt){
+ const groups=new Map(),junctions=new Map();density={};
+ for(const c of cars){const a=c.path[c.seg],b=c.path[c.seg+1];if(b===undefined){c.finish=true;continue}const key=edgeKey(a,b,laneFor(c,a,b));if(!groups.has(key))groups.set(key,[]);groups.get(key).push(c);density[a]=(density[a]||0)+1;if(c.t>.78){if(!junctions.has(b))junctions.set(b,[]);junctions.get(b).push(c)}}
+ for(const arr of groups.values())arr.sort((a,b)=>b.t-a.t);
+ // A deterministic per-node admission token prevents crossing vehicles from overlapping.
+ const winners=new Map();
+ for(const [node,arr] of junctions){const eligible=arr.filter(c=>signalGreen(node,c.path[c.seg]));eligible.sort((a,b)=>b.wait-a.wait||a.id-b.id);if(eligible.length)winners.set(node,eligible[0].id)}
+ for(const arr of groups.values()){
+  let leader=null;
+  for(const c of arr){if(c.finish)continue;c.age+=dt;const a=c.path[c.seg],b=c.path[c.seg+1],tile=G.grid[a],target=G.grid[b];if(!tile||!target){c.finish=true;continue}
+   let velocity=c.speed*(tile.wide?1.3:1)*(tile.noPark?1:.87);
+   let advance=velocity*dt,maxT=1.001;
+   if(leader)maxT=Math.min(maxT,leader.t-(c.truck || leader.truck ? .30 : .25));
+   if(!signalGreen(b,a))maxT=Math.min(maxT,.79);
+   const degree=around(b).filter(isRoad).length;
+   if(degree>=3&&winners.has(b)&&winners.get(b)!==c.id)maxT=Math.min(maxT,.79);
+   const next=c.path[c.seg+2];
+   if(next!==undefined){const nq=groups.get(edgeKey(b,next,laneFor(c,b,next)));if(nq?.some(o=>o.id!==c.id&&o.t<.3))maxT=Math.min(maxT,.8)}
+   const before=c.t;c.t=Math.max(c.t,Math.min(c.t+advance,maxT));let moving=c.t-before>advance*.25;c.waitSmooth+=(moving?0:2.2-c.waitSmooth)*dt*1.7;if(moving)c.waitSmooth=Math.max(0,c.waitSmooth-dt*2);
+   c.wait=moving?Math.max(0,c.wait-dt):c.wait+dt;
+   if(c.t>=1){c.seg++;c.t-=1;if(c.seg>=c.path.length-1)finishCar(c)}
+   if(c.age>180){c.finish=true;G.lostTrips++}
+   leader=c;
+  }
+ }
+ cars=cars.filter(c=>!c.finish);
+}
+
+// ---- Painting: lightweight isometric canvas, no external assets ----------------
+function poly(c,points,fill,stroke=null,lw=1){c.beginPath();c.moveTo(points[0].x,points[0].y);for(let j=1;j<points.length;j++)c.lineTo(points[j].x,points[j].y);c.closePath();if(fill){c.fillStyle=fill;c.fill()}if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.stroke()}}
+function line(c,p,q,color,width=1){c.beginPath();c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.strokeStyle=color;c.lineWidth=width;c.stroke()}
+function diamond(c,x,y,fill,inset=0,stroke=null){poly(c,[iso(x+inset,y+inset),iso(x+1-inset,y+inset),iso(x+1-inset,y+1-inset),iso(x+inset,y+1-inset)],fill,stroke,.7)}
+function block(c,x,y,w,d,h,z=0,top="#e8ecdf",left="#a8c8b9",right="#c8dbce"){
+ const A=iso(x,y,z+h),B=iso(x+w,y,z+h),C=iso(x+w,y+d,z+h),D=iso(x,y+d,z+h);
+ poly(c,[D,C,iso(x+w,y+d,z),iso(x,y+d,z)],left);
+ poly(c,[B,C,iso(x+w,y+d,z),iso(x+w,y,z)],right);
+ poly(c,[A,B,C,D],top);
+ line(c,D,C,"#ffffff24",.7);line(c,B,C,"#ffffff30",.6);
+}
+function circle(c,p,r,color){c.beginPath();c.arc(p.x,p.y,r,0,Math.PI*2);c.fillStyle=color;c.fill()}
+function drawTree(c,x,y,s=1,variant=0){
+ const p=iso(x,y);c.save();c.translate(p.x,p.y);c.scale(s,s);
+ c.fillStyle="#244a2a18";c.beginPath();c.ellipse(5,2,12,4,-.2,0,Math.PI*2);c.fill();
+ line(c,{x:0,y:1},{x:0,y:-17},"#8a8164",2.5);
+ const greens=[["#6aaa80","#8dbb83","#9fc792"],["#55967d","#6dad86","#89bd91"],["#8db78a","#a4c690","#b1d399"]][variant%3];
+ circle(c,{x:0,y:-23},11,greens[0]);circle(c,{x:4,y:-27},8,greens[1]);circle(c,{x:-4,y:-28},6,greens[2]);
+ c.restore();
+}
+function drawRoad(c,x,y,t){
+ diamond(c,x,y,"#cbd5bd");
+ const i=idx(x,y),r=around(i).filter(isRoad),center=iso(x+.5,y+.5),width=t.wide?23:17;
+ // Road bands follow the actual graph; unconnected tiles show a small road pad.
+ c.lineCap="butt";
+ for(const n of r){const p=xy(n),end=iso((x+p.x)/2+.5,(y+p.y)/2+.5);line(c,center,end,"#9aa9a0",width+5);line(c,center,end,"#536875",width)}
+ if(!r.length){diamond(c,x,y,"#536875",.15)}
+ else circle(c,center,width*.48,"#536875");
+ c.setLineDash([3,4]);
+ for(const n of r){const p=xy(n),end=iso((x+p.x)/2+.5,(y+p.y)/2+.5);line(c,center,end,"#e0ddc08a",.8)}
+ c.setLineDash([]);
+ if(r.length>=3){
+  for(const n of r){const p=xy(n),dx=p.x-x,dy=p.y-y;for(let s=-2;s<=2;s++){const px=x+.5+dx*.34+(-dy)*s*.075,py=y+.5+dy*.34+dx*s*.075;line(c,iso(px-dx*.055,py-dy*.055),iso(px+dx*.055,py+dy*.055),"#d5e2db",1.3)}}
+ }
+ if(t.noPark){for(const n of r){const p=xy(n),dx=p.x-x,dy=p.y-y;const A=iso(x+.5-dy*.27,y+.5+dx*.27),B=iso(x+.5+dx*.47-dy*.27,y+.5+dy*.47+dx*.27);line(c,A,B,"#edbc69",1.3)}}
+}
+function legacyRebuildBase(){
+ bc.clearRect(0,0,base.width,base.height);bc.save();bc.translate(OX,OY);
+ // A compact coastal landscape, with sand following the water edge.
+ for(let sum=0;sum<SIZE*2-1;sum++)for(let x=0;x<SIZE;x++){
+  const y=sum-x;if(!valid(x,y))continue;const t=G.grid[idx(x,y)],kind=terrain(x,y);
+  if(t.type==="water"){diamond(bc,x,y,hash(x,y)>.5?"#7cb9bd":"#79b6bb");if(hash(x,y,5)>.6){const p=iso(x+.5,y+.5);line(bc,{x:p.x-8,y:p.y},{x:p.x+8,y:p.y},"#c6e4d34a",1)}} 
+  else if(t.type==="sand")diamond(bc,x,y,"#dcd5ad");
+  else{const v=hash(x,y);diamond(bc,x,y,v>.7?"#a7c7a1":v>.35?"#abcba5":"#a3c39c",0,settings.grid?"#759a7c30":null);if(t.type==="road")drawRoad(bc,x,y,t);else if(t.type!=="grass")diamond(bc,x,y,t.type==="park"?"#8fbd8c":"#c8d3b9",.025)}
+  // Visible earth thickness around the two front edges.
+  if(x===SIZE-1){poly(bc,[iso(x+1,y),iso(x+1,y+1),iso(x+1,y+1,-9),iso(x+1,y,-9)],t.type==="water"?"#53949d":"#73917d")}
+  if(y===SIZE-1){poly(bc,[iso(x,y+1),iso(x+1,y+1),iso(x+1,y+1,-9),iso(x,y+1,-9)],t.type==="water"?"#4b9098":"#617f6c")}
+ }
+ // Entry spur: always connected to the outside-world gate.
+ const a=iso(2.7,11.5),b=iso(3.5,11.5);line(bc,a,b,"#536875",23);line(bc,a,b,"#d9dab566",1);
+ bc.restore();needsBase=false;
+}
+function windows(c,x,y,w,d,h,variant){
+ const floors=Math.max(1,Math.floor((h-8)/11));
+ for(let f=0;f<floors;f++){const z=7+f*11;for(let k=0;k<3;k++){
+  const a=x+.09+k*(w-.15)/3,b=y+.09+k*(d-.15)/3,color=(k+f+variant)%4===0?"#f6e1a5":"#426b7677";
+  poly(c,[iso(a,y+d+.002,z+5),iso(a+.075,y+d+.002,z+5),iso(a+.075,y+d+.002,z),iso(a,y+d+.002,z)],color);
+  poly(c,[iso(x+w+.002,b,z+5),iso(x+w+.002,b+.075,z+5),iso(x+w+.002,b+.075,z),iso(x+w+.002,b,z)],color);
+ }}
+}
+function drawBuilding(c,i){
+ const t=G.grid[i],{x,y}=xy(i),v=t.variant,L=t.level;
+ const homeSets=[["#e4ead5","#9ab8a8","#c4d3bd","#77ab9f"],["#d6e8e3","#83b4af","#add1c7","#426e78"],["#f4e3c4","#baa886","#ddd1ad","#8c7d65"],["#d3e2e8","#86aab9","#b8cbd2","#63899d"],["#e3dfd3","#a5b7ac","#ced6c4","#83968d"]];
+ if(t.type==="home"){
+  const co=homeSets[v],h=27+L*14+v*3,w=.54,d=.58,xx=x+.22,yy=y+.18;
+  poly(c,[iso(xx,yy+.2),iso(xx+w+.37,yy+.15),iso(xx+w+.38,yy+d+.3),iso(xx,yy+d+.25)],"#203a3423");
+  block(c,xx,yy,w,d,h,0,co[0],co[1],co[2]);windows(c,xx,yy,w,d,h,v);
+  block(c,xx-.025,yy-.025,w+.05,d+.05,3,h,co[3],co[3],co[3]);
+  block(c,xx+.08,yy+.08,.19,.23,5,h+3,co[0],co[1],co[2]);
+  block(c,xx+.33,yy+.12,.14,.24,1,h+4,"#547485","#436473","#5c7e8d");
+  if(L>=2)block(c,x+.06,y+.36,.22,.45,h*.55,0,co[0],co[1],co[2]);
+  line(c,iso(xx+.18,yy+d+.01,0),iso(xx+.18,yy+d+.01,11),"#425e66",4);
+  if(v%2===0)drawTree(c,x+.84,y+.77,.55,v);
+ }else if(t.type==="shop"){
+  const xx=x+.1,yy=y+.15,h=22+(L-1)*13;
+  block(c,xx,yy,.77,.7,h,0,"#c6e0dd","#86b5be","#b8d4d1");
+  for(let k=0;k<3;k++){
+   poly(c,[iso(xx+.08+k*.23,yy+.704,5),iso(xx+.23+k*.23,yy+.704,5),iso(xx+.23+k*.23,yy+.704,17),iso(xx+.08+k*.23,yy+.704,17)],"#376d83");
+  }
+  block(c,xx-.03,yy+.58,.83,.2,3,h-3,"#efcf89","#c99a65","#dfb877");
+  for(let k=0;k<4;k++)poly(c,[iso(xx-.03+k*.21,yy+.58,h),iso(xx+.07+k*.21,yy+.58,h),iso(xx+.07+k*.21,yy+.78,h),iso(xx-.03+k*.21,yy+.78,h)],"#f3e9c2");
+  block(c,xx+.15,yy+.13,.5,.25,5,h,"#729bac","#4f7989","#6f97a2");
+  const p=iso(xx+.4,yy+.255,h+7);c.font="bold 7px -apple-system,Arial";c.textAlign="center";c.fillStyle="#f7f2cf";c.fillText(v%2?"MARKET":"CAFE",p.x,p.y);
+ }else if(t.type==="factory"){
+  const h=20+L*4;block(c,x+.08,y+.17,.8,.68,h,0,"#d8bd8b","#a99579","#c3b08b");
+  for(let k=0;k<3;k++){block(c,x+.1+k*.24,y+.2,.20,.61,5,h,"#e7c58c","#ad9270","#ccb388");poly(c,[iso(x+.13+k*.24,y+.86,8),iso(x+.27+k*.24,y+.86,8),iso(x+.27+k*.24,y+.86,17),iso(x+.13+k*.24,y+.86,17)],"#647577")}
+  block(c,x+.69,y+.18,.13,.15,35+L*4,h*.4,"#c4b3a1","#8b8277","#ac9a87");
+  block(c,x+.02,y+.69,.2,.23,8,0,"#a5b3af","#718c88","#8ea59c");
+ }else if(t.type==="park"){
+  line(c,iso(x+.1,y+.5),iso(x+.9,y+.5),"#dcd5aa",8);line(c,iso(x+.5,y+.12),iso(x+.5,y+.88),"#dcd5aa",8);
+  block(c,x+.61,y+.63,.26,.1,4,0,"#bd986e","#8d7856","#a98b65");
+  drawTree(c,x+.23,y+.25,.83,v);drawTree(c,x+.72,y+.22,.7,v+1);drawTree(c,x+.22,y+.76,.65,v+2);
+  const p=iso(x+.68,y+.8);circle(c,p,2,"#e7bd88");circle(c,{x:p.x+4,y:p.y+1},2,"#edc9b6");
+ }else if(t.type==="parking"){
+  diamond(c,x,y,"#738985",.07);
+  for(let k=0;k<4;k++)line(c,iso(x+.12+k*.2,y+.12),iso(x+.12+k*.2,y+.4),"#d1d4bc",1);
+  for(let k=0;k<4;k++)line(c,iso(x+.12+k*.2,y+.6),iso(x+.12+k*.2,y+.89),"#d1d4bc",1);
+  for(let k=0;k<5;k++)drawSmallCar(c,x+.21+(k%3)*.22,y+(k<3?.27:.73),1,0,["#e1d7bc","#7eb4bc","#d09e7b","#b6c6be","#728a9c"][k],false,.8);
+  const p=iso(x+.86,y+.12);line(c,p,{x:p.x,y:p.y-17},"#567177",1.5);c.fillStyle="#426e87";c.fillRect(p.x-4,p.y-23,8,8);c.fillStyle="#fff";c.font="bold 6px Arial";c.textAlign="center";c.fillText("P",p.x,p.y-17);
+ }
+ if(!t.connected&&t.type!=="park"){
+  const p=iso(x+.5,y+.5,(t.type==="home"?42+t.level*14:40)+7);
+  circle(c,p,7,"#f7c77b");c.fillStyle="#664f35";c.font="bold 10px Arial";c.textAlign="center";c.fillText("!",p.x,p.y+3);
+ }else if(t.type==="shop"&&t.goods<=0){
+  const p=iso(x+.5,y+.5,43);circle(c,p,6,"#e88f78");c.fillStyle="#fff";c.font="bold 9px Arial";c.textAlign="center";c.fillText("!",p.x,p.y+3);
+ }
+}
+function legacyDrawSmallCar(c,x,y,dx,dy,color,truck=false,scale=1){
+ const len=(truck?.31:.25)*scale,w=.13*scale;
+ let xx=x-(dx?len:w)/2,yy=y-(dx?w:len)/2;
+ block(c,xx,yy,dx?len:w,dx?w:len,truck?5:3.5,1,color,shade(color,.72),shade(color,.85));
+ if(truck){block(c,xx+(dx?.06:0),yy+(dy?.06:0),dx?len*.58:w,dx?w:len*.58,5,5,"#e2e6d5","#a4beb8","#ccd8c8")}
+ else{block(c,xx+(dx?len*.25:.01),yy+(dy?len*.25:.01),dx?len*.45:w*.85,dx?w*.85:len*.45,2,4,"#436a7a","#314f5e","#60828d")}
+ const p=iso(x,y,3);c.fillStyle="#e2ead5";c.fillRect(p.x+(dx>0?3:dy>0?-3:0),p.y+1,1.5,1);
+}
+const shadeCache={};
+function shade(hex,f){const k=hex+f;if(shadeCache[k])return shadeCache[k];const n=parseInt(hex.replace("#",""),16);return shadeCache[k]="#"+[n>>16,(n>>8)&255,n&255].map(v=>Math.round(v*f).toString(16).padStart(2,"0")).join("")}
+function legacyCarPos(c){
+ const A=xy(c.path[c.seg]),B=xy(c.path[c.seg+1]??c.path[c.seg]),dx=B.x-A.x,dy=B.y-A.y;
+ const lane=laneFor(c,c.path[c.seg],c.path[c.seg+1]),off=lane===1?.22:.115;
+ return {x:A.x+.5+dx*c.t-dy*off,y:A.y+.5+dy*c.t+dx*off,dx,dy};
+}
+function drawSignal(c,i){
+ const {x,y}=xy(i),t=G.grid[i],p=iso(x+.82,y+.82);
+ line(c,p,{x:p.x,y:p.y-22},"#53665d",1.4);c.fillStyle="#253d45";c.fillRect(p.x-3,p.y-32,6,11);
+ circle(c,{x:p.x,y:p.y-29},1.5,signalGreen(i,idx(Math.max(0,x-1),y))?"#6dedb7":"#f39d83");
+ circle(c,{x:p.x,y:p.y-24},1.5,signalGreen(i,idx(x,Math.max(0,y-1)))?"#6dedb7":"#f39d83");
+}
+function drawParked(c,i){
+ const t=G.grid[i],{x,y}=xy(i);if(t.noPark||around(i).filter(isRoad).length!==2||hash(x,y,7)>.55)return;
+ const neighbors=around(i).filter(isRoad),p=xy(neighbors[0]),q=xy(neighbors[1]);if(p.x!==q.x&&p.y!==q.y)return;
+ const horizontal=p.y===q.y;drawSmallCar(c,x+.5+(horizontal?0:.28),y+.5+(horizontal?.28:0),horizontal?1:0,horizontal?0:1,["#d7d6c7","#8da9ba","#cfaa8c"][t.variant%3],false,.75);
+}
+function drawGate(c){
+ const p=iso(3.4,11.9);line(c,p,{x:p.x,y:p.y-30},"#5b7c79",2);c.fillStyle="#245e65";c.fillRect(p.x-25,p.y-46,50,18);c.strokeStyle="#d3e4d433";c.lineWidth=1;c.strokeRect(p.x-25,p.y-46,50,18);
+ c.fillStyle="#ecf4de";c.font="8px -apple-system,Arial";c.textAlign="center";c.fillText("بوابة المدينة",p.x,p.y-35);
+}
+function legacyDraw(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);const grad=ctx.createLinearGradient(0,0,W,H);grad.addColorStop(0,"#d4e7df");grad.addColorStop(.6,"#c4dcd3");grad.addColorStop(1,"#a8cfca");ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(cam.x,cam.y);ctx.scale(cam.z,cam.z);if(needsBase)rebuildBase();
+ // Soft island shadow.
+ ctx.save();ctx.translate(12,20);poly(ctx,[iso(0,0),iso(SIZE,0),iso(SIZE,SIZE),iso(0,SIZE)],"#46777218");ctx.restore();
+ ctx.drawImage(base,-OX,-OY);
+ if(heat){for(const i of roads){const {x,y}=xy(i),n=density[i]||0;diamond(ctx,x,y,n>=3?"#ec806587":n>=2?"#f2bd6680":"#69ca9a40",.06)}}
+ if(selected>=0){const p=xy(selected);diamond(ctx,p.x,p.y,"#fff5b660",.02,"#fff7ce")}
+ const objs=[];
+ for(let i=0;i<G.grid.length;i++){const t=G.grid[i],p=xy(i);
+  if(t.type==="grass"&&hash(p.x,p.y,9)>.90&&p.x>3&&p.y<20)objs.push({type:"tree",i,depth:p.x+p.y+1.1});
+  else if(t.type==="road"){if(t.signal)objs.push({type:"signal",i,depth:p.x+p.y+1.6});if(!t.noPark)objs.push({type:"parked",i,depth:p.x+p.y+1})}
+  else if(["home","shop","factory","park","parking"].includes(t.type))objs.push({type:"building",i,depth:p.x+p.y+1.1});
+ }
+ for(const car of cars){const p=carPos(car);objs.push({type:"car",car,p,depth:p.x+p.y})}
+ objs.push({type:"gate",depth:15.7});
+ objs.sort((a,b)=>a.depth-b.depth);
+ for(const o of objs){
+  if(o.type==="car")drawSmallCar(ctx,o.p.x,o.p.y,o.p.dx,o.p.dy,o.car.color,o.car.truck);
+  else if(o.type==="building")drawBuilding(ctx,o.i);
+  else if(o.type==="tree"){const p=xy(o.i);drawTree(ctx,p.x+.5,p.y+.5,.85,G.grid[o.i].variant)}
+  else if(o.type==="signal")drawSignal(ctx,o.i);
+  else if(o.type==="parked")drawParked(ctx,o.i);
+  else drawGate(ctx);
+ }
+ if(preview.length){let invalid=preview.some(i=>!canPlace(i,tool));for(const i of preview){const p=xy(i);diamond(ctx,p.x,p.y,invalid?"#e4826755":"#d6ffdf66",.02,invalid?"#d65f47":"#f2ffe8")}}
+ else if(hover>=0&&tool!=="hand"){const p=xy(hover);diamond(ctx,p.x,p.y,canPlace(hover,tool)?"#d6ffdf44":"#e4826744",.02,"#f2ffe8")}
+ ctx.restore();
+}
+function resize(){
+ W=innerWidth;H=innerHeight;const oldW=canvas.width/(DPR||1),oldH=canvas.height/(DPR||1);DPR=Math.min(devicePixelRatio||1,settings.low?1.4:2);
+ canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);canvas.style.width=W+"px";canvas.style.height=H+"px";
+ if(oldW&&started){cam.x+=(W-oldW)/2;cam.y+=(H-oldH)/2}else resetCamera();draw();
+}
+function resetCamera(){
+ const narrow=W<600&&H>W;cam.z=clamp(Math.min(W/(narrow?900:1180),(H-180)/570),narrow?.47:.44,.95);
+ const focus=iso(11.3,11.5);cam.x=W/2-focus.x*cam.z;cam.y=H*.49-focus.y*cam.z;
+ if(!started){cam.z=clamp(Math.min(W/1250,H/640),.5,1);cam.x=W*.33;cam.y=H*.45-iso(12,12).y*cam.z}
+}
+function screenToCell(clientX,clientY){
+ const r=canvas.getBoundingClientRect(),sx=(clientX-r.left-cam.x)/cam.z,sy=(clientY-r.top-cam.y)/cam.z;
+ const x=Math.floor(sx/TW+sy/TH),y=Math.floor(sy/TH-sx/TW);return valid(x,y)?idx(x,y):-1;
+}
+function zoomAt(factor,x=W/2,y=H/2){
+ const z=clamp(cam.z*factor,.25,2.2),r=z/cam.z;cam.x=x-(x-cam.x)*r;cam.y=y-(y-cam.y)*r;cam.z=z;limitCamera();
+}
+function limitCamera(){cam.x=clamp(cam.x,-SIZE*TW*cam.z*.5+W*.15,SIZE*TW*cam.z*.5+W*.85);cam.y=clamp(cam.y,-SIZE*TH*cam.z+H*.2,H*.8)}
+// ---- Tools, construction, reversible transactions ----------------------------
+function legacyCanPlace(i,t){
+ if(i<0)return false;const c=G.grid[i];
+ if(t==="hand")return true;
+ if(t==="signal")return c.type==="road"&&around(i).filter(isRoad).length>=3;
+ if(t==="noParking")return c.type==="road";
+ if(t==="road")return c.type==="grass"||c.type==="road";
+ if(t==="bulldoze")return !["grass","water","sand"].includes(c.type)&&i!==idx(3,11);
+ return c.type==="grass";
+}
+function actionCost(i,t){
+ const c=G.grid[i];
+ if(t==="road")return c.type==="road"?(roadWide&&!c.wide?130:0):(roadWide?240:110);
+ if(t==="signal")return c.signal?-30:120;
+ if(t==="noParking")return 0;
+ if(t==="bulldoze"){return -Math.floor(((c.type==="road"?(c.wide?240:110):COST[c.type]||0)+(c.level-1)*400+(c.signal?120:0))*.25)}
+ return COST[t]||0;
+}
+function pathBetween(a,b){
+ if(a<0||b<0)return [];const A=xy(a),B=xy(b),result=[a];let x=A.x,y=A.y;
+ if(Math.abs(B.x-A.x)>=Math.abs(B.y-A.y)){while(x!==B.x){x+=Math.sign(B.x-x);result.push(idx(x,y))}while(y!==B.y){y+=Math.sign(B.y-y);result.push(idx(x,y))}}
+ else{while(y!==B.y){y+=Math.sign(B.y-y);result.push(idx(x,y))}while(x!==B.x){x+=Math.sign(B.x-x);result.push(idx(x,y))}}
+ return result;
+}
+function legacyTransact(indices,t){
+ const unique=[...new Set(indices)];if(!unique.length)return;
+ if(unique.some(i=>!canPlace(i,t))){const reason=t==="signal"?"الإشارة تحتاج تقاطعًا من 3 اتجاهات أو أكثر.":t==="noParking"?"اضغط على طريق لتغيير الوقوف.":t==="bulldoze"?"لا يمكن إزالة الماء أو الشاطئ أو بوابة المدينة.":"المسار فيه مبنى أو شاطئ. غيّر المسار أو أزل العائق.";notify(reason,true);tone("bad");return}
+ const total=unique.reduce((a,i)=>a+actionCost(i,t),0);
+ if(!G.sandbox&&G.money<total){notify("الميزانية غير كافية. تحتاج "+fmt(total)+".",true);tone("bad");return}
+ const before=[],changed=[];
+ for(const i of unique){
+  const c=G.grid[i],p=xy(i);if(t==="road"&&c.type==="road"&&(!roadWide||c.wide))continue;
+  before.push({i,tile:{...c}});
+  if(t==="signal"){c.signal=!c.signal;c.signalOffset=0}
+  else if(t==="noParking")c.noPark=!c.noPark;
+  else if(t==="road"){G.grid[i]=c.type==="road"?{...c,wide:true}:{...newTile("road",p.x,p.y),wide:roadWide}}
+  else if(t==="bulldoze")G.grid[i]=newTile("grass",p.x,p.y);
+  else G.grid[i]=newTile(t,p.x,p.y);
+  changed.push(i);
+ }
+ if(!before.length)return;
+ if(!G.sandbox)G.money-=total;history.push({before,delta:G.sandbox?0:-total});if(history.length>25)history.shift();$("undoBtn").disabled=false;
+ rebuild();recalculate();checkGoals();updateHUD();tone(t==="bulldoze"?"remove":"build");
+ if(t==="home"||t==="shop"||t==="factory"||t==="parking"){
+  const c=G.grid[changed[0]];if(!c.connected)notify("تم البناء. وصّل المبنى بطريق ملاصق ومتصل ببوابة المدينة.");
+  else if(t==="home")notify("حي جديد! ينتقل السكان مع بداية الأيام القادمة.");
+ }
+ if(t==="noParking"){const first=G.grid[changed[0]];notify(first.noPark?"تم منع الوقوف على هذا المقطع. المواقف العامة بديل قريب.":"تم السماح بالوقوف على هذا المقطع.")}
+ if(t==="signal")notify(G.grid[changed[0]].signal?"أُضيفت إشارة بدورة تلقائية.":"أُزيلت الإشارة.");
+ if(selected>=0)inspect(selected);
+}
+function legacyUndo(){
+ const h=history[history.length-1];if(!h)return;
+ if(!G.sandbox&&G.money-h.delta<0){notify("لا تكفي الميزانية للتراجع عن عملية الإزالة.",true);return}
+ history.pop();h.before.forEach(({i,tile})=>G.grid[i]={...tile});if(!G.sandbox)G.money-=h.delta;
+ rebuild();recalculate();updateHUD();updateGoals();$("undoBtn").disabled=!history.length;notify("تم التراجع عن آخر تعديل.");if(selected>=0)inspect(selected);
+}
+function legacySetTool(id){
+ tool=id;selected=-1;$("inspector").hidden=true;preview=[];hover=-1;
+ document.querySelectorAll(".tool").forEach(b=>b.classList.toggle("active",b.dataset.tool===id));
+ const t=TOOLS.find(x=>x.id===id);$("toolName").textContent=t.label;$("toolHelp").textContent=t.help;
+ $("toolOptions").innerHTML=id==="road"?'<button class="chip '+(!roadWide?"on":"")+'" id="roadNormal">عادي 110</button><button class="chip '+(roadWide?"on":"")+'" id="roadWide">عريض 240</button>':"";
+ if(id==="road"){$("roadNormal").onclick=()=>{roadWide=false;setTool("road")};$("roadWide").onclick=()=>{roadWide=true;setTool("road")}}
+ canvas.style.cursor=id==="hand"?"grab":"crosshair";
+}
+function legacyInspect(i){
+ if(i<0)return;selected=i;const c=G.grid[i];$("inspector").hidden=false;$("inspectTitle").textContent=LABEL[c.type]||"مدينة";
+ let text="",actions="";
+ const btn=(id,label)=>'<button class="action" id="'+id+'">'+label+'</button>';
+ if(c.type==="road"){
+  text=(c.wide?"طريق عريض":"طريق محلي")+" · "+(c.noPark?"الوقوف ممنوع":"الوقوف مسموح")+"<br>"+(density[i]||0)+" مركبات على المقطع"+(c.signal?"<br>إشارة تلقائية · دورة 12.8 ثانية":"");
+  actions+=btn("inspectParking",c.noPark?"السماح بالوقوف":"منع الوقوف");
+  if(!c.wide)actions+=btn("inspectWiden","توسيع الطريق · 130");
+  if(around(i).filter(isRoad).length>=3)actions+=btn("inspectSignal",c.signal?"إزالة الإشارة":"إضافة إشارة · 120");
+ }else if(["home","shop","factory"].includes(c.type)){
+  text="المستوى "+c.level+" · "+(c.connected?"متصل بالمدينة ✓":"غير متصل بطريق ⚠")+"<br>";
+  if(c.type==="home")text+="السكان "+c.people+" / "+(18+(c.level-1)*14)+"<br>السعادة المحلية "+(c.happy||0)+"%";
+  else if(c.type==="shop")text+="البضائع "+Math.round(c.goods)+" / 100<br>الوظائف "+(14*c.level)+(c.goods<=0?"<br>بانتظار شاحنة بضائع":"");
+  else text+="الوظائف "+(25*c.level)+"<br>يرسل البضائع إلى المتاجر المتصلة";
+  text+="<br>المواقف القريبة المتاحة نظريًا: "+parkingNear(i);
+  if(c.level<3)actions+=btn("inspectUpgrade","تطوير إلى المستوى "+(c.level+1)+" · 400");
+ }else if(c.type==="park")text="تضيف +6 للسعادة المحلية في نطاق 4 مربعات، حتى +18.<br>الصيانة: 12 يوميًا.";
+ else if(c.type==="parking")text="توفر 8 مواقف مشتركة للمباني في نطاق 3 مربعات.<br>"+(c.connected?"متصلة بالطريق ✓":"تحتاج طريقًا ملاصقًا.")+"<br>الصيانة: 6 يوميًا.";
+ else if(c.type==="grass")text="أرض متاحة للبناء.<br>اختر السكن أو التجارة أو الطرق من الشريط.";
+ else text="منطقة طبيعية غير قابلة للبناء في هذه النسخة.";
+ $("inspectText").innerHTML=text;$("inspectActions").innerHTML=actions;
+ if($("inspectParking"))$("inspectParking").onclick=()=>transact([i],"noParking");
+ if($("inspectWiden"))$("inspectWiden").onclick=()=>{const was=roadWide;roadWide=true;transact([i],"road");roadWide=was};
+ if($("inspectSignal"))$("inspectSignal").onclick=()=>transact([i],"signal");
+ if($("inspectUpgrade"))$("inspectUpgrade").onclick=()=>{
+  if(!G.sandbox&&G.money<400){notify("التطوير يحتاج 400.",true);return}history.push({before:[{i,tile:{...c}}],delta:G.sandbox?0:-400});if(!G.sandbox)G.money-=400;c.level++;needsBase=true;recalculate();updateHUD();inspect(i);$("undoBtn").disabled=false;tone("build");
+ };
+}
+function showBuildCost(e){
+ if(!preview.length){$("buildCost").hidden=true;return}const total=preview.reduce((s,i)=>s+(canPlace(i,tool)?actionCost(i,tool):0),0),b=$("buildCost");
+ b.hidden=false;b.textContent=preview.length+" مربعات · "+(G.sandbox?"∞":fmt(total));b.style.left=clamp(e.clientX-50,10,W-160)+"px";b.style.top=clamp(e.clientY-60,80,H-150)+"px";
+}
+// Pointer input is installed by the continuous-road editor below.
+
+// ---- Saving, settings, and menus ---------------------------------------------
+function notify(message,error=false){
+ const el=$("notice");el.textContent=message;el.classList.toggle("error",error);el.classList.add("show");clearTimeout(noticeTimeout);noticeTimeout=setTimeout(()=>el.classList.remove("show"),3800);
+}
+function tone(type){
+ if(!settings.sound)return;
+ try{
+  if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==="suspended")audio.resume();
+  const notes=type==="win"?[523,659,784,1046]:type==="bad"?[170,120]:type==="remove"?[240,180]:[480,680];
+  notes.forEach((f,i)=>{const o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+i*.085;o.type="sine";o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.045,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+.17);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+.18)});
+ }catch(e){settings.sound=false;syncSettings()}
+}
+function celebrate(title,text){$("achievementTitle").textContent=title;$("achievementText").textContent=text;$("milestone").classList.add("show");clearTimeout(achievementTimeout);achievementTimeout=setTimeout(()=>$("milestone").classList.remove("show"),3700);tone("win")}
+function modalOpen(){return ["startScreen","menuOverlay","helpOverlay","confirmOverlay"].some(id=>!$(id).hidden)}
+function confirmDialog(title,text,callback){
+ $("confirmTitle").textContent=title;$("confirmText").textContent=text;pendingConfirm=callback;$("confirmOverlay").hidden=false;
+}
+function syncSettings(){
+ [["soundToggle","sound"],["gridToggle","grid"],["qualityToggle","low"]].forEach(([id,key])=>{$(id).classList.toggle("on",settings[key]);$(id).setAttribute("aria-pressed",String(settings[key]))});
+}
+function serialize(){
+ return {format:"cityflow",version:VERSION,city:{...G,grid:G.grid.map(c=>({type:c.type,variant:c.variant,level:c.level,people:c.people,goods:c.goods,wide:c.wide,noPark:c.noPark,signal:c.signal,signalOffset:c.signalOffset})),simClock:clock},settings:{...settings},camera:{...cam},savedAt:new Date().toISOString()};
+}
+function legacyValidateSave(raw){
+ if(!raw||raw.format!=="cityflow"||raw.version!==VERSION||!raw.city||raw.city.size!==SIZE||!Array.isArray(raw.city.grid)||raw.city.grid.length!==SIZE*SIZE)throw new Error("هذا الملف ليس نسخة حفظ متوافقة مع مدينتي 0.1.");
+ const num=(n,min,max,def)=>Number.isFinite(n)?clamp(n,min,max):def;
+ const src=raw.city,grid=src.grid.map((c,i)=>{
+  if(!c||typeof c!=="object"||!Object.hasOwnProperty.call(LABEL,c.type))throw new Error("بيانات الخريطة غير صالحة.");
+  const p=xy(i),natural=terrain(p.x,p.y);
+  if((natural==="water"||natural==="sand")&&c.type!==natural)throw new Error("تضاريس ملف الحفظ غير متوافقة.");
+  if(natural==="grass"&&["water","sand"].includes(c.type))throw new Error("تضاريس ملف الحفظ غير متوافقة.");
+  const level=Math.round(num(c.level,1,3,1)),tile=newTile(c.type,p.x,p.y);
+  return {...tile,variant:Math.round(num(c.variant,0,4,0)),level,people:c.type==="home"?Math.round(num(c.people,0,18+(level-1)*14,0)):0,goods:c.type==="shop"?num(c.goods,0,100,35):0,wide:c.wide===true,noPark:c.noPark===true,signal:c.type==="road"&&c.signal===true,signalOffset:num(c.signalOffset,0,12.8,0)};
+ });
+ if(grid[idx(3,11)].type!=="road")throw new Error("بوابة المدينة مفقودة من ملف الحفظ.");
+ const city={version:VERSION,size:SIZE,grid,money:num(src.money,0,1e10,14000),day:Math.round(num(src.day,1,1e7,1)),dayProgress:num(src.dayProgress,0,DAY,0),delivered:Math.round(num(src.delivered,0,1e9,0)),trips:Math.round(num(src.trips,0,1e9,0)),lostTrips:Math.round(num(src.lostTrips,0,1e9,0)),goals:[0,1,2,3].map(i=>src.goals?.[i]===true),sandbox:src.sandbox===true,grant:src.grant===true,seed:4231,created:num(src.created,0,1e15,Date.now()),simClock:num(src.simClock,0,1e12,0)};
+ const s=raw.settings||{},settings={sound:s.sound===true,grid:s.grid!==false,low:s.low===true};
+ const savedCam=raw.camera;const camera=savedCam&&Number.isFinite(savedCam.x)&&Number.isFinite(savedCam.y)&&Number.isFinite(savedCam.z)?{x:savedCam.x,y:savedCam.y,z:num(savedCam.z,.25,2.2,.7)}:null;
+ return {city,settings,camera,savedAt:typeof raw.savedAt==="string"?raw.savedAt:""};
+}
+let storageWarning=false;
+function save(manual=false){
+ if(!started)return false;
+ try{localStorage.setItem(STORE,JSON.stringify(serialize()));saveAvailable=true;saveStamp=new Date().toLocaleTimeString("ar-AE",{hour:"2-digit",minute:"2-digit"});$("saveStatus").textContent="آخر حفظ: "+saveStamp+" · محلي على هذا الجهاز فقط.";$("resumeBtn").hidden=false;if(manual)notify("تم حفظ المدينة على هذا المتصفح.");return true}
+ catch(e){$("saveStatus").textContent="تعذّر الحفظ المحلي. استخدم النسخة الاحتياطية لحماية مدينتك.";if(manual||!storageWarning){notify("الحفظ المحلي غير متاح. صدّر نسخة احتياطية من القائمة.",true);storageWarning=true}return false}
+}
+function legacyLoadValidated(data){
+ G=data.city;settings=data.settings;clock=G.simClock||0;delete G.simClock;cars=[];nextCar=1;history=[];selected=-1;spawnClock=0;autoSaveClock=0;
+ rebuild();recalculate();started=true;$("ui").hidden=false;$("startScreen").hidden=true;$("menuOverlay").hidden=true;$("inspector").hidden=true;
+ resize();resetCamera();syncSettings();setTool("hand");setSpeed(1);updateHUD();updateGoals();$("undoBtn").disabled=true;
+ for(let n=0;n<12;n++)spawnVehicle(true);recalculate();updateHUD();save(false);
+}
+function legacyResume(){
+ try{const text=localStorage.getItem(STORE);if(!text)throw new Error("لا يوجد حفظ متاح.");loadValidated(validateSave(JSON.parse(text)));notify("رجعت مدينتك. نكمل البناء؟")}
+ catch(e){notify(e.message||"تعذّر فتح الحفظ.",true)}
+}
+function startCity(mode){
+ started=true;initCity(mode);resize();resetCamera();$("ui").hidden=false;$("startScreen").hidden=true;$("menuOverlay").hidden=true;$("inspector").hidden=true;setTool("hand");setSpeed(1);syncSettings();save(false);
+ if(mode!=="sandbox")$("helpOverlay").hidden=false;else notify("وضع البناء الحر: الميزانية غير محدودة، والمحاكاة مستمرة.");
+}
+function chooseStart(mode){
+ if(saveAvailable){confirmDialog("استبدال المدينة المحفوظة؟","المدينة الجديدة ستحل محل الحفظ المحلي الحالي. النسخ الاحتياطية التي صدّرتها لن تتأثر.",()=>startCity(mode))}
+ else startCity(mode);
+}
+function exportSave(){
+ const text=JSON.stringify(serialize(),null,2),blob=new Blob([text],{type:"application/json"}),name="cityflow-save-"+new Date().toISOString().slice(0,10)+".json";
+ const download=()=>{const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);notify("تم تجهيز نسخة احتياطية. احتفظ بها في الملفات.")};
+ try{const file=new File([blob],name,{type:"application/json"});if(navigator.canShare?.({files:[file]})){navigator.share({files:[file],title:"نسخة احتياطية لمدينتي"}).then(()=>notify("تمت مشاركة نسخة الحفظ.")).catch(e=>{if(e.name!=="AbortError")download()})}else download()}catch(e){download()}
+}
+async function importSave(file){
+ if(!file)return;if(file.size>1500000){notify("ملف الحفظ أكبر من الحجم المسموح.",true);return}
+ try{const data=validateSave(JSON.parse(await file.text())),pop=data.city.grid.reduce((a,c)=>a+c.people,0);
+ confirmDialog("استعادة المدينة؟","اليوم "+data.city.day+" · "+fmt(pop)+" ساكن · الميزانية "+(data.city.sandbox?"غير محدودة":fmt(data.city.money))+". سيتم استبدال المدينة الحالية بعد التأكيد.",()=>{loadValidated(data);notify("تمت استعادة المدينة وحفظها على هذا الجهاز.")});
+ }catch(e){notify(e.message==="Unexpected end of JSON input"?"ملف الحفظ غير مكتمل.":e.message||"تعذّر قراءة ملف الحفظ.",true)}
+}
+function setSpeed(s){speed=s;document.querySelectorAll("[data-speed]").forEach(b=>b.classList.toggle("on",Number(b.dataset.speed)===s))}
+function initUI(){
+ $("openMenu").innerHTML=icon("menu");$("zoomIn").innerHTML=icon("plus");$("zoomOut").innerHTML=icon("minus");$("center").innerHTML=icon("center");$("heatBtn").innerHTML=icon("heat");$("undoBtn").innerHTML=icon("undo");
+ document.querySelectorAll("[data-icon]").forEach(el=>el.innerHTML=icon(el.dataset.icon));
+ $("tagBuild").insertAdjacentHTML("afterbegin",icon("home"));$("tagTraffic").insertAdjacentHTML("afterbegin",icon("car"));$("tagTouch").insertAdjacentHTML("afterbegin",icon("hand"));
+ $("buildBar").innerHTML=TOOLS.map(t=>'<button class="tool '+(t.id==="hand"?"active":"")+'" data-tool="'+t.id+'" aria-label="'+t.label+'">'+icon(t.id)+'<strong>'+t.label+'</strong><small>'+(t.price?fmt(t.price):t.id==="bulldoze"?"استرداد 25%":t.id==="hand"?"تحريك":"تحكّم")+'</small></button>').join("");
+ document.querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+ document.querySelectorAll("[data-speed]").forEach(b=>b.onclick=()=>setSpeed(Number(b.dataset.speed)));
+ $("startBtn").onclick=()=>chooseStart("starter");$("emptyBtn").onclick=()=>chooseStart("empty");$("sandboxBtn").onclick=()=>chooseStart("sandbox");$("resumeBtn").onclick=resume;
+ $("openMenu").onclick=()=>{$("menuOverlay").hidden=false;updateHUD()};
+ $("closeMenu").onclick=()=>{$("menuOverlay").hidden=true;save(false)};
+ $("helpBtn").onclick=()=>{$("menuOverlay").hidden=true;$("helpOverlay").hidden=false};
+ $("closeHelp").onclick=$("gotIt").onclick=()=>{$("helpOverlay").hidden=true};
+ $("saveBtn").onclick=()=>save(true);$("exportBtn").onclick=exportSave;$("importBtn").onclick=()=>{$("importFile").value="";$("importFile").click()};
+ $("importFile").onchange=e=>importSave(e.target.files[0]);
+ $("newBtn").onclick=()=>{$("menuOverlay").hidden=true;$("startScreen").hidden=false;$("ui").hidden=true;$("resumeBtn").hidden=!saveAvailable};
+ $("grantBtn").onclick=()=>{if(G.money<=1000&&!G.grant&&!G.sandbox){G.money+=5000;G.grant=true;notify("وصل دعم الطوارئ +5,000. متاح مرة واحدة لكل مدينة.");updateHUD();save(false)}};
+ $("soundToggle").onclick=()=>{settings.sound=!settings.sound;syncSettings();tone("build")};$("gridToggle").onclick=()=>{settings.grid=!settings.grid;syncSettings();needsBase=true};$("qualityToggle").onclick=()=>{settings.low=!settings.low;syncSettings();resize()};
+ $("toggleGoals").onclick=()=>$("goals").classList.toggle("expanded");
+ $("closeInspector").onclick=()=>{selected=-1;$("inspector").hidden=true};
+ $("zoomIn").onclick=()=>zoomAt(1.22);$("zoomOut").onclick=()=>zoomAt(1/1.22);$("center").onclick=resetCamera;
+ $("heatBtn").onclick=()=>{heat=!heat;$("heatBtn").classList.toggle("active",heat);$("heatLegend").hidden=!heat;notify(heat?"خريطة المرور: الأحمر مزدحم، والأخضر سالك.":"تم إخفاء خريطة المرور.")};$("undoBtn").onclick=undo;
+ $("confirmNo").onclick=()=>{$("confirmOverlay").hidden=true;pendingConfirm=null};
+ $("confirmYes").onclick=()=>{const action=pendingConfirm;pendingConfirm=null;$("confirmOverlay").hidden=true;action?.()};
+ window.addEventListener("resize",resize);window.addEventListener("orientationchange",()=>setTimeout(resize,180));
+ window.addEventListener("pagehide",()=>save(false));
+ document.addEventListener("visibilitychange",()=>{visible=!document.hidden;lastTime=0;if(!visible)save(false)});
+ document.addEventListener("keydown",e=>{
+  if(e.target instanceof HTMLInputElement)return;
+  if(e.key==="Escape"){$("menuOverlay").hidden=true;$("helpOverlay").hidden=true;$("confirmOverlay").hidden=true;setTool("hand")}
+  if(!started||modalOpen())return;
+  if(e.key===" "){e.preventDefault();setSpeed(speed?0:1)}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();undo()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();save(true)}
+ });
+ try{const raw=localStorage.getItem(STORE);if(raw){validateSave(JSON.parse(raw));saveAvailable=true;$("resumeBtn").hidden=false;$("startBtn").classList.remove("primary")}}catch(e){/* A damaged save is never allowed to break startup. */}
+}
+function simulate(dt){
+ clock+=dt;G.dayProgress+=dt;spawnClock+=dt;metricClock+=dt;
+ const interval=clamp(2.8-stats.pop/160,.28,2.8);
+ while(spawnClock>=interval){spawnClock-=interval;spawnVehicle()}
+ // Fixed substeps keep headway and traffic lights stable at accelerated speed.
+ let left=dt;while(left>0){const sub=Math.min(left,.045);stepTraffic(sub);left-=sub}
+ while(G.dayProgress>=DAY){G.dayProgress-=DAY;newDay()}
+ if(metricClock>=.75){metricClock=0;recalculate();updateHUD();updateGoals();checkGoals()}
+}
+let renderAccumulator=0;
+function frame(now){
+ requestAnimationFrame(frame);const elapsed=lastTime?Math.min((now-lastTime)/1000,.08):0;lastTime=now;if(!visible)return;
+ if(started&&!modalOpen()){if(speed&&!RP.draft)simulate(elapsed*speed);autoSaveClock+=elapsed;if(autoSaveClock>=15){autoSaveClock=0;save(false)}}
+ else if(!started){clock+=elapsed;stepTraffic(elapsed*.6)}
+ renderAccumulator+=elapsed;const fps=settings.low?30:45;
+ if(renderAccumulator>=1/fps||elapsed===0){draw();renderAccumulator=0}
+}
+
+const AR={"roadTitle": "محرّر الشوارع", "straight": "مستقيم", "curve": "منحني", "roundabout": "دوّار", "edit": "تعديل", "lanes": "المسارات", "two": "٢", "four": "٤", "six": "٦", "twoWay": "اتجاهان", "oneWay": "اتجاه واحد", "reverse": "عكس الاتجاه", "parkingOn": "وقوف مسموح", "parkingOff": "الوقوف ممنوع", "apply": "تطبيق", "cancel": "إلغاء", "drawHint": "اسحب من بداية الشارع لنهايته. إصبعان لتحريك الخريطة.", "curveHint": "ارسم البداية والنهاية، ثم اسحب المقبض الأوسط لتعديل الانحناء.", "roundHint": "اسحب من مركز الدوّار للخارج لتحديد حجمه.", "editHint": "المس شارعًا لتعديله، أو اسحب مقابضه بعد تحديده.", "draftHint": "اسحب المقابض لضبط الشكل، ثم اضغط تطبيق.", "blocked": "المسار يتداخل مع مبنى أو خارج الأرض المتاحة.", "tooShort": "ارسم شارعًا أطول قليلًا.", "tooComplex": "وصلت إلى حد الطرق في هذه النسخة. احذف مقاطع غير مستخدمة.", "budget": "الميزانية غير كافية لهذا التعديل.", "built": "تم بناء الطريق وربطه بشبكة المرور.", "edited": "تم تحديث الطريق وإعادة حساب مسارات السيارات.", "roundBuilt": "تم بناء دوّار باتجاه واحد وربط مداخله.", "deleted": "تم حذف مقطع الطريق.", "protected": "هذا هو مدخل المدينة ولا يمكن حذفه أو نقله.", "selectRoad": "المس مقطع طريق أولًا.", "pickJunction": "المس تقاطعًا من ثلاثة اتجاهات أو أكثر.", "cost": "التكلفة", "free": "بلا تكلفة", "units": "وحدة", "length": "الطول", "roadReady": "المسار جاهز", "roadBlocked": "مسار غير صالح", "roadEdit": "تعديل شارع", "roadNew": "شارع جديد", "signal": "إشارة", "signalOn": "إضافة إشارة", "signalOff": "إزالة الإشارة", "phase": "مدة الأخضر", "seconds": "ثوانٍ", "localRoad": "شارع محلي", "avenue": "جادة", "arterial": "طريق رئيسي", "laneUnit": "مسارات", "traffic": "مركبة على الشارع", "modify": "تعديل هذا الشارع", "remove": "إزالة الشارع", "undo": "تم التراجع عن آخر تعديل.", "gate": "مدخل المدينة", "roundRadius": "نصف قطر الدوّار", "snap": "التقاط تلقائي لنقاط الاتصال", "edition": "تحديث الشوارع 0.2 · رسم حر ومنحنيات وتعديل المسارات", "hero": "شوارع ترسمها بطريقتك.", "heroBody": "خطّط المسار، عدّل الانحناء، وخلّ مدينتك تتحرّك.", "helpRoad": "اختر طريقًا مستقيمًا أو منحنيًا، واسحب بين البداية والنهاية. اسحب المقابض لتعديل الشكل، ثم اضغط تطبيق. الطرق لا تلتزم بمربعات الأرض.", "helpEdit": "من محرّر الشوارع اختر تعديل، ثم المس الطريق. غيّر عدد المسارات أو اتجاه السير أو الوقوف، وطبّق التعديل. الدوّار يُرسم بالسحب من مركزه للخارج ويقص الطرق داخل حلقته.", "helpTraffic": "السيارات تتبع هندسة الطرق واتجاهاتها، وتقف خلف المركبات وعند الإشارات. الدوّارات باتجاه واحد. المحاكاة مبسطة وليست نسخة من Trafficity.", "helpSave": "يمكن استعادة حفظ النسخة 0.1؛ تتحول شوارعها إلى الشبكة الجديدة. يبقى الحفظ القديم منفصلًا. صدّر نسخة احتياطية قبل تغيير الموقع أو الجهاز.", "inspectorRoad": "المس الطريق لتحديده وتعديل خصائصه.", "signalAdded": "تم تعديل إشارة التقاطع.", "parkingChanged": "تم تحديث الوقوف الجانبي لهذا الطريق.", "importError": "هذا الملف ليس حفظًا متوافقًا مع مدينتي 0.1 أو 0.2.", "networkError": "بيانات شبكة الطرق غير صالحة.", "restored": "تم استعادة المدينة وتحويل الطرق عند الحاجة.", "preview": "معاينة قبل البناء", "noChange": "لا يوجد تغيير لتطبيقه.", "signalCycle": "دورة الإشارة", "oldSave": "متابعة حفظ النسخة السابقة", "touchRoad": "طرق حرة باللمس", "slow": "إبطاء عند الانعطاف", "allRoads": "شبكة شوارع حرة", "deleteQuestion": "حذف هذا الشارع؟", "deleteText": "سيتم حذف المقطع المحدد فقط. قد تنقطع بعض المباني عن المدينة، ويمكن التراجع عن العملية.", "cannotMoveRing": "يمكن تغيير خصائص الدوّار. لتغيير موقعه أو حجمه احذفه وارسمه من جديد.", "mapTip": "التعديل لا يهدم المباني تلقائيًا.", "draw": "رسم", "connect": "اتصال", "lowQuality": "تفاصيل أقل", "roadTools": "أدوات الطرق", "roadSaved": "مستقيم أو منحني · ٢ / ٤ / ٦ مسارات", "invalidRing": "الدوّار يحتاج مساحة فارغة، ولا يمكن أن يقطع دوّارًا آخر.", "confirmRemove": "إزالة مع استرداد ٢٥٪", "roadBudget": "الميزانية", "modeTraffic": "مرور", "junction": "تقاطع", "closed": "دائري", "onewayWarn": "تأكد من وجود طريق عودة عند استخدام اتجاه واحد.", "longPress": "اختر تعديل ثم المس الشارع.", "cancelDraft": "أُلغيت المعاينة دون خصم من الميزانية.", "switchPaused": "المحاكاة متوقفة مؤقتًا أثناء المعاينة.", "legacyNotice": "تم تحويل طرق المدينة القديمة. الحفظ السابق لم يُحذف."};
+// City Flow 0.2: continuous, editable road geometry and a directed traffic graph.
+const LEGACY_STORE = 'cityflow_v01_save';
+const cloneData = value => JSON.parse(JSON.stringify(value));
+const RP = { mode:'line', lanes:2, oneWay:0, noPark:true, draft:null, selected:null, error:'', handle:null };
+let RN = {nodes:[], arcs:new Map(), roads:new Map(), paths:new Map(), gate:0, junctions:[], length:0};
+let selectedRoad=null, nearestHover=null, roadRevision=0;
+const vdist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const mix=(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
+const unit=(a,b)=>{const d=vdist(a,b)||1;return {x:(b.x-a.x)/d,y:(b.y-a.y)/d}};
+const roadWidth=r=>.12+.14*r.lanes;
+const roadRadius=r=>roadWidth(r)/2+.09;
+const roadPrice=r=>({2:110,4:240,6:360}[r.lanes]||110);
+function pathInfo(points){let marks=[0];for(let i=1;i<points.length;i++)marks.push(marks[i-1]+vdist(points[i-1],points[i]));return {points,marks,length:marks[marks.length-1]||0}}
+function atDistance(path,s){
+ const d=clamp(s,0,path.length);let k=1;while(k<path.marks.length-1&&path.marks[k]<d)k++;
+ const a=path.points[k-1],b=path.points[k]||a,l=path.marks[k]-path.marks[k-1];return {...mix(a,b,l?(d-path.marks[k-1])/l:0),dx:unit(a,b).x,dy:unit(a,b).y};
+}
+function projectPoint(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy,t=den?clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/den,0,1):0;const q=mix(a,b,t);return {...q,t,d:vdist(p,q)}}
+function projectPath(p,path){let best=null;for(let k=1;k<path.points.length;k++){const q=projectPoint(p,path.points[k-1],path.points[k]);if(!best||q.d<best.d)best={...q,s:path.marks[k-1]+q.t*(path.marks[k]-path.marks[k-1]),k}}return best}
+function lineIntersection(a,b,c,d){
+ const ux=b.x-a.x,uy=b.y-a.y,vx=d.x-c.x,vy=d.y-c.y,den=ux*vy-uy*vx;if(Math.abs(den)<1e-9)return null;
+ const t=((c.x-a.x)*vy-(c.y-a.y)*vx)/den,u=((c.x-a.x)*uy-(c.y-a.y)*ux)/den;
+ if(t<-.00001||t>1.00001||u<-.00001||u>1.00001)return null;return {t:clamp(t,0,1),u:clamp(u,0,1),x:a.x+ux*t,y:a.y+uy*t};
+}
+function sampleCurve(a,c,b){const steps=clamp(Math.ceil((vdist(a,c)+vdist(c,b))/.24),12,120),out=[];for(let k=0;k<=steps;k++){const t=k/steps,s=1-t;out.push({x:s*s*a.x+2*s*t*c.x+t*t*b.x,y:s*s*a.y+2*s*t*c.y+t*t*b.y})}return out}
+function circlePoints(center,r){const n=72,out=[];for(let k=0;k<=n;k++){const a=-k/n*Math.PI*2;out.push({x:center.x+Math.cos(a)*r,y:center.y+Math.sin(a)*r})}out[out.length-1]={...out[0]};return out}
+function pathSlice(path,start,end){const pts=[atDistance(path,start)];for(let k=1;k<path.points.length-1;k++)if(path.marks[k]>start+1e-6&&path.marks[k]<end-1e-6)pts.push(path.points[k]);pts.push(atDistance(path,end));return pts.map(p=>({x:p.x,y:p.y}))}
+function simplifyPoints(points){const out=[];for(const p of points){if(out.length&&vdist(p,out[out.length-1])<.0001)continue;if(out.length>=2){const a=out[out.length-2],b=out[out.length-1];if(Math.abs((b.x-a.x)*(p.y-b.y)-(b.y-a.y)*(p.x-b.x))<.0001){out.pop()}}out.push({x:p.x,y:p.y})}return out}
+function makeNetworkFromTiles(city){
+ const original=city.grid.map(c=>({...c})),net={version:1,nextId:1,roads:[],signals:[]},visited=new Set();
+ const rs=[];original.forEach((c,i)=>{if(c.type==='road')rs.push(i)});
+ const adj=i=>around(i).filter(j=>original[j].type==='road'),key=(a,b)=>Math.min(a,b)+':'+Math.max(a,b);
+ const settingsEqual=(a,b)=>original[a].wide===original[b].wide&&original[a].noPark===original[b].noPark;
+ const terminal=i=>{const ns=adj(i);if(ns.length!==2)return true;const a=xy(ns[0]),b=xy(ns[1]);return (a.x!==b.x&&a.y!==b.y)||ns.some(j=>!settingsEqual(i,j))};
+ const add=(start,next)=>{if(visited.has(key(start,next)))return;const list=[start];let a=start,b=next;visited.add(key(a,b));list.push(b);let guard=0;
+  while(!terminal(b)&&guard++<SIZE*SIZE){const n=adj(b).find(v=>v!==a);if(n==null||visited.has(key(b,n)))break;visited.add(key(b,n));a=b;b=n;list.push(b)}
+  const pts=list.map(i=>{const p=xy(i);return{x:p.x+.5,y:p.y+.5}}),s=original[start],e=original[next];
+  net.roads.push({id:net.nextId++,points:simplifyPoints(pts),lanes:s.wide&&e.wide?4:2,oneWay:0,noPark:s.noPark&&e.noPark,kind:'line',protected:list.includes(idx(3,11))});
+ };
+ for(const i of rs.filter(terminal))for(const j of adj(i))add(i,j);
+ for(const i of rs)for(const j of adj(i))add(i,j);
+ for(const i of rs){const p=xy(i);if(original[i].signal)net.signals.push({x:p.x+.5,y:p.y+.5,green:5.6,offset:original[i].signalOffset||0});city.grid[i]=newTile('grass',p.x,p.y)}
+ if(!net.roads.length)net.roads.push({id:net.nextId++,points:[{x:3.5,y:11.5},{x:5.5,y:11.5}],lanes:4,oneWay:0,noPark:true,kind:'line',protected:true});
+ city.network=net;return net;
+}
+function addRoadDemo(){
+ const net=G.network,add=r=>net.roads.push({id:net.nextId++,lanes:4,oneWay:0,noPark:true,kind:'line',...r});
+ // A small showcase extension in unoccupied land. Never added to an imported city.
+ add({points:sampleCurve({x:19.5,y:11.5},{x:22.2,y:11.5},{x:20.9,y:16.8}),kind:'curve',control:{x:22.2,y:11.5}});
+ add({points:circlePoints({x:19.3,y:16.8},1.6),kind:'round',center:{x:19.3,y:16.8},radius:1.6,lanes:2,oneWay:1});
+ add({points:sampleCurve({x:19.3,y:18.4},{x:17,y:20.8},{x:12.5,y:19.2}),kind:'curve',control:{x:17,y:20.8}});
+ add({points:sampleCurve({x:12.5,y:19.2},{x:11,y:19.2},{x:11,y:17.5}),kind:'curve',control:{x:11,y:19.2}});
+}
+function initCity(mode='starter'){
+ Object.assign(RP,{mode:'line',lanes:2,oneWay:0,noPark:true,draft:null,selected:null,error:'',handle:null});selectedRoad=null;RN={nodes:[],arcs:new Map(),roads:new Map(),paths:new Map(),gate:0,junctions:[],length:0};
+ legacyInitCity(mode);
+ if(mode!=='empty'){addRoadDemo();rebuild();recalculate();updateHUD();cars=[];for(let i=0;i<30;i++)spawnVehicle(true)}
+ needsBase=true;updateRoadPanel();
+}
+function buildRoadGraph(){
+ const net=G.network,paths=new Map(),cuts=new Map();let length=0;
+ for(const r of net.roads){const p=pathInfo(r.points);paths.set(r.id,p);cuts.set(r.id,[0,p.length]);length+=p.length}
+ // Insert exact intersection nodes rather than connecting roads by tile proximity.
+ for(let i=0;i<net.roads.length;i++){
+  const r=net.roads[i],p=paths.get(r.id);
+  for(let j=i+1;j<net.roads.length;j++){
+   const s=net.roads[j],q=paths.get(s.id);
+   for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){
+    const A=p.points[a-1],B=p.points[a],C=q.points[b-1],D=q.points[b];
+    if(Math.max(A.x,B.x)+.0001<Math.min(C.x,D.x)||Math.max(C.x,D.x)+.0001<Math.min(A.x,B.x)||Math.max(A.y,B.y)+.0001<Math.min(C.y,D.y)||Math.max(C.y,D.y)+.0001<Math.min(A.y,B.y))continue;
+    const hit=lineIntersection(A,B,C,D);if(hit){cuts.get(r.id).push(p.marks[a-1]+hit.t*(p.marks[a]-p.marks[a-1]));cuts.get(s.id).push(q.marks[b-1]+hit.u*(q.marks[b]-q.marks[b-1]))}
+   }
+   // Collinear T-junctions and precisely snapped endpoints are also nodes.
+   for(const end of [p.points[0],p.points[p.points.length-1]]){const hit=projectPath(end,q);if(hit.d<.015)cuts.get(s.id).push(hit.s)}
+   for(const end of [q.points[0],q.points[q.points.length-1]]){const hit=projectPath(end,p);if(hit.d<.015)cuts.get(r.id).push(hit.s)}
+  }
+ }
+ const accesses=new Map();
+ for(const b of buildings){const p=xy(b),center={x:p.x+.5,y:p.y+.5};let best=null;
+  for(const r of net.roads){const hit=projectPath(center,paths.get(r.id));if(hit.d<=1.12+roadRadius(r)&&(!best||hit.d<best.d))best={...hit,road:r.id}}
+  if(best){cuts.get(best.road).push(best.s);accesses.set(b,best)}
+ }
+ const nodes=[],arcs=new Map(),spatial=new Map();
+ function nodeAt(p){const kx=Math.round(p.x*1000),ky=Math.round(p.y*1000);for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const k=(kx+dx)+','+(ky+dy);if(spatial.has(k)){const n=nodes[spatial.get(k)];if(vdist(n,p)<.002)return n.id}}
+  const id=nodes.length;nodes.push({id,x:p.x,y:p.y,links:[],all:new Set(),roadIds:new Set(),signal:null});spatial.set(kx+','+ky,id);return id;
+ }
+ function addArc(a,b,r,forward){if(a===b)return;const A=nodes[a],B=nodes[b],d=vdist(A,B);if(d<.0001)return;
+  A.all.add(b);B.all.add(a);A.roadIds.add(r.id);B.roadIds.add(r.id);
+  if((r.oneWay===1&&!forward)||(r.oneWay===-1&&forward))return;
+  const arc={a,b,length:d,road:r.id,forward,lanes:r.oneWay?r.lanes:r.lanes/2,dx:(B.x-A.x)/d,dy:(B.y-A.y)/d};
+  const k=a+':'+b;if(arcs.has(k))return;arcs.set(k,arc);A.links.push(arc);
+ }
+ for(const r of net.roads){const path=paths.get(r.id);let marks=cuts.get(r.id).concat(path.marks).sort((a,b)=>a-b),clean=[];
+  for(const s of marks)if(!clean.length||s-clean[clean.length-1]>.002)clean.push(s);
+  const refined=[clean[0]];for(let k=1;k<clean.length;k++){const a=clean[k-1],b=clean[k],n=Math.max(1,Math.ceil((b-a)/.72));for(let j=1;j<=n;j++)refined.push(a+(b-a)*j/n)}
+  let prev=null;for(const s of refined){const n=nodeAt(atDistance(path,s));if(prev!==null){addArc(prev,n,r,true);addArc(n,prev,r,false)}prev=n}
+ }
+ let gate=0,bestGate=Infinity;for(const n of nodes){const d=vdist(n,{x:3.5,y:11.5});if(d<bestGate){bestGate=d;gate=n.id}}
+ const junctions=nodes.filter(n=>n.all.size>=3);
+ net.signals=net.signals.filter(signal=>junctions.some(n=>vdist(n,signal)<.14));
+ for(const signal of net.signals){let near=null;for(const n of junctions)if(vdist(n,signal)<.14)near=n;if(near)near.signal=signal}
+ for(const [b,p] of accesses){const n=nodeAt(p);G.grid[b].access=n}
+ RN={nodes,arcs,roads:new Map(net.roads.map(r=>[r.id,r])),paths,gate,junctions,length};
+ // Connected components are undirected; actual vehicle routes obey directed arcs.
+ compMap=Array(nodes.length).fill(-1);let cid=0;for(const root of nodes){if(compMap[root.id]>=0)continue;const q=[root.id];compMap[root.id]=cid;for(let k=0;k<q.length;k++)for(const n of nodes[q[k]].all)if(compMap[n]<0){compMap[n]=cid;q.push(n)}cid++}
+ connected=new Set(nodes.filter(n=>compMap[n.id]===compMap[gate]).map(n=>n.id));
+ for(const b of buildings){const c=G.grid[b];if(!accesses.has(b))c.access=-1;c.connected=c.access>=0&&connected.has(c.access)}
+ roads=net.roads.map(r=>r.id);routeCache.clear();roadRevision++;
+}
+function rebuild(){
+ const oldPositions=cars.map(c=>({car:c,p:RN.nodes.length?carPos(c):null}));
+ buildings=[];G.grid.forEach((c,i)=>{if(['home','shop','factory','park','parking'].includes(c.type))buildings.push(i)});
+ if(!G.network)makeNetworkFromTiles(G);
+ buildRoadGraph();density={};cars=[];
+ for(const old of oldPositions){const c=old.car,dest=G.grid[c.dest];if(!old.p||!dest||dest.type!==c.destType||!dest.connected)continue;let from=nearestNode(old.p,1.4);if(from<0)continue;const path=route(from,dest.access);if(path&&path.length>1){c.path=path;c.seg=0;c.t=0;c.wait=0;c.finish=false;cars.push(c)}}
+ needsBase=true;
+}
+function nearestNode(p,max=Infinity){let id=-1,d=max;for(const n of RN.nodes){const v=vdist(p,n);if(v<d){id=n.id;d=v}}return id}
+function nearestRoad(p,max=.7){let best=null;for(const r of G.network.roads){const hit=projectPath(p,RN.paths.get(r.id)||pathInfo(r.points));if(hit.d<max&&(!best||hit.d<best.d))best={...hit,road:r.id}}return best}
+function roadClearance(p){const hit=nearestRoad(p,2);return hit?hit.d-roadRadius(RN.roads.get(hit.road)):Infinity}
+function parkingNear(i){let spots=near(i,'parking',3).filter(j=>G.grid[j].connected).length*8;const p=xy(i);const hit=nearestRoad({x:p.x+.5,y:p.y+.5},1.8);if(hit&&!RN.roads.get(hit.road).noPark)spots+=6;return spots}
+function route(start,end){
+ if(start<0||end<0||!RN.nodes[start]||!RN.nodes[end]||compMap[start]!==compMap[end]||start===end)return null;
+ const key=start+':'+end,cache=routeCache.get(key);if(cache&&clock-cache.time<3)return cache.path.slice();
+ const cost=new Map([[start,0]]),prev=new Map(),open=[start],done=new Set();let found=false;
+ while(open.length){let bi=0;for(let k=1;k<open.length;k++)if(cost.get(open[k])<cost.get(open[bi]))bi=k;const v=open.splice(bi,1)[0];if(v===end){found=true;break}if(done.has(v))continue;done.add(v);
+  for(const arc of RN.nodes[v].links){const n=arc.b;if(done.has(n))continue;const road=RN.roads.get(arc.road),weight=arc.length/(road.lanes>=4?1.35:1)+(density[n]||0)*.12+(RN.nodes[n].signal?.12:0),d=cost.get(v)+weight;if(!cost.has(n)||d<cost.get(n)){cost.set(n,d);prev.set(n,v);open.push(n)}}
+ }
+ if(!found)return null;const path=[end];while(path[0]!==start){const p=prev.get(path[0]);if(p===undefined)return null;path.unshift(p)}routeCache.set(key,{path,time:clock});if(routeCache.size>1000)routeCache.clear();return path.slice();
+}
+function laneFor(c,from,to){const arc=RN.arcs.get(from+':'+to);return arc?(c.id%arc.lanes):0}
+function spawnVehicle(seed=false){
+ const cap=settings.low?65:150;if(cars.length>=cap)return;
+ const homes=buildings.filter(i=>G.grid[i].type==='home'&&G.grid[i].people>0&&G.grid[i].connected),shops=buildings.filter(i=>G.grid[i].type==='shop'&&G.grid[i].connected),factories=buildings.filter(i=>G.grid[i].type==='factory'&&G.grid[i].connected);
+ let source,dest,truck=Math.random()<.28,from,to,type;
+ if(truck){dest=choose(shops.filter(i=>G.grid[i].goods<85&&cars.filter(c=>c.truck&&c.dest===i).length<2));if(dest==null)return;source=choose(factories);from=source==null?RN.gate:G.grid[source].access;to=G.grid[dest].access;type='shop'}
+ else{source=choose(homes);if(source==null)return;dest=choose(shops.concat(factories));if(dest==null)return;from=G.grid[source].access;to=G.grid[dest].access;type=G.grid[dest].type}
+ const path=route(from,to);if(!path||path.length<2)return;
+ const id=nextCar++,c={id,path,seg:0,t:0,source,dest,destType:type,truck,color:truck?'#e9bf74':choose(['#f5eecc','#e7b27b','#80c9dd','#e5eeeb','#d57f69','#75b7a6','#7c8ba8']),wait:0,waitSmooth:0,age:0,returning:false,finish:false,speed:truck?.75:.96};
+ if(seed){c.seg=Math.floor(Math.random()*(path.length-1));c.t=Math.random()*.7}
+ const a=path[c.seg],b=path[c.seg+1],arc=RN.arcs.get(a+':'+b);if(!arc)return;
+ if(cars.some(o=>o.path[o.seg]===a&&o.path[o.seg+1]===b&&laneFor(o,a,b)===laneFor(c,a,b)&&Math.abs(o.t-c.t)*arc.length<.32))return;
+ cars.push(c);
+}
+function signalGreen(i,from){
+ const node=RN.nodes[i],signal=node?.signal;if(!signal)return true;const arc=RN.arcs.get(from+':'+i);if(!arc)return true;
+ const green=signal.green||5.6,half=green+.8,p=(clock+(signal.offset||0))%(half*2),horizontal=Math.abs(arc.dx)>=Math.abs(arc.dy);
+ return horizontal?p<green:(p>=half&&p<half+green);
+}
+function finishCar(c){
+ if(c.truck){if(G.grid[c.dest]?.type==='shop'){G.grid[c.dest].goods=Math.min(100,G.grid[c.dest].goods+22);G.delivered++}c.finish=true;return}
+ G.trips++;if(!c.returning&&c.source!=null&&G.grid[c.source]?.type==='home'){
+  const back=route(c.path[c.path.length-1],G.grid[c.source].access);if(back&&back.length>1){c.path=back;c.seg=0;c.t=0;c.returning=true;c.dest=c.source;c.destType='home';c.age=0;c.wait=0;return}}
+ c.finish=true;
+}
+function stepTraffic(dt){
+ const groups=new Map(),arrivals=new Map();density={};
+ for(const c of cars){const a=c.path[c.seg],b=c.path[c.seg+1],arc=RN.arcs.get(a+':'+b);if(!arc){c.finish=true;continue}const key=edgeKey(a,b,laneFor(c,a,b));if(!groups.has(key))groups.set(key,[]);groups.get(key).push(c);density[a]=(density[a]||0)+1;if((1-c.t)*arc.length<.36&&RN.nodes[b].all.size>=3){if(!arrivals.has(b))arrivals.set(b,[]);arrivals.get(b).push(c)}}
+ for(const arr of groups.values())arr.sort((a,b)=>b.t-a.t);
+ const winners=new Map();
+ for(const [node,arr] of arrivals){const eligible=arr.filter(c=>signalGreen(node,c.path[c.seg]));eligible.sort((a,b)=>{const A=RN.arcs.get(a.path[a.seg]+':'+node),B=RN.arcs.get(b.path[b.seg]+':'+node),ar=RN.roads.get(A.road).kind==='round',br=RN.roads.get(B.road).kind==='round';return (br?1:0)-(ar?1:0)||b.wait-a.wait||a.id-b.id});if(eligible.length)winners.set(node,eligible[0].id)}
+ for(const arr of groups.values()){let leader=null;for(const c of arr){if(c.finish)continue;c.age+=dt;const a=c.path[c.seg],b=c.path[c.seg+1],arc=RN.arcs.get(a+':'+b),road=RN.roads.get(arc.road),next=c.path[c.seg+2],nextArc=RN.arcs.get(b+':'+next);
+  const turn=nextArc?arc.dx*nextArc.dx+arc.dy*nextArc.dy:1;let velocity=c.speed*(road.lanes>=4?1.3:1)*(road.noPark?1:.90)*(turn<.75?.65:1),advance=velocity*dt/arc.length,maxT=1.00001;
+  const gap=(c.truck||leader?.truck)? .32 : .27;
+  if(leader)maxT=Math.min(maxT,leader.t-gap/arc.length);
+  const stop=Math.max(0,1-.12/arc.length);
+  if(!signalGreen(b,a))maxT=Math.min(maxT,stop);
+  if(RN.nodes[b].all.size>=3&&winners.has(b)&&winners.get(b)!==c.id)maxT=Math.min(maxT,stop);
+  // Look into the next arcs so short graph segments cannot hide a vehicle ahead.
+  let ahead=0;for(let k=c.seg+1;k<Math.min(c.path.length-1,c.seg+5)&&ahead<.45;k++){
+   const aa=c.path[k],bb=c.path[k+1],na=RN.arcs.get(aa+':'+bb);if(!na)break;const q=groups.get(edgeKey(aa,bb,laneFor(c,aa,bb)));
+   if(q)for(const other of q)if(other.id!==c.id){const front=arc.length+ahead+other.t*na.length-((c.truck||other.truck)? .32 : .27);maxT=Math.min(maxT,front/arc.length)}ahead+=na.length;
+  }
+  const before=c.t;c.t=Math.max(c.t,Math.min(c.t+advance,maxT));const moving=c.t-before>advance*.25;c.waitSmooth+=((moving?0:2.2)-c.waitSmooth)*Math.min(1,dt*1.8);c.wait=moving?Math.max(0,c.wait-dt):c.wait+dt;
+  if(c.t>=1){c.seg++;c.t=0;if(c.seg>=c.path.length-1)finishCar(c)}
+  if(c.age>210){c.finish=true;G.lostTrips++}leader=c;
+ }}cars=cars.filter(c=>!c.finish);
+}
+function laneOffset(c,arc){const r=RN.roads.get(arc.road),lane=laneFor(c,arc.a,arc.b);return r.oneWay?(lane-(arc.lanes-1)/2)*.14:(lane+.5)*.14+.018}
+function carPos(c){
+ const a=c.path[c.seg],b=c.path[c.seg+1],arc=RN.arcs.get(a+':'+b);if(!arc){const n=RN.nodes[a]||{x:3.5,y:11.5};return {x:n.x,y:n.y,dx:1,dy:0}}
+ const A=RN.nodes[a],B=RN.nodes[b],off=laneOffset(c,arc),base=mix(A,B,c.t),prev=RN.arcs.get(c.path[c.seg-1]+':'+a),next=RN.arcs.get(b+':'+c.path[c.seg+2]);
+ const normal=(v,o)=>({x:-v.dy*o,y:v.dx*o});let n0=normal(arc,off),n1={...n0};
+ if(prev){const o=laneOffset(c,prev),n=normal(prev,o);n0={x:(n.x+n0.x)/2,y:(n.y+n0.y)/2}}
+ if(next){const o=laneOffset(c,next),n=normal(next,o);n1={x:(n.x+n1.x)/2,y:(n.y+n1.y)/2}}
+ const n=mix(n0,n1,c.t);return {x:base.x+n.x,y:base.y+n.y,dx:arc.dx,dy:arc.dy};
+}
+
+function worldContext(c){c.transform(TW/2,TH/2,-TW/2,TH/2,0,0)}
+function strokePath(c,points,width,color,dash=[]){if(points.length<2)return;c.beginPath();c.moveTo(points[0].x,points[0].y);for(let k=1;k<points.length;k++)c.lineTo(points[k].x,points[k].y);c.lineWidth=width;c.strokeStyle=color;c.lineCap='round';c.lineJoin='round';c.setLineDash(dash);c.stroke();c.setLineDash([])}
+function offsetPoints(points,offset){return points.map((p,i)=>{let u;if(!i)u=unit(p,points[i+1]);else if(i===points.length-1)u=unit(points[i-1],p);else{const a=unit(points[i-1],p),b=unit(p,points[i+1]);const l=Math.hypot(a.x+b.x,a.y+b.y)||1;u={x:(a.x+b.x)/l,y:(a.y+b.y)/l}}return {x:p.x-u.y*offset,y:p.y+u.x*offset}})}
+function roadArrow(c,p,dx,dy,scale=1){const s=.10*scale,nx=-dy,ny=dx;const points=[{x:p.x+dx*s,y:p.y+dy*s},{x:p.x-dx*s*.3+nx*s*.55,y:p.y-dy*s*.3+ny*s*.55},{x:p.x-dx*s*.3+nx*s*.18,y:p.y-dy*s*.3+ny*s*.18},{x:p.x-dx*s,y:p.y-dy*s},{x:p.x-dx*s*.3-nx*s*.18,y:p.y-dy*s*.3-ny*s*.18},{x:p.x-dx*s*.3-nx*s*.55,y:p.y-dy*s*.3-ny*s*.55}];poly(c,points,'#e3e7d8')}
+function drawNetwork(c){
+ c.save();worldContext(c);
+ // Building driveways sit under the road surface.
+ for(const i of buildings){const t=G.grid[i],p=xy(i);if(t.access<0||t.type==='park')continue;const n=RN.nodes[t.access];if(n)strokePath(c,[{x:p.x+.5,y:p.y+.5},n],.13,'#c9d1bd')}
+ const list=G.network.roads;
+ for(const r of list)strokePath(c,r.points,roadWidth(r)+.23,'#76927d');
+ for(const r of list)strokePath(c,r.points,roadWidth(r)+.18,'#d2d6c6');
+ for(const r of list)strokePath(c,r.points,roadWidth(r),'#354b55');
+ for(const r of list){const w=roadWidth(r),p=RN.paths.get(r.id);
+  strokePath(c,offsetPoints(r.points,w/2-.025),.012,'#d2d8cd');strokePath(c,offsetPoints(r.points,-w/2+.025),.012,'#d2d8cd');
+  const laneStep=.14;
+  for(let k=1;k<r.lanes;k++){const off=(k-r.lanes/2)*laneStep;
+   if(!r.oneWay&&k===r.lanes/2){if(r.lanes>=4){strokePath(c,offsetPoints(r.points,.019),.013,'#d9c68a');strokePath(c,offsetPoints(r.points,-.019),.013,'#d9c68a')}else strokePath(c,r.points,.017,'#d9c68a',[.17,.14]);}
+   else strokePath(c,offsetPoints(r.points,off),.012,'#c0cbc7',[.16,.14]);
+  }
+  if(r.noPark){strokePath(c,offsetPoints(r.points,w/2+.048),.018,'#e3bc68',[.20,.06]);strokePath(c,offsetPoints(r.points,-w/2-.048),.018,'#e3bc68',[.20,.06])}
+  for(let s=1.1;s<p.length-.5;s+=2.6){const q=atDistance(p,s);if(RN.junctions.some(n=>vdist(n,q)<.7))continue;
+   if(r.oneWay){const sign=r.oneWay;for(let k=0;k<r.lanes;k++){const off=(k-(r.lanes-1)/2)*laneStep;roadArrow(c,{x:q.x-q.dy*off,y:q.y+q.dx*off},q.dx*sign,q.dy*sign,.7)}}
+   else{for(const sign of [-1,1]){const off=sign*.115;roadArrow(c,{x:q.x-q.dy*off,y:q.y+q.dx*off},q.dx*sign,q.dy*sign,.7)}}
+  }
+ }
+ // Clear marking conflicts inside junctions, then draw crossings and stop lines.
+ for(const n of RN.junctions){const rs=[...n.roadIds].map(id=>RN.roads.get(id)),isRound=rs.some(r=>r.kind==='round'),radius=Math.max(...rs.map(r=>roadWidth(r)))/2+.045;
+  circle(c,n,radius,'#354b55');
+  if(!isRound)for(const other of n.all){const b=RN.nodes[other],u=unit(n,b),arc=RN.arcs.get(n.id+':'+other)||RN.arcs.get(other+':'+n.id),r=RN.roads.get(arc.road),width=roadWidth(r)*.83,anchor={x:n.x+u.x*(radius+.07),y:n.y+u.y*(radius+.07)},count=Math.max(3,Math.floor(width/.075));
+   for(let j=0;j<count;j++){const d=-width/2+(j+.5)*width/count;strokePath(c,[{x:anchor.x-u.y*d-u.x*.045,y:anchor.y+u.x*d-u.y*.045},{x:anchor.x-u.y*d+u.x*.045,y:anchor.y+u.x*d+u.y*.045}],.033,'#dce0d4')}
+   if(n.signal){const p={x:n.x+u.x*(radius+.19),y:n.y+u.y*(radius+.19)};strokePath(c,[{x:p.x+u.y*.02,y:p.y-u.x*.02},{x:p.x+u.y*width/2,y:p.y-u.x*width/2}],.027,'#dce0d4')}
+  }
+ }
+ for(const r of list)if(r.kind==='round'&&r.center){const inner=r.radius-roadWidth(r)/2-.11;circle(c,r.center,inner+.04,'#d1d7c3');circle(c,r.center,inner,'#8eb68c');circle(c,r.center,inner*.64,'#a4c99b');}
+ c.restore();
+}
+function rebuildBase(){
+ legacyRebuildBase();bc.save();bc.translate(OX,OY);drawNetwork(bc);bc.restore();needsBase=false;
+}
+function orientedBox(c,x,y,dx,dy,len,width,height,z,top,left,right){
+ const nx=-dy,ny=dx,pt=(a,b,h)=>iso(x+dx*a+nx*b,y+dy*a+ny*b,h),p=[pt(-len/2,-width/2,z+height),pt(len/2,-width/2,z+height),pt(len/2,width/2,z+height),pt(-len/2,width/2,z+height)];
+ const side=[];for(let k=0;k<4;k++){const j=(k+1)%4;side.push({k,j,depth:(p[k].y+p[j].y)/2})}side.sort((a,b)=>a.depth-b.depth);
+ for(const s of side){const a=p[s.k],b=p[s.j];poly(c,[a,b,{x:b.x,y:b.y+height},{x:a.x,y:a.y+height}],s.k%2?left:right)}poly(c,p,top);
+}
+function drawSmallCar(c,x,y,dx,dy,color,truck=false,scale=1){
+ const norm=Math.hypot(dx,dy)||1;dx/=norm;dy/=norm;const len=(truck?.29:.235)*scale,w=.12*scale;
+ const p=iso(x,y);c.save();c.fillStyle='#183c3435';c.beginPath();c.ellipse(p.x+2,p.y+2,6*scale,2.5*scale,0,0,Math.PI*2);c.fill();c.restore();
+ orientedBox(c,x,y,dx,dy,len,w,truck?4.5:3.4,1,color,shade(color,.70),shade(color,.87));
+ if(truck)orientedBox(c,x-dx*.025,y-dy*.025,dx,dy,len*.65,w*.93,3.2,5,'#e6e8d9','#b0c5bf','#ced8ce');
+ else orientedBox(c,x-dx*.012,y-dy*.012,dx,dy,len*.45,w*.84,1.7,4.4,'#50798a','#345660','#648b98');
+ const f=iso(x+dx*len*.42,y+dy*len*.42,3.5);circle(c,f,.7*scale,'#fff2be');
+}
+function drawNetworkSignal(c,n){
+ const rs=[...n.roadIds].map(id=>RN.roads.get(id)),r=Math.max(...rs.map(r=>roadWidth(r)))/2+.13;
+ const p=iso(n.x+r,n.y+r);line(c,p,{x:p.x,y:p.y-20},'#43595a',1.5);c.fillStyle='#243c43';c.fillRect(p.x-3,p.y-29,6,12);
+ const green=n.signal.green||5.6,t=(clock+(n.signal.offset||0))%((green+.8)*2);circle(c,{x:p.x,y:p.y-26},1.55,t<green?'#6be9b1':'#ef957c');circle(c,{x:p.x,y:p.y-21},1.55,t>=green+.8&&t<green*2+.8?'#6be9b1':'#ef957c');
+}
+function roadHandles(){
+ const r=RP.draft?.road;if(!r||r.protected||RP.draft.existing&&r.kind==='round')return [];
+ if(r.kind==='round')return [{name:'center',p:r.center},{name:'radius',p:{x:r.center.x+r.radius,y:r.center.y}}];
+ const list=[{name:'start',p:r.points[0]},{name:'end',p:r.points[r.points.length-1]}];if(r.kind==='curve'&&r.control)list.push({name:'control',p:r.control});return list;
+}
+function drawRoadOverlay(c){
+ const chosen=RP.draft?.road||RN.roads.get(selectedRoad);
+ if(chosen){c.save();worldContext(c);if(RP.draft){const err=RP.error,color=err?'#db7a60':'#76ddbb';c.globalAlpha=.42;strokePath(c,chosen.points,roadWidth(chosen)+.16,color);c.globalAlpha=1;strokePath(c,chosen.points,.035,err?'#ffc3ac':'#f0ffe8',[.13,.10]);}
+ else{c.globalAlpha=.28;strokePath(c,chosen.points,roadWidth(chosen)+.1,'#f6d17c')}
+ c.restore();
+ }
+ const draft=RP.draft?.road;if(!draft)return;
+ if(draft.kind==='curve'&&draft.control){const A=iso(draft.points[0].x,draft.points[0].y),B=iso(draft.points[draft.points.length-1].x,draft.points[draft.points.length-1].y),C=iso(draft.control.x,draft.control.y);c.setLineDash([5/cam.z,5/cam.z]);line(c,A,C,'#f7d48c',1/cam.z);line(c,C,B,'#f7d48c',1/cam.z);c.setLineDash([])}
+ for(const h of roadHandles()){const p=iso(h.p.x,h.p.y),radius=8/cam.z;circle(c,p,radius+3/cam.z,'#12333bd9');circle(c,p,radius,h.name==='control'||h.name==='radius'?'#f4cc82':'#c0f4dc');circle(c,p,2/cam.z,'#24474a');}
+}
+function draw(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);const grad=ctx.createLinearGradient(0,0,W,H);grad.addColorStop(0,'#d4e7df');grad.addColorStop(.6,'#c4dcd3');grad.addColorStop(1,'#a8cfca');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(cam.x,cam.y);ctx.scale(cam.z,cam.z);if(needsBase)rebuildBase();
+ ctx.save();ctx.translate(12,20);poly(ctx,[iso(0,0),iso(SIZE,0),iso(SIZE,SIZE),iso(0,SIZE)],'#46777218');ctx.restore();ctx.drawImage(base,-OX,-OY);
+ if(heat){ctx.save();worldContext(ctx);for(const r of G.network.roads){const count=cars.filter(c=>RN.arcs.get(c.path[c.seg]+':'+c.path[c.seg+1])?.road===r.id).length,len=RN.paths.get(r.id).length;strokePath(ctx,r.points,roadWidth(r)+.07,count/len>2?'#e67c638a':count/len>.8?'#eec06d83':'#6cd7ac65')}ctx.restore()}
+ if(selected>=0){const p=xy(selected);diamond(ctx,p.x,p.y,'#fff5b660',.02,'#fff7ce')}
+ const objs=[];
+ for(let i=0;i<G.grid.length;i++){const t=G.grid[i],p=xy(i),center={x:p.x+.5,y:p.y+.5};
+  if(t.type==='grass'&&hash(p.x,p.y,9)>.90&&p.x>3&&p.y<20&&roadClearance(center)>.25&&!G.network.roads.some(r=>r.kind==='round'&&vdist(r.center,center)<r.radius))objs.push({type:'tree',i,depth:p.x+p.y+1.1});
+  else if(['home','shop','factory','park','parking'].includes(t.type))objs.push({type:'building',i,depth:p.x+p.y+1.1});
+ }
+ for(const n of RN.junctions)if(n.signal)objs.push({type:'signal',n,depth:n.x+n.y+1});
+ for(const r of G.network.roads){
+  if(!r.noPark){const path=RN.paths.get(r.id);for(let s=1;s<path.length-.5;s+=2.9){const p=atDistance(path,s);if(RN.junctions.some(n=>vdist(n,p)<.85))continue;const offset=roadWidth(r)/2-.045;const pos={x:p.x-p.dy*offset,y:p.y+p.dx*offset,dx:p.dx,dy:p.dy};objs.push({type:'parked',p:pos,color:['#cdd4c4','#729ca8','#d6b28d'][r.id%3],depth:pos.x+pos.y})}}
+  if(r.kind==='round'){for(let k=0;k<3;k++){const a=k/3*Math.PI*2,p={x:r.center.x+Math.cos(a)*r.radius*.27,y:r.center.y+Math.sin(a)*r.radius*.27};objs.push({type:'islandTree',p,depth:p.x+p.y})}}
+ }
+ for(const car of cars){const p=carPos(car);objs.push({type:'car',car,p,depth:p.x+p.y})}objs.push({type:'gate',depth:15.7});objs.sort((a,b)=>a.depth-b.depth);
+ for(const o of objs){if(o.type==='car')drawSmallCar(ctx,o.p.x,o.p.y,o.p.dx,o.p.dy,o.car.color,o.car.truck);else if(o.type==='parked')drawSmallCar(ctx,o.p.x,o.p.y,o.p.dx,o.p.dy,o.color,false,.8);else if(o.type==='building')drawBuilding(ctx,o.i);else if(o.type==='tree'){const p=xy(o.i);drawTree(ctx,p.x+.5,p.y+.5,.85,G.grid[o.i].variant)}else if(o.type==='signal')drawNetworkSignal(ctx,o.n);else if(o.type==='islandTree')drawTree(ctx,o.p.x,o.p.y,.7,1);else drawGate(ctx)}
+ if(tool!=='road'){
+  if(preview.length){const invalid=preview.some(i=>!canPlace(i,tool));for(const i of preview){const p=xy(i);diamond(ctx,p.x,p.y,invalid?'#e4826755':'#d6ffdf66',.02,invalid?'#d65f47':'#f2ffe8')}}
+  else if(hover>=0&&tool!=='hand'&&!['signal','noParking'].includes(tool)){const p=xy(hover);diamond(ctx,p.x,p.y,canPlace(hover,tool)?'#d6ffdf44':'#e4826744',.02,'#f2ffe8')}
+ }
+ drawRoadOverlay(ctx);ctx.restore();
+}
+
+
+// Activate touch buttons on a deliberate pointer release. Avoid relying on a
+// compatibility click immediately after a captured canvas drag (mobile browsers).
+function bindTouchButtons(root=document){
+ for(const button of root.querySelectorAll('button')){
+  if(button._touchBound||typeof button.onclick!=='function')continue;
+  button._touchBound=true;const action=button.onclick;let press=null,ignoreClickUntil=0;
+  button.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'&&!button.disabled)press={id:e.pointerId,x:e.clientX,y:e.clientY}});
+  button.addEventListener('pointercancel',()=>{press=null});
+  button.addEventListener('pointerup',e=>{if(!press||press.id!==e.pointerId)return;const start=press;press=null;if(button.disabled||Math.hypot(e.clientX-start.x,e.clientY-start.y)>14)return;e.preventDefault();ignoreClickUntil=performance.now()+600;action.call(button,e)});
+  button.onclick=e=>{if(performance.now()<ignoreClickUntil&&e.detail!==0)return;action.call(button,e)};
+ }
+}
+function screenToWorld(clientX,clientY){const r=canvas.getBoundingClientRect(),sx=(clientX-r.left-cam.x)/cam.z,sy=(clientY-r.top-cam.y)/cam.z;return {x:sx/TW+sy/TH,y:sy/TH-sx/TW}}
+function worldToScreen(p){const s=iso(p.x,p.y);return {x:cam.x+s.x*cam.z,y:cam.y+s.y*cam.z}}
+function snapRoadPoint(p,exclude=null){let best=null;for(const r of G.network.roads){if(r.id===exclude)continue;const q=projectPath(p,RN.paths.get(r.id));if(q.d<.38&&(!best||q.d<best.d))best=q}if(best)return{x:best.x,y:best.y};return{x:clamp(p.x,3.2,23.6),y:clamp(p.y,.4,20.6)}}
+function draftCost(draft=RP.draft){if(!draft)return 0;const r=draft.road,price=pathInfo(r.points).length*roadPrice(r),old=draft.existing?RN.roads.get(draft.existing):null;return Math.ceil(Math.max(0,price-(old?pathInfo(old.points).length*roadPrice(old):0)))}
+function roadGeometryError(road,existing=null){
+ const path=pathInfo(road.points);if(path.length<.6)return AR.tooShort;
+ if(G.network.roads.length>=180&&!existing||RN.length+path.length-(existing?RN.paths.get(existing)?.length||0:0)>650)return AR.tooComplex;
+ for(let s=0;s<=path.length+.1;s+=.12){const p=atDistance(path,Math.min(s,path.length)),radius=roadRadius(road);
+  for(const off of [{x:0,y:0},{x:radius,y:0},{x:-radius,y:0},{x:0,y:radius},{x:0,y:-radius}]){
+   const x=p.x+off.x,y=p.y+off.y;if(x<0||y<0||x>=SIZE||y>=SIZE||terrain(Math.floor(x),Math.floor(y))!=='grass')return AR.blocked;
+  }
+  for(const i of buildings){const b=xy(i),dx=Math.max(b.x+.11-p.x,0,p.x-(b.x+.89)),dy=Math.max(b.y+.11-p.y,0,p.y-(b.y+.89));if(Math.hypot(dx,dy)<radius-.015)return AR.blocked}
+  if(road.kind!=='round')for(const ring of G.network.roads)if(ring.id!==existing&&ring.kind==='round'&&vdist(p,ring.center)<ring.radius-.15)return AR.invalidRing;
+ }
+ if(road.kind==='round'){
+  for(const r of G.network.roads)if(r.protected&&projectPath(road.center,RN.paths.get(r.id)).d<road.radius+roadRadius(r))return AR.protected;
+  for(const i of buildings){const p=xy(i);if(vdist(road.center,{x:p.x+.5,y:p.y+.5})<road.radius+roadRadius(road)+.5)return AR.invalidRing}
+  for(const r of G.network.roads)if(r.id!==existing&&r.kind==='round'&&vdist(r.center,road.center)<r.radius+road.radius+.5)return AR.invalidRing;
+ }
+ // Reject long duplicate overlays; use Edit to change capacity instead.
+ if(!existing&&road.kind!=='round')for(const r of G.network.roads){const p=RN.paths.get(r.id);let close=0,n=0;for(let s=.15;s<path.length-.1;s+=.25){n++;if(projectPath(atDistance(path,s),p).d<.06)close++}if(n>=3&&close/n>.7)return AR.longPress}
+ return '';
+}
+function currentRoadDraftError(){if(!RP.draft)return '';const error=roadGeometryError(RP.draft.road,RP.draft.existing);if(error)return error;if(!G.sandbox&&G.money<draftCost())return AR.budget;return ''}
+function beginRoadDraft(start,end,mode=RP.mode){
+ let r={id:0,points:[start,end],lanes:RP.lanes,oneWay:RP.oneWay,noPark:RP.noPark,kind:mode==='curve'?'curve':'line'};
+ if(mode==='curve'){const l=vdist(start,end),u=unit(start,end);r.control={x:(start.x+end.x)/2-u.y*l*.22,y:(start.y+end.y)/2+u.x*l*.22};r.points=sampleCurve(start,r.control,end)}
+ if(mode==='round'){const radius=clamp(vdist(start,end),1.1,3.4);r={...r,kind:'round',center:{...start},radius,points:circlePoints(start,radius),lanes:2,oneWay:1,noPark:true}}
+ RP.draft={road:r,existing:null};RP.selected=null;selectedRoad=null;updateRoadPanel();
+}
+function selectRoadForEdit(id){
+ const r=RN.roads.get(id);if(!r)return;RP.mode='edit';RP.draft={road:cloneData(r),existing:id};RP.selected=id;selectedRoad=id;selected=-1;
+ RP.lanes=r.lanes;RP.oneWay=r.oneWay;RP.noPark=r.noPark;$('inspector').hidden=true;updateRoadPanel();
+}
+function setRoadMode(mode){
+ if((mode==='line'||mode==='curve')&&RP.draft&&RP.draft.road.kind!=='round'){
+  const r=RP.draft.road;if(r.protected&&mode==='curve'){notify(AR.protected,true);return}
+  const a=r.points[0],b=r.points[r.points.length-1];r.kind=mode;
+  if(mode==='curve'){r.control=r.control||{x:(a.x+b.x)/2,y:(a.y+b.y)/2};r.points=sampleCurve(a,r.control,b)}else{r.points=[a,b];delete r.control}
+ }else RP.draft=null;
+ RP.mode=mode;selectedRoad=null;updateRoadPanel();
+}
+function changeRoadProperty(key,value){
+ RP[key]=value;if(RP.draft){const r=RP.draft.road;if(r.kind==='round'&&key==='oneWay')return;r[key]=value;if(r.protected&&key==='oneWay'){r.oneWay=0;RP.oneWay=0}}
+ updateRoadPanel();
+}
+function moveRoadHandle(name,p){
+ const r=RP.draft?.road;if(!r||r.protected)return;
+ if(r.kind==='round'){
+  if(RP.draft.existing)return;if(name==='center')r.center=p;else r.radius=clamp(vdist(r.center,p),1.1,3.4);r.points=circlePoints(r.center,r.radius);
+ }else{
+  if(name==='start')r.points[0]=snapRoadPoint(p,RP.draft.existing);else if(name==='end')r.points[r.points.length-1]=snapRoadPoint(p,RP.draft.existing);else if(name==='control')r.control=p;
+  if(r.kind==='curve')r.points=sampleCurve(r.points[0],r.control,r.points[r.points.length-1]);
+ }
+ updateRoadPanel();
+}
+function hitRoadHandle(p){const s=worldToScreen(p);for(const h of roadHandles()){if(RP.draft?.road.protected)continue;const q=worldToScreen(h.p);if(Math.hypot(q.x-s.x,q.y-s.y)<24)return h.name}return null}
+function cancelRoadDraft(silent=false){RP.draft=null;RP.selected=null;RP.error='';selectedRoad=null;updateRoadPanel();if(!silent)notify(AR.cancelDraft)}
+function pushRoadHistory(delta=0){history.push({network:cloneData(G.network),before:[],delta:G.sandbox?0:delta});if(history.length>25)history.shift();$('undoBtn').disabled=false}
+function trimForRoundabout(ring){
+ const ringPath=pathInfo(ring.points),out=[];
+ for(const road of G.network.roads){if(road.protected){out.push(road);continue}const p=pathInfo(road.points),cuts=[0,p.length];
+  for(let a=1;a<p.points.length;a++)for(let b=1;b<ringPath.points.length;b++){const hit=lineIntersection(p.points[a-1],p.points[a],ringPath.points[b-1],ringPath.points[b]);if(hit)cuts.push(p.marks[a-1]+hit.t*(p.marks[a]-p.marks[a-1]))}
+  cuts.sort((a,b)=>a-b);const marks=cuts.filter((v,i)=>i===0||v-cuts[i-1]>.002);let chunks=[],start=null;
+  for(let k=1;k<marks.length;k++){const mid=atDistance(p,(marks[k-1]+marks[k])/2),outside=vdist(mid,ring.center)>ring.radius-.015;
+   if(outside){if(start===null)start=marks[k-1]}else if(start!==null){chunks.push([start,marks[k-1]]);start=null}}
+  if(start!==null)chunks.push([start,p.length]);
+  if(chunks.length===1&&chunks[0][0]===0&&chunks[0][1]===p.length){out.push(road);continue}
+  let first=true;for(const [a,b] of chunks)if(b-a>.18){const id=first?road.id:G.network.nextId++;first=false;out.push({...road,id,points:pathSlice(p,a,b),kind:'poly',control:undefined})}
+ }
+ G.network.roads=out;
+}
+function applyRoadDraft(){
+ if(!RP.draft)return false;RP.error=currentRoadDraftError();if(RP.error){notify(RP.error,true);tone('bad');updateRoadPanel();return false}
+ const draft=RP.draft,r=cloneData(draft.road),cost=draftCost(),old=draft.existing?RN.roads.get(draft.existing):null;
+ if(old&&JSON.stringify(old)===JSON.stringify(r)){cancelRoadDraft(true);notify(AR.noChange);return true}
+ pushRoadHistory(-cost);
+ if(old){r.id=old.id;G.network.roads=G.network.roads.map(o=>o.id===old.id?r:o)}
+ else{if(r.kind==='round')trimForRoundabout(r);r.id=G.network.nextId++;G.network.roads.push(r)}
+ if(!G.sandbox)G.money-=cost;RP.draft=null;RP.selected=null;selectedRoad=r.id;rebuild();recalculate();updateHUD();updateGoals();updateRoadPanel();tone('build');save(false);
+ notify(old?AR.edited:r.kind==='round'?AR.roundBuilt:AR.built);return true;
+}
+function deleteRoad(id,ask=true){
+ const r=RN.roads.get(id);if(!r)return false;if(r.protected){notify(AR.protected,true);return false}
+ const act=()=>{const refund=Math.floor(RN.paths.get(id).length*roadPrice(r)*.25);pushRoadHistory(refund);G.network.roads=G.network.roads.filter(o=>o.id!==id);if(!G.sandbox)G.money+=refund;RP.draft=null;selectedRoad=null;selected=-1;$('inspector').hidden=true;rebuild();recalculate();updateHUD();updateRoadPanel();tone('remove');notify(AR.deleted);save(false)};
+ if(ask)confirmDialog(AR.deleteQuestion,AR.deleteText,act);else act();return true;
+}
+function changeParking(id){const r=RN.roads.get(id);if(!r)return;pushRoadHistory();r.noPark=!r.noPark;rebuild();recalculate();updateHUD();notify(AR.parkingChanged);if(selectedRoad===id)inspectRoad(id)}
+function changeSignal(nodeId,cycle=null){
+ const n=RN.nodes[nodeId];if(!n||n.all.size<3){notify(AR.pickJunction,true);return false}
+ const si=G.network.signals.findIndex(s=>vdist(s,n)<.14),exists=si>=0,cost=cycle!==null?0:exists?-30:120;
+ if(!G.sandbox&&G.money<cost){notify(AR.budget,true);return false}pushRoadHistory(-cost);if(!G.sandbox)G.money-=cost;
+ if(cycle!==null){if(exists)G.network.signals[si].green=cycle;else G.network.signals.push({x:n.x,y:n.y,green:cycle,offset:0})}
+ else if(exists)G.network.signals.splice(si,1);else G.network.signals.push({x:n.x,y:n.y,green:5.6,offset:0});
+ rebuild();recalculate();updateHUD();notify(AR.signalAdded);return true;
+}
+function closestJunction(p,max=.95){let best=null;for(const n of RN.junctions)if(vdist(p,n)<max&&(!best||vdist(p,n)<vdist(p,best)))best=n;return best}
+function updateRoadPanel(){
+ const panel=$('roadPanel');if(!panel)return;panel.hidden=tool!=='road';document.body.classList.toggle('roads-open',tool==='road');
+ $('toolTip').hidden=tool==='road';const d=RP.draft,r=d?.road;RP.error=d?currentRoadDraftError():'';
+ document.querySelectorAll('[data-road-mode]').forEach(b=>{const active=RP.mode===b.dataset.roadMode;b.classList.toggle('on',active);b.setAttribute('aria-pressed',String(active))});
+ document.querySelectorAll('[data-lanes]').forEach(b=>{b.classList.toggle('on',Number(b.dataset.lanes)===(r?r.lanes:RP.lanes));b.disabled=r?.kind==='round'&&Number(b.dataset.lanes)>2});
+ const way=r?r.oneWay:RP.oneWay;$('roadDirection').textContent=way?AR.oneWay:AR.twoWay;$('roadDirection').classList.toggle('on',!!way);$('roadDirection').disabled=r?.kind==='round'||r?.protected;
+ $('roadReverse').disabled=!way||r?.kind==='round'||r?.protected;$('roadPark').textContent=(r?r.noPark:RP.noPark)?AR.parkingOff:AR.parkingOn;$('roadPark').classList.toggle('on',r?r.noPark:RP.noPark);
+ $('roadStatus').textContent=d?(RP.error||AR.draftHint):({line:AR.drawHint,curve:AR.curveHint,round:AR.roundHint,edit:AR.editHint}[RP.mode]);$('roadStatus').classList.toggle('invalid',!!RP.error);
+ $('roadApply').hidden=$('roadCancel').hidden=!d;$('roadApply').disabled=!!RP.error;
+ $('roadMetrics').textContent=d?AR.length+' '+pathInfo(r.points).length.toFixed(1)+' '+AR.units+'  /  '+AR.cost+' '+(G.sandbox?'\u221e':fmt(draftCost())):AR.preview;
+ $('roadTitle').textContent=d?(d.existing?AR.roadEdit:AR.roadNew):AR.roadTitle;
+}
+function setTool(id){
+ RP.draft=null;RP.selected=null;selectedRoad=null;legacySetTool(id);if(id==='road'){$('toolOptions').innerHTML='';$('toolHelp').textContent=AR.drawHint}updateRoadPanel();
+}
+function canPlace(i,t){
+ if(i<0)return false;const c=G.grid[i],p=xy(i),center={x:p.x+.5,y:p.y+.5};if(t==='hand')return true;
+ if(t==='signal')return !!closestJunction(center);if(t==='noParking')return !!nearestRoad(center,.9);
+ if(t==='bulldoze')return ['home','shop','factory','park','parking'].includes(c.type)||!!nearestRoad(center,.65);
+ if(t==='road')return c.type==='grass';if(c.type!=='grass')return false;
+ // Test a prospective building footprint, not just its centre.
+ for(const r of G.network.roads){const path=RN.paths.get(r.id);if(r.kind==='round'&&vdist(center,r.center)<r.radius+roadRadius(r)+.5)return false;
+  for(let s=0;s<=path.length+.1;s+=.18){const q=atDistance(path,Math.min(s,path.length)),dx=Math.max(p.x+.11-q.x,0,q.x-(p.x+.89)),dy=Math.max(p.y+.11-q.y,0,q.y-(p.y+.89));if(Math.hypot(dx,dy)<roadRadius(r)-.015)return false}}
+ return true;
+}
+function transact(indices,t){
+ if(!indices.length)return false;
+ const i=indices[0],p=xy(i),world={x:p.x+.5,y:p.y+.5};
+ if(t==='road'){const pts=indices.map(j=>{const q=xy(j);return{x:q.x+.5,y:q.y+.5}});RP.draft={road:{id:0,points:simplifyPoints(pts),lanes:roadWide?4:2,noPark:true,oneWay:0,kind:'poly'},existing:null};const ok=applyRoadDraft();if(!ok)cancelRoadDraft(true);return ok}
+ if(t==='signal'){const n=closestJunction(world);return n?changeSignal(n.id):(notify(AR.pickJunction,true),false)}
+ if(t==='noParking'){const hit=nearestRoad(world,.95);return hit?(changeParking(hit.road),true):(notify(AR.selectRoad,true),false)}
+ if(t==='bulldoze'&&G.grid[i].type==='grass'){const hit=nearestRoad(world,.65);return hit?deleteRoad(hit.road):false}
+ return legacyTransact(indices,t);
+}
+function undo(){
+ const h=history[history.length-1];if(!h)return;if(!G.sandbox&&G.money-h.delta<0){notify(AR.budget,true);return}
+ cancelRoadDraft(true);history.pop();if(h.network)G.network=cloneData(h.network);if(h.before)h.before.forEach(({i,tile})=>G.grid[i]={...tile});if(!G.sandbox)G.money-=h.delta;
+ rebuild();recalculate();updateHUD();updateGoals();$('undoBtn').disabled=!history.length;selectedRoad=null;$('inspector').hidden=true;notify(AR.undo);save(false);
+}
+function inspectRoad(id){
+ const r=RN.roads.get(id);if(!r)return;selected=-1;selectedRoad=id;$('inspector').hidden=false;
+ $('inspectTitle').textContent=r.kind==='round'?AR.roundabout:({2:AR.localRoad,4:AR.avenue,6:AR.arterial}[r.lanes]);
+ const count=cars.filter(c=>RN.arcs.get(c.path[c.seg]+':'+c.path[c.seg+1])?.road===id).length;
+ $('inspectText').textContent=r.lanes+' '+AR.laneUnit+' \u00b7 '+(r.oneWay?AR.oneWay:AR.twoWay)+' \u00b7 '+(r.noPark?AR.parkingOff:AR.parkingOn)+'\n'+count+' '+AR.traffic;
+ const actions=$('inspectActions');actions.innerHTML='';const button=(text,fn)=>{const b=document.createElement('button');b.className='action';b.textContent=text;b.onclick=fn;actions.appendChild(b)};
+ button(AR.modify,()=>{setTool('road');selectRoadForEdit(id)});button(r.noPark?AR.parkingOn:AR.parkingOff,()=>changeParking(id));
+ const ns=RN.junctions.filter(n=>n.roadIds.has(id));if(ns.length){const n=ns[0];button(n.signal?AR.signalOff:AR.signalOn,()=>{changeSignal(n.id);inspectRoad(id)});if(n.signal)button(AR.phase+' '+n.signal.green+' '+AR.seconds,()=>{const now=n.signal.green,cycle=now<6?8:now<10?12:4;changeSignal(n.id,cycle);inspectRoad(id)})}
+ if(!r.protected)button(AR.remove,()=>deleteRoad(id));bindTouchButtons(actions);
+}
+function inspect(i){if(i<0)return;const p=xy(i);if(G.grid[i].type==='grass'){const hit=nearestRoad({x:p.x+.5,y:p.y+.5},.7);if(hit){inspectRoad(hit.road);return}}selectedRoad=null;legacyInspect(i);bindTouchButtons($('inspector'))}
+function tapWorld(p){
+ const x=Math.floor(p.x),y=Math.floor(p.y),i=valid(x,y)?idx(x,y):-1;if(i>=0&&G.grid[i].type!=='grass'){inspect(i);return}const hit=nearestRoad(p,.6);if(hit)inspectRoad(hit.road);else if(i>=0)inspect(i);
+}
+function initRoadUI(){
+ $('roadPanel').addEventListener('pointerdown',e=>e.stopPropagation());
+ document.querySelectorAll('[data-road-mode]').forEach(b=>b.onclick=()=>setRoadMode(b.dataset.roadMode));
+ document.querySelectorAll('[data-lanes]').forEach(b=>b.onclick=()=>changeRoadProperty('lanes',Number(b.dataset.lanes)));
+ $('roadDirection').onclick=()=>changeRoadProperty('oneWay',(RP.draft?.road.oneWay??RP.oneWay)?0:1);
+ $('roadReverse').onclick=()=>changeRoadProperty('oneWay',-(RP.draft?.road.oneWay??RP.oneWay));
+ $('roadPark').onclick=()=>changeRoadProperty('noPark',!(RP.draft?.road.noPark??RP.noPark));
+ $('roadApply').onclick=applyRoadDraft;$('roadCancel').onclick=()=>cancelRoadDraft();
+ $('closeInspector').onclick=()=>{selected=-1;selectedRoad=null;$('inspector').hidden=true};
+ bindTouchButtons();
+ try{if(!localStorage.getItem(STORE)&&localStorage.getItem(LEGACY_STORE)){validateSave(JSON.parse(localStorage.getItem(LEGACY_STORE)));saveAvailable=true;$('resumeBtn').hidden=false;$('resumeBtn').textContent=AR.oldSave}}catch(e){}
+ updateRoadPanel();
+}
+
+function sanitizeNetwork(raw){
+ if(!raw||!Array.isArray(raw.roads)||raw.roads.length<1||raw.roads.length>180)throw new Error(AR.networkError);
+ const ids=new Set();let totalPoints=0,totalLength=0;
+ const point=p=>{if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<0||p.y<0||p.x>=SIZE||p.y>=SIZE)throw new Error(AR.networkError);return{x:p.x,y:p.y}};
+ const roads=raw.roads.map(r=>{
+  if(!r||!Number.isSafeInteger(r.id)||r.id<1||r.id>1000000||ids.has(r.id)||![2,4,6].includes(r.lanes)||![-1,0,1].includes(r.oneWay)||!Array.isArray(r.points)||r.points.length<2||r.points.length>160)throw new Error(AR.networkError);
+  ids.add(r.id);const points=r.points.map(point);totalPoints+=points.length;const length=pathInfo(points).length;totalLength+=length;if(length<.06||length>150)throw new Error(AR.networkError);
+  const kind=['line','curve','round','poly'].includes(r.kind)?r.kind:'poly';const out={id:r.id,points,lanes:r.lanes,oneWay:r.oneWay,noPark:r.noPark===true,kind,protected:r.protected===true};
+  if(kind==='curve'&&r.control)out.control=point(r.control);
+  if(kind==='round'){if(!Number.isFinite(r.radius)||r.radius<1.05||r.radius>3.5||!r.center)throw new Error(AR.networkError);out.center=point(r.center);out.radius=r.radius;out.oneWay=1;out.points=circlePoints(out.center,out.radius)}
+  return out;
+ });
+ if(totalPoints>3500||totalLength>680)throw new Error(AR.networkError);
+ if(!roads.some(r=>r.protected&&projectPath({x:3.5,y:11.5},pathInfo(r.points)).d<.03))throw new Error(AR.networkError);
+ const signals=Array.isArray(raw.signals)?raw.signals.slice(0,180).map(s=>({...point(s),green:Number.isFinite(s.green)?clamp(s.green,3,15):5.6,offset:Number.isFinite(s.offset)?clamp(s.offset,0,60):0})):[];
+ return {version:1,nextId:Math.max(...roads.map(r=>r.id))+1,roads,signals};
+}
+function validateSave(raw){
+ if(!raw||raw.format!=='cityflow'||![1,2].includes(raw.version)||!raw.city||!Array.isArray(raw.city.grid)||raw.city.grid.length!==SIZE*SIZE)throw new Error(AR.importError);
+ const source=cloneData(raw);source.version=VERSION;
+ if(raw.version===2){source.city.grid[idx(3,11)]=newTile('road',3,11)}
+ const result=legacyValidateSave(source);
+ if(raw.version===2){result.city.network=sanitizeNetwork(raw.city.network);result.city.grid[idx(3,11)]=newTile('grass',3,11);if(result.city.grid.some(c=>c.type==='road'))throw new Error(AR.networkError)}
+ return result;
+}
+function loadValidated(data){RP.draft=null;RP.selected=null;selectedRoad=null;RN={nodes:[],arcs:new Map(),roads:new Map(),paths:new Map(),gate:0,junctions:[],length:0};legacyLoadValidated(data);updateRoadPanel()}
+function resume(){try{const old=!localStorage.getItem(STORE),text=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE);if(!text)throw new Error(AR.importError);loadValidated(validateSave(JSON.parse(text)));notify(old?AR.legacyNotice:AR.restored)}catch(e){notify(e.message||AR.importError,true)}}
+
+canvas.addEventListener('pointerdown',e=>{
+ if(!started||modalOpen())return;e.preventDefault();canvas.setPointerCapture(e.pointerId);pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointer.size===2){if(gesture?.kind==='roadDraw')RP.draft=gesture.beforeDraft;const pts=[...pointer.values()];gesture={kind:'pinch',dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),mx:(pts[0].x+pts[1].x)/2,my:(pts[0].y+pts[1].y)/2};preview=[];$('buildCost').hidden=true;updateRoadPanel();return}
+ if(pointer.size>2)return;
+ const p=screenToWorld(e.clientX,e.clientY),i=screenToCell(e.clientX,e.clientY),baseGesture={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,start:i,world:p,moved:false};
+ if(tool==='hand'||e.button===1||e.button===2){gesture={...baseGesture,kind:'pan'};return}
+ if(tool==='road'){
+  const handle=hitRoadHandle(p);if(handle){gesture={...baseGesture,kind:'roadHandle',handle,beforeDraft:cloneData(RP.draft)};return}
+  if(RP.mode==='edit'){const hit=nearestRoad(p,.85);if(hit)selectRoadForEdit(hit.road);else notify(AR.selectRoad,true);gesture={...baseGesture,kind:'roadSelect'};return}
+  const beforeDraft=RP.draft?cloneData(RP.draft):null,start=RP.mode==='round'?p:snapRoadPoint(p);gesture={...baseGesture,kind:'roadDraw',anchor:start,beforeDraft};beginRoadDraft(start,start);return;
+ }
+ gesture={...baseGesture,kind:'build'};preview=i>=0?[i]:[];showBuildCost(e);
+});
+canvas.addEventListener('pointermove',e=>{
+ const i=screenToCell(e.clientX,e.clientY);hover=i;if(!pointer.has(e.pointerId))return;e.preventDefault();pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointer.size>=2&&gesture?.kind==='pinch'){const pts=[...pointer.values()].slice(0,2),d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),mx=(pts[0].x+pts[1].x)/2,my=(pts[0].y+pts[1].y)/2;if(gesture.dist>3)zoomAt(d/gesture.dist,gesture.mx,gesture.my);cam.x+=mx-gesture.mx;cam.y+=my-gesture.my;gesture={kind:'pinch',dist:d,mx,my};limitCamera();return}
+ if(!gesture||['pinch','cancel'].includes(gesture.kind))return;
+ if(Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y)>6)gesture.moved=true;
+ const p=screenToWorld(e.clientX,e.clientY);
+ if(gesture.kind==='pan'){cam.x+=e.clientX-gesture.lastX;cam.y+=e.clientY-gesture.lastY;limitCamera()}
+ else if(gesture.kind==='roadHandle')moveRoadHandle(gesture.handle,p);
+ else if(gesture.kind==='roadDraw')beginRoadDraft(gesture.anchor,RP.mode==='round'?p:snapRoadPoint(p),RP.mode);
+ else if(gesture.kind==='build'){preview=i>=0?[i]:[];showBuildCost(e)}
+ gesture.lastX=e.clientX;gesture.lastY=e.clientY;
+});
+function pointerEnd(e,cancel=false){
+ if(!pointer.has(e.pointerId))return;pointer.delete(e.pointerId);
+ if(gesture?.kind==='pinch'||gesture?.kind==='cancel'){gesture=pointer.size?{kind:'cancel'}:null;preview=[];$('buildCost').hidden=true;return}
+ if(gesture){const p=screenToWorld(e.clientX,e.clientY);
+  if(cancel&&['roadDraw','roadHandle'].includes(gesture.kind)){RP.draft=gesture.beforeDraft;updateRoadPanel()}
+  if(!cancel){if(gesture.kind==='pan'&&!gesture.moved)tapWorld(p);
+   else if(gesture.kind==='roadDraw'){if(!gesture.moved){const hit=nearestRoad(p,.65);RP.draft=gesture.beforeDraft;if(hit)selectRoadForEdit(hit.road);else updateRoadPanel()}else updateRoadPanel()}
+   else if(gesture.kind==='build'){
+    if(tool==='signal'){const n=closestJunction(p);if(n)changeSignal(n.id);else notify(AR.pickJunction,true)}
+    else if(tool==='noParking'){const hit=nearestRoad(p,.75);if(hit)changeParking(hit.road);else notify(AR.selectRoad,true)}
+    else if(tool==='bulldoze'){const i=screenToCell(e.clientX,e.clientY);if(i>=0&&G.grid[i].type!=='grass')transact([i],tool);else{const hit=nearestRoad(p,.65);if(hit)deleteRoad(hit.road)}}
+    else transact(preview,tool);
+   }
+  }
+ }
+ preview=[];gesture=null;$('buildCost').hidden=true;
+}
+canvas.addEventListener('pointerup',e=>pointerEnd(e));canvas.addEventListener('pointercancel',e=>pointerEnd(e,true));
+canvas.addEventListener('lostpointercapture',e=>{if(pointer.has(e.pointerId))pointerEnd(e,true)});canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('wheel',e=>{if(!started||modalOpen())return;e.preventDefault();zoomAt(Math.exp(-e.deltaY*.0014),e.clientX,e.clientY)},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
+
+
+initUI();initRoadUI();initCity("starter");resize();setTool("hand");syncSettings();requestAnimationFrame(frame);
+// Opt-in diagnostics. Not enabled during normal play.
+if(new URLSearchParams(location.search).has("debug")){
+ window.cityflowDebug={
+  state:()=>({city:G,stats,cars,cam:{...cam},tool,speed,settings,history:history.length,connected:[...connected]}),
+  start:mode=>startCity(mode||"starter"),tool:setTool,build:transact,inspect,undo,route,save,serialize,validate:validateSave,load:loadValidated,step:simulate,render:draw,
+  cell:(x,y)=>{const p=iso(x+.5,y+.5);return {x:cam.x+p.x*cam.z,y:cam.y+p.y*cam.z}},
+  setWide:v=>{roadWide=v},hideDialogs:()=>["helpOverlay","menuOverlay","confirmOverlay"].forEach(id=>$(id).hidden=true),
+  importText:text=>{const d=validateSave(JSON.parse(text));loadValidated(d);return true},
+  spend:amount=>{G.money=amount;updateHUD()},getStorageKey:()=>STORE
+ };
+}
+
+if(window.cityflowDebug){
+ Object.assign(window.cityflowDebug,{
+  network:()=>({nodes:RN.nodes.map(n=>({id:n.id,x:n.x,y:n.y,degree:n.all.size,links:n.links,signal:n.signal})),gate:RN.gate,junctions:RN.junctions.map(n=>n.id),length:RN.length,revision:roadRevision}),
+  world:worldToScreen,position:carPos,nearest:nearestRoad,nearestNode,
+  editor:()=>cloneData(RP),roadMode:setRoadMode,roadProperty:changeRoadProperty,
+  roadDraft:beginRoadDraft,roadApply:applyRoadDraft,roadCancel:cancelRoadDraft,roadEdit:selectRoadForEdit,roadDelete:id=>deleteRoad(id,false),roadHandle:moveRoadHandle,
+  roadValid:roadGeometryError,signal:changeSignal,parking:changeParking,rebuild,
+  setCamera:v=>{Object.assign(cam,v);draw()},setSpeed,
+  scenario:mode=>{startCity(mode);['helpOverlay','menuOverlay','confirmOverlay'].forEach(id=>$(id).hidden=true);setSpeed(0)},
+  checkPath:path=>path.every((n,i)=>!i||RN.arcs.has(path[i-1]+':'+n))
+ });
+}
+})();
+</script>
+</body>
+</html>
