@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="مدينتي: لعبة بناء مدينة ومرور صغيرة تعمل داخل المتصفح، دون مكتبات أو اتصال خارجي.">
-<title>V0.4 | مدينتي | City Flow</title>
+<title>V0.4 | مدينتي | V0.5 Road Rules Test</title>
 <style>
 :root{--ink:#ecf5f5;--muted:#9eb5b9;--panel:#112b35;--mint:#9ee9c7;--amber:#f6cb7d;--line:rgba(218,245,239,.13);--bad:#ff9e92;--safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px);--safeL:env(safe-area-inset-left,0px);--safeR:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -884,7 +884,7 @@ function makeNetworkFromTiles(city){
  for(const i of rs.filter(terminal))for(const j of adj(i))add(i,j);
  for(const i of rs)for(const j of adj(i))add(i,j);
  for(const i of rs){const p=xy(i);if(original[i].signal)net.signals.push({x:p.x+.5,y:p.y+.5,green:5.6,offset:original[i].signalOffset||0});city.grid[i]=newTile('grass',p.x,p.y)}
- if(!net.roads.length)net.roads.push({id:net.nextId++,points:[{x:3.5,y:11.5},{x:5.5,y:11.5}],lanes:4,oneWay:0,noPark:true,kind:'line',protected:true});
+ if(!net.roads.length)net.roads.push({id:net.nextId++,points:[{x:3.5,y:11.5},{x:5.5,y:11.5}],lanes:4,oneWay:0,noPark:true,kind:'line',protected:true,roadClass:'highway'});
  city.network=net;return net;
 }
 function addRoadDemo(){
@@ -1462,9 +1462,9 @@ function city3_buildRoadGraph(){
  const net=G.network,paths=new Map(),cuts=new Map();let length=0;
  for(const r of net.roads){const p=pathInfo(r.points);paths.set(r.id,p);cuts.set(r.id,[0,p.length,...zoneCuts(r,p)]);length+=p.length}
  for(let i=0;i<net.roads.length;i++){const r=net.roads[i],p=paths.get(r.id);for(let j=i+1;j<net.roads.length;j++){const s=net.roads[j],q=paths.get(s.id);
-  for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){const A=p.points[a-1],B=p.points[a],C=q.points[b-1],D=q.points[b];if(Math.max(A.x,B.x)+.001<Math.min(C.x,D.x)||Math.max(C.x,D.x)+.001<Math.min(A.x,B.x)||Math.max(A.y,B.y)+.001<Math.min(C.y,D.y)||Math.max(C.y,D.y)+.001<Math.min(A.y,B.y))continue;const hit=lineIntersection(A,B,C,D);if(hit){const ps=p.marks[a-1]+hit.t*(p.marks[a]-p.marks[a-1]),qs=q.marks[b-1]+hit.u*(q.marks[b]-q.marks[b-1]);if(Math.abs(roadHeight(r,ps,p)-roadHeight(s,qs,q))<.025){cuts.get(r.id).push(ps);cuts.get(s.id).push(qs)}}}
-  for(const e of [0,p.length]){const endpoint=atDistance(p,e),hit=projectPath(endpoint,q);if(hit.d<.02&&Math.abs(roadHeight(r,e,p)-roadHeight(s,hit.s,q))<.025)cuts.get(s.id).push(hit.s)}
-  for(const e of [0,q.length]){const endpoint=atDistance(q,e),hit=projectPath(endpoint,p);if(hit.d<.02&&Math.abs(roadHeight(s,e,q)-roadHeight(r,hit.s,p))<.025)cuts.get(r.id).push(hit.s)}
+  for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){const A=p.points[a-1],B=p.points[a],C=q.points[b-1],D=q.points[b];if(Math.max(A.x,B.x)+.001<Math.min(C.x,D.x)||Math.max(C.x,D.x)+.001<Math.min(A.x,B.x)||Math.max(A.y,B.y)+.001<Math.min(C.y,D.y)||Math.max(C.y,D.y)+.001<Math.min(A.y,B.y))continue;const hit=lineIntersection(A,B,C,D);if(hit){const ps=p.marks[a-1]+hit.t*(p.marks[a]-p.marks[a-1]),qs=q.marks[b-1]+hit.u*(q.marks[b]-q.marks[b-1]);if(Math.abs(roadHeight(r,ps,p)-roadHeight(s,qs,q))<.025&&legalSameLevelConnection(r,s)){cuts.get(r.id).push(ps);cuts.get(s.id).push(qs)}}}
+  for(const e of [0,p.length]){const endpoint=atDistance(p,e),hit=projectPath(endpoint,q);if(hit.d<.02&&Math.abs(roadHeight(r,e,p)-roadHeight(s,hit.s,q))<.025&&legalSameLevelConnection(r,s))cuts.get(s.id).push(hit.s)}
+  for(const e of [0,q.length]){const endpoint=atDistance(q,e),hit=projectPath(endpoint,p);if(hit.d<.02&&Math.abs(roadHeight(s,e,q)-roadHeight(r,hit.s,p))<.025&&legalSameLevelConnection(r,s))cuts.get(r.id).push(hit.s)}
  }}
  const candidates=new Map();
  for(const b of buildings){const p=xy(b),center={x:p.x+.5,y:p.y+.5},list=[];for(const r of net.roads){if(!isGround(r))continue;const hit=projectPath(center,paths.get(r.id));if(hit.d<=1.05+roadRadius(r)&&drivewayClear(center,hit,b)){cuts.get(r.id).push(hit.s);list.push({...hit,road:r.id})}}candidates.set(b,list)}
@@ -1712,7 +1712,17 @@ function laneFor(c,from,to){const arc=RN.arcs.get(from+':'+to);if(!arc)return 0;
  if(r.laneZone&&arc.lanes>base&&c.id%4===0)desired=arc.lanes-1;return Math.max(0,Math.min(arc.lanes-1,desired));
 }
 function laneOffset(c,arc){const r=RN.roads.get(arc.road),lane=laneFor(c,arc.a,arc.b);return r.oneWay?(lane-(r.lanes-1)/2)*.14:(lane+.5)*.14}
+function isHighwayRoad(r){return !!r&&(r.protected===true||r.roadClass==='highway'||(r.kind!=='exit'&&r.lanes>=6))}
+function legalSameLevelConnection(a,b){if(!a||!b)return true;if(a.kind==='exit'||b.kind==='exit')return true;if(isHighwayRoad(a)||isHighwayRoad(b))return isHighwayRoad(a)&&isHighwayRoad(b);return true}
+function illegalHighwayConnection(r,existing=null){
+ const p=pathInfo(r.points);
+ for(const other of G.network.roads){if(other.id===existing)continue;if(legalSameLevelConnection(r,other))continue;const q=RN.paths.get(other.id)||pathInfo(other.points);
+  for(let a=1;a<p.points.length;a++)for(let b=1;b<q.points.length;b++){const h=lineIntersection(p.points[a-1],p.points[a],q.points[b-1],q.points[b]);if(!h)continue;const ps=p.marks[a-1]+h.t*(p.marks[a]-p.marks[a-1]),qs=q.marks[b-1]+h.u*(q.marks[b]-q.marks[b-1]);if(Math.abs(roadHeight(r,ps,p)-roadHeight(other,qs,q))<.03)return true}
+  for(const e of [0,p.length]){const pt=atDistance(p,e),h=projectPath(pt,q);if(h.d<.055&&Math.abs(roadHeight(r,e,p)-roadHeight(other,h.s,q))<.03)return true}
+ }return false;
+}
 function roadGeometryError(r,existing=null){
+ if(illegalHighwayConnection(r,existing))return 'لا يمكن ربط شارع عادي مباشرة بالطريق السريع. استخدم مخرج/مدخل Ramp، أو اعبر فوقه بجسر.';
  if(r.kind==='round'&&(r.lanes>2||r.radius<.45))return U.roundTooWide;
  if(r.laneZone){const z=r.laneZone;if(!Number.isFinite(z.from)||!Number.isFinite(z.to)||z.to-z.from<.08||z.from<.02||z.to>.98||![1,2,3,4,5,6].includes(z.lanes)||(!r.oneWay&&z.lanes<2))return U.badSave;if(pathInfo(r.points).length<4)return U.zoneShort}
  if(r.protected){const old=RN.roads.get(existing||r.id);if(!old||JSON.stringify(old.points)!==JSON.stringify(r.points)||r.z0||r.z1||r.oneWay||r.lanes<2)return U.tunnelFixed;return ''}
