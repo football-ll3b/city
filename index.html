@@ -1004,7 +1004,19 @@ function stepTraffic(dt){
  const winners=new Map();
  for(const [node,arr] of arrivals){const eligible=arr.filter(c=>signalGreen(node,c.path[c.seg]));eligible.sort((a,b)=>{const A=RN.arcs.get(a.path[a.seg]+':'+node),B=RN.arcs.get(b.path[b.seg]+':'+node),ar=RN.roads.get(A.road).kind==='round',br=RN.roads.get(B.road).kind==='round';return (br?1:0)-(ar?1:0)||b.wait-a.wait||a.id-b.id});if(eligible.length)winners.set(node,eligible[0].id)}
  for(const arr of groups.values()){let leader=null;for(const c of arr){if(c.finish)continue;c.age+=dt;const a=c.path[c.seg],b=c.path[c.seg+1],arc=RN.arcs.get(a+':'+b),road=RN.roads.get(arc.road),next=c.path[c.seg+2],nextArc=RN.arcs.get(b+':'+next);
-  const turn=nextArc?arc.dx*nextArc.dx+arc.dy*nextArc.dy:1;let velocity=c.speed*(road.lanes>=4?1.3:1)*(road.noPark?1:.90)*(turn<.75?.65:1),advance=velocity*dt/arc.length,maxT=1.00001;
+  const turn=nextArc?arc.dx*nextArc.dx+arc.dy*nextArc.dy:1;
+  // V0.5: comfortable speed, progressive braking before corners and intersections.
+  const baseSpeed=Math.min(.59,(c.speed||.92)*.55)*(c.truck?.72:1)*(road.lanes>=4?1.10:1)*(road.noPark?1:.94);
+  const remaining=(1-c.t)*arc.length;
+  const turnSpeed=turn<.25?.23:turn<.75?.32:baseSpeed;
+  let target=Math.min(baseSpeed,turnSpeed);
+  if(RN.nodes[b].all.size>=3&&remaining<.55)target=Math.min(target,.30+remaining*.25);
+  const stopping=!signalGreen(b,a)||(RN.nodes[b].all.size>=3&&winners.has(b)&&winners.get(b)!==c.id);
+  if(stopping)target=Math.min(target,Math.max(0,(remaining-.13)*1.25));
+  if(leader){const gapMeters=(leader.t-c.t)*arc.length;target=Math.min(target,Math.max(0,(gapMeters-.34)*1.3))}
+  const current=c.velocity??0;
+  c.velocity=Math.max(0,current+Math.max(-.92*dt,Math.min(.40*dt,target-current)));
+  let velocity=c.velocity,advance=velocity*dt/arc.length,maxT=1.00001;
   const gap=(c.truck||leader?.truck)? .32 : .27;
   if(leader)maxT=Math.min(maxT,leader.t-gap/arc.length);
   const stop=Math.max(0,1-.12/arc.length);
@@ -1027,7 +1039,13 @@ function v2_carPos(c){
  const normal=(v,o)=>({x:-v.dy*o,y:v.dx*o});let n0=normal(arc,off),n1={...n0};
  if(prev){const o=laneOffset(c,prev),n=normal(prev,o);n0={x:(n.x+n0.x)/2,y:(n.y+n0.y)/2}}
  if(next){const o=laneOffset(c,next),n=normal(next,o);n1={x:(n.x+n1.x)/2,y:(n.y+n1.y)/2}}
- const n=mix(n0,n1,c.t);return {x:base.x+n.x,y:base.y+n.y,dx:arc.dx,dy:arc.dy};
+ const n=mix(n0,n1,c.t);
+ const blend=.23, start=prev?Math.max(0,(blend-c.t)/blend):0,end=next?Math.max(0,(c.t-(1-blend))/blend):0;
+ let dx=arc.dx,dy=arc.dy;
+ if(start){dx=dx*(1-start)+prev.dx*start;dy=dy*(1-start)+prev.dy*start}
+ if(end){dx=dx*(1-end)+next.dx*end;dy=dy*(1-end)+next.dy*end}
+ const mag=Math.hypot(dx,dy)||1;
+ return {x:base.x+n.x,y:base.y+n.y,dx:dx/mag,dy:dy/mag};
 }
 
 function worldContext(c){c.transform(TW/2,TH/2,-TW/2,TH/2,0,0)}
@@ -1769,9 +1787,19 @@ function spawnColorGrowth(){if(!isColors())return false;const ch=G.challenge,com
  if(introduce){const p=findColorSite('shop',color);if(!p)return false;addColorBuilding('shop',color,p.x,p.y);rebuild();for(let k=0;k<2;k++){const q=findColorSite('home',color);if(q){addColorBuilding('home',color,q.x,q.y);rebuild()}}notify(U.newCompany)}else{const p=findColorSite('home',color);if(!p)return false;addColorBuilding('home',color,p.x,p.y);rebuild();notify(U.newHome)}recalculate();updateHUD();updateGoals();needsBase=true;return true;
 }
 function initCity(mode='starter'){if(mode!=='colors'&&mode!=='colorsRelaxed'){STORE=CITY_STORE;city3_initCity(mode);G.playMode='city';colorSelection=-1;syncColorUI();return}
- STORE=COLOR_STORE;city3_initCity('empty');G.playMode='colors';G.money=18000;G.challenge={score:0,elapsed:0,demandClock:0,growthClock:0,growthIndex:0,seed:732831,relaxed:mode==='colorsRelaxed',ended:false,rewardMark:0};
+ STORE=COLOR_STORE;city3_initCity('empty');G.playMode='colors';G.money=18000;G.challenge={score:0,elapsed:0,demandClock:0,growthClock:0,growthIndex:0,seed:732831,relaxed:mode==='colorsRelaxed',ended:false,rewardMark:0,weeklyRewards:0,weeklyClaimed:0};
  addColorBuilding('home',0,7,7);addColorBuilding('home',0,7,10);addColorBuilding('shop',0,17,7);addColorBuilding('home',1,8,16);addColorBuilding('home',1,11,16);addColorBuilding('shop',1,18,15);
  cars=[];history=[];nextCar=1;clock=0;spawnClock=metricClock=0;colorSelection=-1;RP.roundSize=.62;rebuild();recalculate();updateHUD();updateGoals();syncColorUI();needsBase=true;
+}
+function v05ConnectionDiagnosis(){
+ if(!isColors())return '';
+ const pairs=colorPairs();
+ if(pairs.length)return 'مسارات متاحة: '+pairs.length+' — السيارات تتحرك بعد تشغيل الوقت.';
+ const homes=buildings.filter(i=>G.grid[i].type==='home');
+ const companies=buildings.filter(i=>G.grid[i].type==='shop');
+ const unlinked=homes.filter(i=>G.grid[i].access<0).length+companies.filter(i=>G.grid[i].access<0).length;
+ if(unlinked)return 'لا توجد سيارات: '+unlinked+' مبانٍ بلا مدخل أرضي متصل. قرّب الشارع من المبنى.';
+ return 'لا توجد سيارات: أكمل طريق الذهاب والعودة بين البيت والشركة من نفس اللون؛ افحص اتجاهات الطرق.';
 }
 function dispatchColors(){if(!isColors()||restoringColor||G.challenge.ended)return false;const cap=settings.low?60:100;if(cars.length>=cap)return false;const pairs=colorPairs(),companies=buildings.filter(i=>G.grid[i].type==='shop').sort((a,b)=>(G.grid[b].pending||0)-(G.grid[a].pending||0));
  for(const dest of companies){const t=G.grid[dest],reserved=cars.filter(c=>c.colorTrip&&!c.returning&&c.company===dest).length;if((t.pending||0)<=reserved)continue;const choices=[];for(const pair of pairs.filter(p=>p.company===dest)){if(cars.filter(c=>c.colorTrip&&c.source===pair.home).length>=2)continue;const h=G.grid[pair.home];let path=route(h.access,t.access);if(h.access===t.access){const a=RN.nodes[h.access]?.links.find(a=>RN.arcs.has(a.b+':'+h.access));if(a)path=[h.access,a.b,h.access]}if(!path||path.length<2)continue;let length=0;for(let k=1;k<path.length;k++)length+=RN.arcs.get(path[k-1]+':'+path[k]).length;choices.push({home:pair.home,path,length})}choices.sort((a,b)=>a.length-b.length);
@@ -1783,18 +1811,25 @@ function finishCar(c){if(!c.colorTrip)return city3_finishCar(c);if(c.returning){
  const back=h?.access>=0?route(c.path[c.path.length-1],h.access):null;if(back&&back.length>1){c.path=back;c.seg=0;c.t=0;c.returning=true;c.dest=c.source;c.destType='home';c.age=0;c.wait=0;c.waitSmooth=0}else c.finish=true;
 }
 function simulate(dt){if(!isColors())return city3_simulate(dt);if(G.challenge.ended||!Number.isFinite(dt)||dt<=0)return;dt=Math.min(dt,2);const ch=G.challenge;clock+=dt;ch.elapsed+=dt;G.dayProgress+=dt;ch.demandClock+=dt;ch.growthClock+=dt;spawnClock+=dt;metricClock+=dt;
- const interval=Math.max(10,18-ch.elapsed/160);while(ch.demandClock>=interval){ch.demandClock-=interval;for(const i of buildings)if(G.grid[i].type==='shop')G.grid[i].pending=Math.min(40,(G.grid[i].pending||0)+1)}
+ const week=Math.floor((G.day-1)/7);
+ const rush=(week>=1&&(((G.day-1)%7===3)||((G.day-1)%7===5)))?1.28:1;
+ const interval=Math.max(9.8,22-Math.min(week,9)*1.3)/rush;
+ while(ch.demandClock>=interval){ch.demandClock-=interval;for(const i of buildings)if(G.grid[i].type==='shop')G.grid[i].pending=Math.min(40,(G.grid[i].pending||0)+1)}
  if(ch.growthClock>=50){ch.growthClock-=50;spawnColorGrowth()}
  while(spawnClock>=.65){spawnClock-=.65;dispatchColors()}
  let left=dt;while(left>0){const sub=Math.min(.045,left);stepTraffic(sub);left-=sub}
- while(G.dayProgress>=DAY){G.dayProgress-=DAY;G.day++;if(G.day%3===0){G.money+=1800;notify(U.roadGrant+' +1,800')}}
+ while(G.dayProgress>=DAY){G.dayProgress-=DAY;G.day++;
+  if(G.day%7===1&&G.day>1){G.money+=1100;notify('مكافأة الأسبوع: +1,100 رصيد طرق. اختر تطويرًا إضافيًا من زر المكافأة.');v05EarnReward()}
+  else if(G.day%3===0){G.money+=400;notify(U.roadGrant+' +400')}
+  if((G.day-1)%7===3&&G.day>=11)notify('ساعة ذروة: الطلبات تزيد مؤقتًا. راقب المداخل والدوّارات.');
+ }
  for(const i of buildings){const t=G.grid[i];if(t.type!=='shop')continue;if(t.pending>=12){if(!t.alarm)notify(U.warning,true);t.alarm=(t.alarm||0)+dt;if(t.alarm>=60&&!ch.relaxed){ch.ended=true;setSpeed(0);showColorResult();save(false);break}}else t.alarm=Math.max(0,(t.alarm||0)-dt*2)}
  if(metricClock>=.6){metricClock=0;recalculate();updateHUD();updateGoals();if(selected>=0&&G.grid[selected]?.colorId!==undefined)inspect(selected)}
  const mark=Math.floor(ch.score/25);if(mark>ch.rewardMark){ch.rewardMark=mark;G.money+=1000;celebrate(U.newMilestone,String(ch.score)+' \u00b7 +1,000');save(false)}
 }
 function recalculate(){if(!isColors())return city3_recalculate();const homes=buildings.filter(i=>G.grid[i].type==='home'),companies=buildings.filter(i=>G.grid[i].type==='shop');const flow=cars.length?Math.round(cars.reduce((n,c)=>n+Math.max(0,1-c.waitSmooth/2),0)/cars.length*100):100;stats={pop:homes.length*2,jobs:companies.length*2,happy:100,flow:clamp(flow,0,100),income:0,revenue:0,expenses:0,homes:homes.length,shops:companies.length,active:companies.filter(i=>G.grid[i].connected).length,factories:0,parks:0,parking:0,employment:1,roadConnected:0,pending:companies.reduce((n,i)=>n+(G.grid[i].pending||0),0),risk:companies.filter(i=>G.grid[i].pending>=12).length}}
 function updateHUD(){if(!isColors())return city3_updateHUD();$('money').textContent=fmt(G.money);$('income').textContent=U.perDelivery;$('income').style.color='var(--mint)';$('population').textContent=fmt(G.challenge.score);$('jobs').textContent=stats.homes+' '+U.home+' / '+stats.shops+' '+U.company;$('flow').textContent=stats.flow+'%';$('cars').textContent=cars.length+' \u0645\u0631\u0643\u0628\u0629';$('happy').textContent=stats.pending;$('shops').textContent=stats.risk?stats.risk+' '+U.colorAtRisk:U.autoGrowing;$('happy').style.color=stats.risk?'var(--bad)':'var(--ink)';$('flow').style.color=stats.flow<50?'var(--bad)':'var(--ink)';$('day').textContent='\u0627\u0644\u064a\u0648\u0645 '+G.day;$('modeTag').textContent=G.challenge.relaxed?U.relaxed:U.colors;$('grantBtn').hidden=true}
-function updateGoals(){if(!isColors())return city3_updateGoals();$('goalCount').textContent=String(G.challenge.score);$('goalTitle').textContent=U.challengeGoal;$('goalText').textContent=U.colorLegend+' \u00b7 '+U.onlyRoads;$('goalFill').style.width=(Math.min(1,(G.challenge.score%25)/25)*100)+'%';$('goalReward').textContent=U.roadGrant+' +1,000 / 25 '+U.successful;const keys=$('colorKey');if(keys){keys.innerHTML=PALETTE.slice(0,stats.shops).map((p,i)=>'<span><i style="background:'+p.color+'">'+p.mark+'</i>'+buildings.filter(b=>G.grid[b].type==='shop'&&G.grid[b].colorId===i).reduce((n,b)=>n+(G.grid[b].pending||0),0)+'</span>').join('')}}
+function updateGoals(){if(!isColors())return city3_updateGoals();$('goalCount').textContent=String(G.challenge.score);$('goalTitle').textContent=U.challengeGoal;$('goalText').textContent=U.colorLegend+' \u00b7 '+U.onlyRoads+' — '+v05ConnectionDiagnosis();$('goalFill').style.width=(Math.min(1,(G.challenge.score%25)/25)*100)+'%';$('goalReward').textContent=U.roadGrant+' +1,000 / 25 '+U.successful;const keys=$('colorKey');if(keys){keys.innerHTML=PALETTE.slice(0,stats.shops).map((p,i)=>'<span><i style="background:'+p.color+'">'+p.mark+'</i>'+buildings.filter(b=>G.grid[b].type==='shop'&&G.grid[b].colorId===i).reduce((n,b)=>n+(G.grid[b].pending||0),0)+'</span>').join('')}}
 function checkGoals(){if(isColors())return updateGoals();city3_checkGoals()}
 function canPlace(i,t){if(isColors()&&['home','shop','factory','park','parking'].includes(t))return false;if(isColors()&&t==='bulldoze'&&G.grid[i]?.colorId!==undefined)return false;return city3_canPlace(i,t)}
 function transact(indices,t){if(isColors()&&['home','shop','factory','park','parking'].includes(t)){notify(U.autoOnly,true);return false}if(isColors()&&t==='bulldoze'&&indices.some(i=>G.grid[i]?.colorId!==undefined)){notify(U.protectedBuilding,true);return false}return city3_transact(indices,t)}
@@ -1812,7 +1847,7 @@ function inspect(i){if(!isColors()||G.grid[i]?.colorId===undefined)return city3_
 function inspectRoad(id){city3_inspectRoad(id);const r=RN.roads.get(id);if(!r)return;if(![1,2,4,6].includes(r.lanes))$('inspectTitle').textContent=U.roadWiden;if(r.protected){$('inspectTitle').textContent=U.tunnelTitle;$('inspectText').textContent=U.tunnelHelp+'\n'+U.laneCount+': '+r.lanes}else{$('inspectText').textContent+='\n'+U.roadInspector;if(r.laneZone)$('inspectText').textContent+='\n'+r.lanes+' \u2192 '+r.laneZone.lanes+' \u2192 '+r.lanes}}
 function drawConnectionOverlay(c){if(!isColors())return city3_drawConnectionOverlay(c);if(connectionView){c.save();worldContext(c);for(const r of G.network.roads){const p=projectedRoad(r);strokePath(c,p,.035,'#94c9ad')}c.restore()}if(highlightedRoute){c.save();worldContext(c);const pts=highlightedRoute.map(id=>RN.nodes[id]).filter(Boolean).map(n=>viewPoint(n,n.z));strokePath(c,pts,.065,PALETTE[colorSelection]?.color||'#f6cb7d',[.20,.08]);c.restore()}}
 function serialize(){const raw=city3_serialize();raw.city.network=cloneData(G.network);raw.city.playMode=G.playMode||'city';raw.city.grid=raw.city.grid.map((t,i)=>{const orig=G.grid[i];if(Number.isInteger(orig.colorId))return{...t,colorId:orig.colorId,pending:orig.pending||0,alarm:orig.alarm||0};return t});if(isColors())raw.city.challenge=cloneData(G.challenge);return raw}
-function validateSave(raw){const data=city3_validateSave(raw);data.city.playMode=raw.city.playMode==='colors'?'colors':'city';if(data.city.playMode==='colors'){const src=raw.city.challenge;if(!src||typeof src!=='object')throw new Error(U.badSave);const num=(x,a,b,d)=>Number.isFinite(x)?clamp(x,a,b):d;data.city.challenge={score:Math.round(num(src.score,0,1e8,0)),elapsed:num(src.elapsed,0,1e9,0),demandClock:num(src.demandClock,0,30,0),growthClock:num(src.growthClock,0,50,0),growthIndex:Math.round(num(src.growthIndex,0,1e8,0)),seed:Math.round(num(src.seed,0,4294967295,732831)),relaxed:src.relaxed===true,ended:src.ended===true,rewardMark:Math.round(num(src.rewardMark,0,1e8,0))};
+function validateSave(raw){const data=city3_validateSave(raw);data.city.playMode=raw.city.playMode==='colors'?'colors':'city';if(data.city.playMode==='colors'){const src=raw.city.challenge;if(!src||typeof src!=='object')throw new Error(U.badSave);const num=(x,a,b,d)=>Number.isFinite(x)?clamp(x,a,b):d;data.city.challenge={score:Math.round(num(src.score,0,1e8,0)),elapsed:num(src.elapsed,0,1e9,0),demandClock:num(src.demandClock,0,30,0),growthClock:num(src.growthClock,0,50,0),growthIndex:Math.round(num(src.growthIndex,0,1e8,0)),seed:Math.round(num(src.seed,0,4294967295,732831)),relaxed:src.relaxed===true,ended:src.ended===true,rewardMark:Math.round(num(src.rewardMark,0,1e8,0)),weeklyRewards:Math.round(num(src.weeklyRewards,0,1000,0)),weeklyClaimed:Math.round(num(src.weeklyClaimed,0,1000,0))};
   let hs=0,cs=0;data.city.grid.forEach((t,i)=>{const o=raw.city.grid[i];if(t.type==='home'||t.type==='shop'){if(!Number.isInteger(o.colorId)||o.colorId<0||o.colorId>=PALETTE.length)throw new Error(U.badSave);t.colorId=o.colorId;t.pending=t.type==='shop'?Math.round(num(o.pending,0,40,0)):0;t.alarm=num(o.alarm,0,60,0);if(t.type==='home')hs++;else cs++}});if(hs>24||hs<1||cs>5||cs<1)throw new Error(U.badSave);
  }return data;
 }
@@ -1823,7 +1858,7 @@ function resumeColors(){try{const text=localStorage.getItem(COLOR_STORE);if(!tex
 function chooseStart(mode){const colors=mode==='colors'||mode==='colorsRelaxed',key=colors?COLOR_STORE:CITY_STORE;let exists=false;try{exists=!!localStorage.getItem(key)}catch(e){}if(exists)confirmDialog(colors?U.saveColorsPrompt:U.saveCityPrompt,U.saveSeparate,()=>startCity(mode));else startCity(mode)}
 function startCity(mode){$('challengeOver').hidden=true;city3_startCity(mode);syncColorUI();if(isColors()){document.querySelector('#helpOverlay h2').textContent=U.helpHeadline;const p=$('colorHelp');if(p)p.hidden=false;setSpeed(0);notify(U.zeroHomes)}else{document.querySelector('#helpOverlay h2').textContent='\u0645\u0646 \u0634\u0627\u0631\u0639\u2026 \u0625\u0644\u0649 \u0645\u062f\u064a\u0646\u0629';if($('colorHelp'))$('colorHelp').hidden=true}}
 function refreshResumeButtons(){try{if($('resumeColors'))$('resumeColors').hidden=!localStorage.getItem(COLOR_STORE);$('resumeBtn').hidden=![CITY_STORE,'cityflow_v03_save',PREVIOUS_STORE,LEGACY_STORE].some(k=>localStorage.getItem(k));$('resumeBtn').textContent=U.cityResume}catch(e){}}
-function syncColorUI(){const on=isColors();document.body.classList.toggle('color-mode',on);const labels=document.querySelectorAll('.stats .stat label');[on?U.roadsBudget:U.cityBudget,on?U.deliveries:U.cityPop,U.flow,on?U.requests:U.cityHappy].forEach((v,i)=>labels[i].textContent=v);document.querySelector('#toggleGoals b').textContent=on?U.colors:'\u062f\u0644\u064a\u0644 \u062a\u0637\u0648\u064a\u0631 \u0627\u0644\u0645\u062f\u064a\u0646\u0629';document.querySelectorAll('[data-tool]').forEach(b=>{b.hidden=on&&['home','shop','factory','park','parking','noParking'].includes(b.dataset.tool)});if($('colorKey'))$('colorKey').hidden=!on;if($('relaxedSetting'))$('relaxedSetting').hidden=!on;if($('relaxedToggle')){$('relaxedToggle').classList.toggle('on',!!G.challenge?.relaxed);$('relaxedToggle').setAttribute('aria-pressed',String(!!G.challenge?.relaxed))}refreshResumeButtons()}
+function syncColorUI(){const on=isColors();v05SyncRewards();document.body.classList.toggle('color-mode',on);const labels=document.querySelectorAll('.stats .stat label');[on?U.roadsBudget:U.cityBudget,on?U.deliveries:U.cityPop,U.flow,on?U.requests:U.cityHappy].forEach((v,i)=>labels[i].textContent=v);document.querySelector('#toggleGoals b').textContent=on?U.colors:'\u062f\u0644\u064a\u0644 \u062a\u0637\u0648\u064a\u0631 \u0627\u0644\u0645\u062f\u064a\u0646\u0629';document.querySelectorAll('[data-tool]').forEach(b=>{b.hidden=on&&['home','shop','factory','park','parking','noParking'].includes(b.dataset.tool)});if($('colorKey'))$('colorKey').hidden=!on;if($('relaxedSetting'))$('relaxedSetting').hidden=!on;if($('relaxedToggle')){$('relaxedToggle').classList.toggle('on',!!G.challenge?.relaxed);$('relaxedToggle').setAttribute('aria-pressed',String(!!G.challenge?.relaxed))}refreshResumeButtons()}
 function showColorResult(){$('challengeOver').hidden=false;$('resultScore').textContent=fmt(G.challenge.score)}
 function initRoadUI(){
  const group=$('roadPanel').querySelector('.roadLaneGroup');for(const value of [3,5]){const b=document.createElement('button');b.className='chip';b.dataset.lanes=String(value);b.textContent=String(value);const next=group.querySelector('[data-lanes="'+(value+1)+'"]');group.insertBefore(b,next)}group.querySelector('span').textContent=U.laneCount;
@@ -1842,7 +1877,42 @@ function initRoadUI(){
  refreshResumeButtons();bindTouchButtons();updateRoadPanel();
 }
 
-initUI();initRoadUI();initCity("starter");resize();setTool("hand");syncSettings();requestAnimationFrame(frame);
+
+function v05EarnReward(){
+ if(!isColors())return;
+ G.challenge.weeklyRewards=(G.challenge.weeklyRewards||0)+1;
+ v05SyncRewards();
+}
+function v05SyncRewards(){
+ const b=document.getElementById('v05RewardButton');
+ if(!b)return;
+ const pending=Math.max(0,(G.challenge?.weeklyRewards||0)-(G.challenge?.weeklyClaimed||0));
+ b.hidden=!isColors()||!pending;
+ b.textContent='🎁 مكافأة أسبوعية ('+pending+')';
+}
+function v05ClaimReward(choice){
+ if(!isColors())return;
+ const ch=G.challenge;
+ if((ch.weeklyRewards||0)<=(ch.weeklyClaimed||0))return;
+ if(choice==='credit'){G.money+=2400;notify('تم استلام +2,400 رصيد طرق')}
+ else {for(const i of buildings){const t=G.grid[i];if(t.type==='shop'){t.pending=Math.max(0,(t.pending||0)-4);t.alarm=0}}notify('تم تخفيف 4 طلبات من كل شركة')}
+ ch.weeklyClaimed=(ch.weeklyClaimed||0)+1;
+ document.getElementById('v05RewardOverlay').hidden=true;
+ v05SyncRewards();recalculate();updateHUD();save(false);
+}
+function v05InitUI(){
+ const b=document.createElement('button');b.id='v05RewardButton';b.className='action primary';b.hidden=true;
+ b.style.cssText='position:absolute;top:calc(160px + env(safe-area-inset-top,0px));left:12px;z-index:12;padding:8px;font-size:11px;max-width:150px';
+ b.onclick=()=>{document.getElementById('v05RewardOverlay').hidden=false};document.getElementById('ui').appendChild(b);
+ const overlay=document.createElement('div');overlay.id='v05RewardOverlay';overlay.className='overlay';overlay.hidden=true;
+ overlay.innerHTML='<div class="dialog"><h2>🎁 مكافأة الأسبوع</h2><p>اختر مكافأة واحدة لمساعدة شبكة الطرق. تستطيع تأجيل الاختيار.</p><div class="actionRow"><button class="action primary" id="v05Credit">+2,400 رصيد طرق</button><button class="action" id="v05Relief">تخفيف طلبات الشركات</button></div><button class="action wide" id="v05Later" style="margin-top:12px">لاحقًا</button></div>';
+ document.body.appendChild(overlay);
+ document.getElementById('v05Credit').onclick=()=>v05ClaimReward('credit');
+ document.getElementById('v05Relief').onclick=()=>v05ClaimReward('relief');
+ document.getElementById('v05Later').onclick=()=>overlay.hidden=true;
+}
+
+initUI();initRoadUI();v05InitUI();initCity("starter");resize();setTool("hand");syncSettings();requestAnimationFrame(frame);
 // Opt-in diagnostics. Not enabled during normal play.
 if(new URLSearchParams(location.search).has("debug")){
  window.cityflowDebug={
