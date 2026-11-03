@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#111b29"><title>حراس العوالم V1.5 — أبطال أصليون</title><style>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#111b29"><title>حراس العوالم V1.6 — هجمات وأعداء مميزون</title><style>
 *{box-sizing:border-box}body{margin:0;background:#101827;color:#f7f2df;font-family:system-ui,Tahoma,sans-serif;overflow:hidden;touch-action:none}button{font:inherit;cursor:pointer;border:1px solid #536779;border-radius:10px;background:#293e55;color:white;padding:7px 9px}button:disabled{opacity:.35}button.active{background:#d49c38;color:#172231;border-color:#ffe3a2}button:active{transform:scale(.97)}#game{width:100vw;height:100dvh;display:block;touch-action:none}#hud{position:absolute;top:7px;left:7px;right:7px;display:none;align-items:center;gap:5px;flex-wrap:wrap;pointer-events:none}#hud>*{pointer-events:auto} .pill{background:#17283be9;border:1px solid #5d7482;border-radius:9px;padding:7px 10px;font-weight:700;font-size:12px}#bottom{position:absolute;bottom:8px;left:8px;right:8px;display:none;justify-content:center;gap:5px;flex-wrap:wrap;background:#152338e8;border:1px solid #526578;border-radius:14px;padding:7px}#bottom button{font-size:12px;padding:8px 9px}#panel{position:absolute;top:52px;right:8px;background:#142438f2;border:1px solid #6d8191;border-radius:12px;padding:12px;width:min(270px,48vw);display:none;z-index:4;font-size:13px;box-shadow:0 8px 28px #0008}#panel button{margin:3px}#overlay{position:absolute;inset:0;background:#08111cdb;display:flex;align-items:center;justify-content:center;z-index:10;overflow:auto;padding:18px}#modal{width:min(760px,96vw);max-height:95dvh;overflow:auto;background:linear-gradient(140deg,#1e364b,#101c30);border:2px solid #b88e4b;border-radius:20px;padding:20px;text-align:center;box-shadow:0 15px 50px #0009}h1{color:#ffd27a;margin:3px 0 8px}h2{color:#ffe2a6;margin:9px 0}p{line-height:1.7}.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0}.levels button{min-height:48px}.bar{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:12px}.muted{color:#b6c8d4;font-size:13px}.notice{background:#2c4257;padding:9px;border-radius:9px;margin:8px 0}#toast{position:absolute;top:102px;left:50%;transform:translateX(-50%);background:#18283de8;border:1px solid #b9a06a;border-radius:12px;padding:10px 16px;display:none;z-index:8;pointer-events:none;text-align:center;max-width:75vw}#rotate{display:none;position:absolute;inset:0;z-index:20;background:#0e1b2b;align-items:center;justify-content:center;text-align:center;padding:25px;font-size:22px}@media(orientation:portrait) and (max-width:750px){#rotate{display:flex}}@media(max-height:480px){#hud{gap:3px}.pill{padding:4px 6px;font-size:11px}#bottom{padding:3px}#bottom button{padding:5px;font-size:11px}#panel{top:43px;font-size:11px;padding:7px}}
 </style></head><body><canvas id="game"></canvas><div id="hud"><span class="pill" id="stats"></span><span class="pill" id="wave"></span><button id="startWave">▶ ابدأ الموجة</button><button id="pause">⏸ إيقاف</button><button id="menuBtn">☰ القائمة</button></div><div id="panel"></div><div id="bottom"></div><div id="toast"></div><div id="overlay"><div id="modal"></div></div><div id="rotate">📱 لف الجهاز للوضع الأفقي للعب دفاع القلعة 🏰</div><script>
 'use strict';
@@ -38,7 +38,20 @@ function validBuild(x,y){if(x<38||x>W-115||y<45||y>H-45)return false;if(nearRoad
 function build(x,y){let t=TYPES.find(t=>t.id===buildType);if(game.level<t.unlock)return notify('البرج يفتح في المرحلة '+t.unlock);if(game.gold<t.cost)return notify('الذهب غير كافٍ');if(!validBuild(x,y))return notify('اختر أرضًا فارغة بعيدًا عن الطريق والأبراج');game.gold-=t.cost;game.towers.push({x,y,type:t.id,level:1,spent:t.cost,cd:0});sfx('build');selected=game.towers.at(-1);showTower();syncHud();persistRun()}
 function showTower(){if(!selected)return;let t=TYPES.find(x=>x.id===selected.type),cost=Math.floor(t.cost*(.8+selected.level*.65));panel.style.display='block';panel.innerHTML=`<b>⚔️ ${worldFor(game.level).units[TYPES.indexOf(t)]} (${t.name}) — مستوى ${selected.level}/5</b><p>الضرر: ${Math.round(t.damage*(1+(selected.level-1)*.5))} • المدى: ${Math.round(t.range+(selected.level-1)*10)}</p><button id="upgrade">⬆ تطوير ${cost}💰</button><button id="sell">بيع ${Math.floor(selected.spent*.7)}💰</button><button id="closePanel">إغلاق</button>`;$('#upgrade').disabled=selected.level>=5||game.gold<cost;$('#upgrade').onclick=()=>{if(selected.level>=5||game.gold<cost)return;game.gold-=cost;selected.spent+=cost;selected.level++;showTower();syncHud();persistRun()};$('#sell').onclick=()=>{game.gold+=Math.floor(selected.spent*.7);game.towers.splice(game.towers.indexOf(selected),1);selected=null;panel.style.display='none';syncHud();persistRun()};$('#closePanel').onclick=()=>{selected=null;panel.style.display='none'}}
 function activatePower(id,x=0,y=0){if(game.cool[id]>0)return;game.cool[id]=id==='air'?35:id==='freeze'?45:55;if(id==='air'){for(let e of game.enemies){if(Math.hypot(e.x-x,e.y-y)<145)e.hp-=200+game.level*12}burst(x,y,'#ffae55',35)}if(id==='freeze'){game.frozen=6;notify('❄ تم تجميد الأعداء 6 ثوانٍ')}if(id==='heal'){game.hp=Math.min(game.maxhp,game.hp+35);notify('❤ تم إصلاح القلعة')}sfx('power');power=null;drawButtons();syncHud()}
-function shoot(t,e,typ){let base=TYPES.find(z=>z.id===t.type),damage=base.damage*(1+(t.level-1)*.5)*(1+save.upgrades.damage*.06);let targets=[e];if(t.type==='cannon'||t.type==='electric')targets=game.enemies.filter(z=>Math.hypot(z.x-e.x,z.y-e.y)<(t.type==='cannon'?52:72)).slice(0,t.type==='electric'?4:12);for(let z of targets){let dmg=damage*(z.type==='armored'&&t.type!=='cannon'?1-z.armor:1);z.hp-=dmg;if(t.type==='ice')z.slow=2.4;if(t.type==='fire')z.burn=3.5}game.shots.push({x:t.x,y:t.y-24,tx:e.x,ty:e.y,life:.28,maxLife:.28,color:base.color,type:t.type});if(t.level>=3&&['fire','electric','ice'].includes(t.type))burst(e.x,e.y,base.color,Math.min(3,t.level));sfx('hit');if(t.type==='cannon')burst(e.x,e.y,'#ffba68',8)}
+function shoot(t,e){
+ const base=TYPES.find(z=>z.id===t.type),damage=base.damage*(1+(t.level-1)*.5)*(1+save.upgrades.damage*.06);
+ let targets=[e],impact=0;
+ if(t.type==='cannon'||t.type==='fire'){impact=t.type==='cannon'?52:35;targets=game.enemies.filter(z=>z.hp>0&&Math.hypot(z.x-e.x,z.y-e.y)<impact)}
+ if(t.type==='electric'){targets=game.enemies.filter(z=>z.hp>0&&Math.hypot(z.x-e.x,z.y-e.y)<75).slice(0,Math.min(6,2+t.level))}
+ for(let z of targets){let dmg=damage*(z.type==='armored'&&t.type!=='cannon'?1-z.armor:1);z.hp-=dmg;if(t.type==='ice')z.slow=2.4;if(t.type==='fire')z.burn=3.5}
+ let duration=t.type==='electric'?.2:t.type==='sniper'?.14:.35;
+ game.shots.push({x:t.x,y:t.y-24,tx:e.x,ty:e.y,life:duration,maxLife:duration,color:base.color,type:t.type,level:t.level,chains:t.type==='electric'?targets.map(z=>({x:z.x,y:z.y})):[]});
+ if(t.type==='cannon')burst(e.x,e.y,'#ffba68',8);
+ if(t.type==='fire')burst(e.x,e.y,'#ff7839',Math.min(12,3+t.level*2));
+ if(t.type==='ice')burst(e.x,e.y,'#b6f3ff',Math.min(10,2+t.level));
+ if(t.type==='electric')burst(e.x,e.y,'#d7aaff',4);
+ sfx('hit');
+}
 function burst(x,y,color,n){for(let i=0;i<n;i++){let a=Math.random()*Math.PI*2,s=20+Math.random()*85;game.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.35+Math.random()*.5,color})}}
 function update(dt){if(!game||game.paused||game.finished)return;game.elapsed+=dt;for(let id of Object.keys(game.cool))game.cool[id]=Math.max(0,game.cool[id]-dt);game.frozen=Math.max(0,game.frozen-dt);if(game.active){game.spawnClock+=dt;while(game.queue.length&&game.queue[0].delay<=game.spawnClock){spawn(game.queue.shift())}}
 for(let e of game.enemies){let speed=e.speed*(e.slow>0?.55:1)*(game.frozen>0?.1:1);e.d+=speed*dt;e.slow=Math.max(0,e.slow-dt);if(e.burn>0){e.hp-=8*dt;e.burn-=dt}let pos=atPath(paths[e.path],e.d);e.x=pos.x;e.y=pos.y;e.phase+=dt*8;if(e.d>=paths[e.path].total){game.hp=Math.max(0,game.hp-e.damage);e.hp=-999;if(game.hp<=0){endGame(false);return}}}
@@ -107,14 +120,29 @@ function renderTower(t){
  if(selected===t){ctx.strokeStyle='#ffe5a0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(t.x,t.y,TYPES[idx].range+(t.level-1)*10,0,7);ctx.stroke()}
 }
 function renderEnemy(e){
- let boss=e.type==='boss',sz=boss?16:e.type==='armored'?12:9,bob=Math.sin(e.phase)*1.8,x=e.x,y=e.y;
- ctx.fillStyle='#19242c66';ctx.beginPath();ctx.ellipse(x,y+6,sz+4,5,0,0,7);ctx.fill();
- ctx.strokeStyle='#303a42';ctx.lineWidth=boss?5:3;ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x-6+Math.sin(e.phase)*3,y+8);ctx.moveTo(x+4,y);ctx.lineTo(x+6-Math.sin(e.phase)*3,y+8);ctx.stroke();
- ctx.fillStyle=ENEMIES[e.type].color;ctx.beginPath();ctx.roundRect(x-sz*.65,y-sz+bob,sz*1.3,sz*1.45,3);ctx.fill();
- ctx.fillStyle=e.type==='armored'?'#d5d8e1':'#e5c5a4';ctx.beginPath();ctx.arc(x,y-sz-4+bob,sz*.65,0,7);ctx.fill();
- if(e.type==='armored'||boss){ctx.fillStyle='#515e69';ctx.beginPath();ctx.arc(x,y-sz-7+bob,sz*.73,Math.PI,Math.PI*2);ctx.fill()}
- if(e.type==='flying'){ctx.strokeStyle='#f1e8ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-7,y-9);ctx.lineTo(x-21,y-17+Math.sin(e.phase)*6);ctx.moveTo(x+7,y-9);ctx.lineTo(x+21,y-17+Math.sin(e.phase)*6);ctx.stroke()}
- if(boss){ctx.strokeStyle=WORLDS[Math.floor((game.level-1)/5)].accent;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y-sz,sz+9,0,7);ctx.stroke()} if(e.type==='fast'){ctx.strokeStyle='#ffe6a0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-16,y-3);ctx.lineTo(x-27,y-3);ctx.stroke()} ctx.fillStyle='#24323a';ctx.fillRect(x-sz,y-sz-19,sz*2,4);ctx.fillStyle='#86e68b';ctx.fillRect(x-sz,y-sz-19,sz*2*Math.max(0,e.hp/e.maxhp),4)
+ const world=Math.floor((game.level-1)/5),accent=WORLDS[world].accent,boss=e.type==='boss';
+ const x=e.x,y=e.y,bob=Math.sin(e.phase)*2,sz=boss?20:e.type==='armored'?14:11;
+ ctx.save();ctx.translate(x,y+bob);if(e.type==='hidden')ctx.globalAlpha=.62+.22*Math.sin(e.phase);
+ ctx.fillStyle='#102a3266';ctx.beginPath();ctx.ellipse(0,7,sz+6,5,0,0,7);ctx.fill();
+ // Distinct anatomy: crawler, runner, golem, winged creature, ghost, overlord.
+ if(e.type==='normal'){
+  ctx.fillStyle=world%2?'#6858a1':'#b64d4c';polygon(0,-9,sz+3,6,ctx.fillStyle);
+  ctx.fillStyle=accent;polygon(0,-23,8,3,accent);ctx.fillStyle='#ffe9aa';ctx.fillRect(-6,-12,3,3);ctx.fillRect(3,-12,3,3);
+  ctx.strokeStyle='#46394b';ctx.lineWidth=3;for(let i of [-1,1]){ctx.beginPath();ctx.moveTo(i*8,-4);ctx.lineTo(i*13,7+Math.sin(e.phase)*2);ctx.stroke()}
+ }else if(e.type==='fast'){
+  ctx.fillStyle='#f0a848';ctx.beginPath();ctx.moveTo(-14,-8);ctx.lineTo(7,-24);ctx.lineTo(14,-5);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffe2a1';polygon(6,-24,7,3,'#ffe2a1');ctx.strokeStyle='#e6e8ff';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-18-i*5,0+i*4);ctx.lineTo(-7-i*5,0+i*4);ctx.stroke()}
+ }else if(e.type==='armored'){
+  ctx.fillStyle='#526675';ctx.fillRect(-13,-22,26,27);ctx.fillStyle='#aebbc4';polygon(0,-24,17,5,'#aebbc4');ctx.fillStyle=accent;ctx.fillRect(-9,-16,18,4);
+  ctx.fillStyle='#384654';ctx.fillRect(-19,-16,7,18);ctx.fillRect(12,-16,7,18);
+ }else if(e.type==='flying'){
+  let flap=Math.sin(e.phase)*9;ctx.fillStyle='#a675c9';polygon(0,-21,11,5,'#a675c9');ctx.fillStyle='#dfb3ff';ctx.beginPath();ctx.moveTo(-5,-18);ctx.lineTo(-25,-31+flap);ctx.lineTo(-20,-7);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(5,-18);ctx.lineTo(25,-31+flap);ctx.lineTo(20,-7);ctx.closePath();ctx.fill();ctx.fillStyle='#f2e2ff';ctx.fillRect(-4,-24,8,4);
+ }else if(e.type==='hidden'){
+  ctx.fillStyle='#395b68';ctx.beginPath();ctx.moveTo(0,-35);ctx.lineTo(15,2);ctx.lineTo(-15,2);ctx.closePath();ctx.fill();ctx.fillStyle=accent;ctx.fillRect(-7,-19,5,2);ctx.fillRect(2,-19,5,2);ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-13,18,0,Math.PI*1.5);ctx.stroke();
+ }else{
+  ctx.fillStyle='#4e304a';ctx.fillRect(-18,-30,36,34);ctx.fillStyle=accent;polygon(0,-36,20,5,accent);ctx.fillStyle='#e5d4c2';ctx.fillRect(-9,-26,18,8);ctx.fillStyle='#a33c5a';ctx.fillRect(-24,-22,8,24);ctx.fillRect(16,-22,8,24);ctx.strokeStyle=accent;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-17,29,0,7);ctx.stroke();
+ }
+ ctx.globalAlpha=1;ctx.fillStyle='#26333c';ctx.fillRect(-sz,-sz-29,sz*2,4);ctx.fillStyle='#8ae79c';ctx.fillRect(-sz,-sz-29,sz*2*Math.max(0,e.hp/e.maxhp),4);ctx.restore();
 }
 function polygon(x,y,r,n,color){ctx.fillStyle=color;ctx.beginPath();for(let i=0;i<n;i++){let a=i*Math.PI*2/n-Math.PI/2;ctx[i?'lineTo':'moveTo'](x+Math.cos(a)*r,y+Math.sin(a)*r*.7)}ctx.closePath();ctx.fill()}
 function draw(){ctx.clearRect(0,0,cv.width,cv.height);if(scene!=='game'||!game){let g=ctx.createLinearGradient(0,0,0,cv.height);g.addColorStop(0,'#17283b');g.addColorStop(1,'#0b1421');ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);return}ctx.fillStyle='#101927';ctx.fillRect(0,0,cv.width,cv.height);ctx.save();ctx.translate(offX+scale*W/2,offY+scale*H/2);ctx.scale(scale*cam.z,scale*cam.z);ctx.translate(-W/2+cam.x,-H/2+cam.y);let env=Math.floor((game.level-1)/5);let colors=WORLDS.map(w=>w.ground);ctx.fillStyle=colors[env];ctx.fillRect(-500,-500,2000,1700);
@@ -134,11 +162,25 @@ for(let p of paths){ctx.lineCap='round';ctx.lineJoin='round';for(let [width,colo
  for(let t of game.towers)renderTower(t);
 for(let e of game.enemies)renderEnemy(e);
 for(let s of game.shots){
- let progress=1-Math.max(0,s.life)/(s.maxLife||.28),x=s.x+(s.tx-s.x)*progress,y=s.y+(s.ty-s.y)*progress;
- ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(s.ty-s.y,s.tx-s.x));
- if(s.type==='arrow'||s.type==='sniper'){ctx.strokeStyle=s.type==='sniper'?'#e5ffcf':'#f8e3a5';ctx.lineWidth=s.type==='sniper'?3:2;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(9,0);ctx.stroke();ctx.fillStyle='#f5f0d2';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(5,-4);ctx.lineTo(5,4);ctx.fill()}
- else {ctx.shadowColor=s.color;ctx.shadowBlur=10;ctx.fillStyle=s.type==='cannon'?'#39414a':s.color;ctx.beginPath();ctx.arc(0,0,s.type==='cannon'?6:4,0,7);ctx.fill()}
- ctx.restore()
+ const progress=1-Math.max(0,s.life)/(s.maxLife||.35),x=s.x+(s.tx-s.x)*progress,y=s.y+(s.ty-s.y)*progress;
+ ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+ if(s.type==='electric'){
+  let pts=[{x:s.x,y:s.y},...(s.chains||[])];if(pts.length===1)pts.push({x:s.tx,y:s.ty});
+  ctx.strokeStyle='#b7a2ff';ctx.shadowColor='#e5caff';ctx.shadowBlur=14;ctx.lineWidth=3+s.level*.3;ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){let p=pts[i],last=pts[i-1];ctx.lineTo((p.x+last.x)/2+Math.sin(game.elapsed*57+i)*12,(p.y+last.y)/2-8);ctx.lineTo(p.x,p.y)}ctx.stroke();
+ }else if(s.type==='sniper'){
+  ctx.strokeStyle='#d3ff9b';ctx.shadowColor='#e6ffb8';ctx.shadowBlur=12;ctx.lineWidth=3+s.level*.3;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.tx,s.ty);ctx.stroke();
+ }else if(s.type==='fire'){
+  ctx.translate(x,y);ctx.rotate(progress*12);ctx.shadowColor='#ff5c22';ctx.shadowBlur=14;polygon(0,0,11+s.level,7,'#ff8a2b');polygon(0,0,6,5,'#fff4a1');
+  if(progress>.82){ctx.strokeStyle='#ff9a4b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,20+(progress-.82)*85,0,7);ctx.stroke()}
+ }else if(s.type==='ice'){
+  ctx.translate(x,y);ctx.rotate(progress*7);ctx.shadowColor='#8deaff';ctx.shadowBlur=10;polygon(0,0,11,4,'#d7f9ff');polygon(0,0,5,4,'#62caff');
+ }else if(s.type==='cannon'){
+  ctx.translate(x,y);ctx.shadowColor='#ff9b54';ctx.shadowBlur=12;ctx.fillStyle='#343b48';ctx.beginPath();ctx.arc(0,0,7,0,7);ctx.fill();ctx.fillStyle='#ffb45c';ctx.beginPath();ctx.arc(-3,-3,3,0,7);ctx.fill();
+ }else{
+  ctx.translate(x,y);ctx.rotate(Math.atan2(s.ty-s.y,s.tx-s.x));ctx.strokeStyle='#c5f5ce';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(10,0);ctx.stroke();ctx.fillStyle='#b9f7b8';polygon(11,0,6,3,'#b9f7b8');
+ }
+ ctx.restore();
 }for(let p of game.particles){ctx.globalAlpha=Math.min(1,p.life*2);ctx.fillStyle=p.color;ctx.fillRect(p.x-3,p.y-3,6,6)}ctx.globalAlpha=1;
 ctx.restore();if(toastTimer>0){toastTimer-=1/60;if(toastTimer<=0)$('#toast').style.display='none'}}
 function loop(t){let dt=Math.min(.05,(t-last)/1000||0);last=t;try{update(dt);draw()}catch(e){console.error(e);if(game)game.paused=true;notify('حدث خطأ في التشغيل: '+e.message)}requestAnimationFrame(loop)}home();requestAnimationFrame(loop);setInterval(()=>{if(game&&!game.finished)persistRun()},7000);
