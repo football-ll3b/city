@@ -1,7 +1,7 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no"><title>فك الزحمة | تجربة عجمان V1.6</title><meta name="theme-color" content="#102a36"><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#a8c5a8;color:#eff8f4;font-family:system-ui,-apple-system,Tahoma,sans-serif}canvas{width:100%;height:100%;display:block;touch-action:none}.ui{position:absolute;inset:0;pointer-events:none}.ui>*{pointer-events:auto}.top{position:absolute;top:calc(8px + env(safe-area-inset-top));left:10px;right:10px;display:flex;align-items:center;gap:8px}.logo,.stats,.panel,.bar{background:#102b36ed;border:1px solid #ffffff22;box-shadow:0 5px 20px #203b4030;border-radius:16px}.logo{padding:10px 16px;min-width:130px;font-size:19px;font-weight:800}.logo small{display:block;font-size:9px;color:#a6ebcb}.stats{display:flex;flex:1;max-width:690px}.stat{flex:1;padding:8px 12px;border-left:1px solid #ffffff18}.stat:last-child{border:0}.stat small{display:block;color:#acc4c5;font-size:10px}.stat b{font-size:20px}.panel{position:absolute;right:10px;top:calc(90px + env(safe-area-inset-top));width:232px;padding:12px;font-size:12px}.panel h3{margin:0 0 5px;font-size:15px}.panel p{color:#c1d3d3;line-height:1.6;margin:6px 0}.meter{height:6px;background:#314d54;border-radius:6px;overflow:hidden}.meter>div{height:100%;background:#f0bd67;width:0}.bar{position:absolute;bottom:calc(10px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:5px;padding:7px;max-width:98%;overflow-x:auto}button{border:0;border-radius:11px;background:#2c4c57;color:#f1f8f7;font:inherit;font-size:12px;font-weight:700;padding:10px;min-height:44px;white-space:nowrap;touch-action:manipulation}button.active{background:#a5ebc8;color:#102b36}button:disabled{opacity:.4}.tip{position:absolute;bottom:calc(78px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#102b36e9;padding:7px 12px;border-radius:11px;font-size:11px;text-align:center;max-width:88%}.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0c2637a8;backdrop-filter:blur(5px);z-index:5;padding:20px}.modal{max-width:480px;width:100%;background:#102b36;border:1px solid #ffffff25;border-radius:23px;padding:25px}.modal h1{font-size:36px;margin:3px 0}.modal p{font-size:14px;color:#bdd1d0;line-height:1.8}.modal button{width:100%;background:#a5ebc8;color:#102b36;font-size:16px}.note{font-size:10px;color:#bdd1d0}#toast{position:absolute;top:calc(160px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:10px 16px;border-radius:12px;background:#102b36;opacity:0;transition:opacity .2s;font-size:12px}#toast.show{opacity:1}
 @media(max-width:700px){.logo{display:none}.stat{padding:7px}.stat b{font-size:16px}.panel{width:175px;padding:9px}.bar{left:5px;right:5px;transform:none;justify-content:flex-start}.tip{bottom:calc(78px + env(safe-area-inset-bottom))}}@media(max-height:600px) and (orientation:landscape){.top{top:4px}.panel{top:67px}.bar{bottom:4px;padding:5px}.tip{bottom:65px}}
-</style></head><body><canvas id="map"></canvas><div class="ui" id="ui" hidden><div class="top"><div class="logo">🚦 فك الزحمة<small id="cityCaption">الإمارات · اختبار الشبكة</small></div><div class="stats"><div class="stat"><small>التوصيلات</small><b id="score">0</b></div><div class="stat"><small>السيارات</small><b id="cars">0</b></div><div class="stat"><small>أطول انتظار</small><b id="wait">0</b></div><div class="stat"><small>النقاط</small><b id="points">0</b></div></div></div><div class="panel"><h3 id="cityTitle">الإمارات — إدارة المرور</h3><p>اضغط الدوائر عند التقاطعات لتغيير كل إشارة مستقلة. الأخضر يسمح فقط بحركة اتجاهها.</p><p id="message">شارعان رئيسيان، دوار متصل، جسر مرتفع ومخارج اختيارية.</p><div class="meter"><div id="meter"></div></div><p id="alert">المرور مستقر</p></div><div class="tip" id="tip">اسحب الخريطة بإصبع، كبّر بإصبعين، واضغط إشارة للتحكم فيها.</div><div class="bar"><button id="pause">Ⅱ إيقاف</button><button id="heat">🌡️ الزحمة</button><button id="ramp">↗️ فتح المخرج</button><button id="widen">🛣️ توسعة</button><button id="center">⌖ تمركز</button><button id="restart">↻ إعادة</button><button id="cities">🗺️ الإمارات</button></div><div id="toast"></div></div><div class="overlay" id="start"><div class="modal"><div class="note">نسخة اختبار مستقلة · V1.9</div><h1>فك الزحمة — الإمارات السبع</h1><p>اختر إمارة لتجربة شبكة طرق تخطيطية مختلفة. تحكم بكل إشارة على حدة، وافتح الوصلات البديلة، وراقب الزحمة.</p><label for="citySelect">اختر الإمارة</label><select id="citySelect" style="display:block;width:100%;margin:10px 0 16px;padding:13px;border-radius:12px;background:#294b55;color:white;border:1px solid #ffffff44;font:inherit"><option value="ajman">عجمان</option><option value="uaq">أم القيوين</option><option value="fujairah">الفجيرة</option><option value="rak">رأس الخيمة</option><option value="sharjah">الشارقة</option><option value="abudhabi">أبوظبي</option><option value="dubai">دبي</option></select><p>هذه خرائط تخطيطية مستوحاة من طابع المدن، وليست خرائط جغرافية مطابقة للشوارع الحقيقية.</p><button id="go">ابدأ اللعب</button></div></div><div class="overlay" id="over" style="display:none"><div class="modal"><h1>انتهت الجولة</h1><p id="result"></p><button id="again">حاول مرة ثانية</button></div></div>
+</style></head><body><canvas id="map"></canvas><div class="ui" id="ui" hidden><div class="top"><div class="logo">🚦 فك الزحمة<small id="cityCaption">الإمارات · اختبار الشبكة</small></div><div class="stats"><div class="stat"><small>التوصيلات</small><b id="score">0</b></div><div class="stat"><small>السيارات</small><b id="cars">0</b></div><div class="stat"><small>أطول انتظار</small><b id="wait">0</b></div><div class="stat"><small>النقاط</small><b id="points">0</b></div></div></div><div class="panel"><h3 id="cityTitle">الإمارات — إدارة المرور</h3><p>اضغط الدوائر عند التقاطعات لتغيير كل إشارة مستقلة. الأخضر يسمح فقط بحركة اتجاهها.</p><p id="message">شارعان رئيسيان، دوار متصل، جسر مرتفع ومخارج اختيارية.</p><div class="meter"><div id="meter"></div></div><p id="alert">المرور مستقر</p></div><div class="tip" id="tip">اسحب الخريطة بإصبع، كبّر بإصبعين، واضغط إشارة للتحكم فيها.</div><div class="bar"><button id="pause">Ⅱ إيقاف</button><button id="heat">🌡️ الزحمة</button><button id="ramp">↗️ فتح المخرج</button><button id="widen">🛣️ توسعة</button><button id="center">⌖ تمركز</button><button id="restart">↻ إعادة</button><button id="cities">🗺️ الإمارات</button></div><div id="toast"></div></div><div class="overlay" id="start"><div class="modal"><div class="note">نسخة اختبار مستقلة · V2.0</div><h1>فك الزحمة — الإمارات السبع — إصلاح المرور</h1><p>اختر إمارة لتجربة شبكة طرق تخطيطية مختلفة. تحكم بكل إشارة على حدة، وافتح الوصلات البديلة، وراقب الزحمة.</p><label for="citySelect">اختر الإمارة</label><select id="citySelect" style="display:block;width:100%;margin:10px 0 16px;padding:13px;border-radius:12px;background:#294b55;color:white;border:1px solid #ffffff44;font:inherit"><option value="ajman">عجمان</option><option value="uaq">أم القيوين</option><option value="fujairah">الفجيرة</option><option value="rak">رأس الخيمة</option><option value="sharjah">الشارقة</option><option value="abudhabi">أبوظبي</option><option value="dubai">دبي</option></select><p>خرائط تجريبية تشترك في بنية أساسية؛ نعمل على تصميم شبكة مستقلة لكل إمارة. هذه ليست خرائط جغرافية دقيقة.</p><button id="go">ابدأ اللعب</button></div></div><div class="overlay" id="over" style="display:none"><div class="modal"><h1>انتهت الجولة</h1><p id="result"></p><button id="again">حاول مرة ثانية</button></div></div>
 <script>
 'use strict';
 const cv=document.getElementById('map'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);
@@ -29,10 +29,10 @@ edge('roundN','northDistrict','local');
 // Access road from the roundabout stops before the highway, then splits into dedicated ramps.
 node('access',690,575);edge('roundS','access','arterial',[{x:690,y:525}]);
 // Compact four-entry roundabout; every road ends exactly at an entry node.
-edge('roundW','roundN','round',[{x:648,y:378}],false);
-edge('roundN','roundE','round',[{x:732,y:378}],false);
-edge('roundE','roundS','round',[{x:732,y:462}],false);
-edge('roundS','roundW','round',[{x:648,y:462}],false);
+edge('roundW','roundS','round',[{x:648,y:462}],false);
+edge('roundS','roundE','round',[{x:732,y:462}],false);
+edge('roundE','roundN','round',[{x:732,y:378}],false);
+edge('roundN','roundW','round',[{x:648,y:378}],false);
 // Ordered highway nodes. Exit occurs before entry for eastbound traffic.
 edge('hW','rampW','highway');edge('rampW','rampExit','highway');edge('rampExit','hMid','highway');
 edge('hMid','rampMerge','highway');edge('rampMerge','rampE','highway');edge('rampE','hE','highway');
@@ -67,15 +67,49 @@ function pos(e,forward,s){let p=poly(e,forward),distance=Math.max(0,Math.min(1,s
 function direction(from,to){let a=N[from],b=N[to],dx=b.x-a.x,dy=b.y-a.y;return Math.abs(dx)>Math.abs(dy)?(dx>0?'E':'W'):(dy>0?'S':'N')}
 function signalFor(edgeRef){let dest=edgeRef.forward?edgeRef.e.b:edgeRef.e.a;if(N[dest].kind!=='signal')return null;let from=edgeRef.forward?edgeRef.e.a:edgeRef.e.b;return signals.find(s=>s.node===dest&&s.side===direction(dest,from))}
 function route(a,b){let dist={},prev={},q=new Set(Object.keys(N));for(let n of q)dist[n]=Infinity;dist[a]=0;while(q.size){let u=null,d=Infinity;for(let n of q)if(dist[n]<d){d=dist[n];u=n}if(u===null)break;q.delete(u);if(u===b)break;for(const ref of adj[u]){let e=ref.e;if(e.locked)continue;let cost=e.len/(e.kind==='highway'?2.2:e.kind==='arterial'?1.25:1)+e.cars*28/(e.capacity);if(dist[u]+cost<dist[ref.to]){dist[ref.to]=dist[u]+cost;prev[ref.to]={u,ref}}}}if(!prev[b])return null;let p=[],cur=b;while(cur!==a){p.unshift(prev[cur].ref);cur=prev[cur].u}return p}
-const origins=['res1','res2','west','industrial','southW'],destinations=['shops','office','industrial','res1','res2'];function spawn(){if(cars.length>=20)return;let a=origins[Math.floor(Math.random()*origins.length)],b=destinations[Math.floor(Math.random()*destinations.length)];if(a===b)return;let p=route(a,b);if(!p)return;let first=p[0];if(cars.some(c=>c.ref.e===first.e&&c.ref.forward===first.forward&&c.s<.17))return;cars.push({id:++carId,ref:first,path:p,idx:0,s:0,v:0,wait:0,color:palette[carId%palette.length],finished:false,hold:0})}
+const origins=['res1','res2','west','industrial','southW'],destinations=['shops','office','industrial','res1','res2'];function spawn(){if(cars.length>=20)return;let a=origins[Math.floor(Math.random()*origins.length)],b=destinations[Math.floor(Math.random()*destinations.length)];if(a===b)return;let p=route(a,b);if(!p)return;let first=p[0];if(cars.some(c=>c.ref.e===first.e&&c.ref.forward===first.forward&&c.s<.17))return;cars.push({id:++carId,ref:first,path:p,idx:0,s:0,v:0,wait:0,color:palette[carId%palette.length],finished:false,hold:0,committed:false})}
 function nextRef(c){return c.path[c.idx+1]||null}
 function nearAhead(c){let g=Infinity;for(const o of cars)if(o!==c&&o.ref.e===c.ref.e&&o.ref.forward===c.ref.forward&&o.s>c.s)g=Math.min(g,(o.s-c.s)*c.ref.e.len);return g}
 function crossBusy(c){let target=c.ref.forward?c.ref.e.b:c.ref.e.a;if(N[target].kind!=='signal')return false;return cars.some(o=>o!==c&&o.hold>0&&o.holdNode===target)}
-function canEnter(c){let sig=signalFor(c.ref);if(sig&&!sig.green)return false;if(sig&&crossBusy(c))return false;let n=nextRef(c);if(n&&cars.some(o=>o!==c&&o.ref.e===n.e&&o.ref.forward===n.forward&&o.s<.16))return false;return true}
+function canEnter(c){
+ let sig=signalFor(c.ref);
+ if(sig&&!sig.green)return false;
+ if(sig&&crossBusy(c))return false;
+ let n=nextRef(c);
+ if(n&&cars.some(o=>o!==c&&o.ref.e===n.e&&o.ref.forward===n.forward&&o.s<.12))return false;
+ return true;
+}
+function stopDistance(c){return signalFor(c.ref)?32:9}
 function step(dt){servicePending();t+=dt;spawnTimer+=dt;while(spawnTimer>1.4){spawnTimer-=1.4;spawn()}for(const e of E)e.cars=0;for(const c of cars)c.ref.e.cars++;
 // Cars advance in front-to-back order, respecting lane headways and junction reservations.
-const ordered=[...cars].sort((a,b)=>b.s-a.s);for(const c of ordered){let e=c.ref.e,gap=nearAhead(c),endDist=(1-c.s)*e.len,target=e.kind==='highway'?90:e.kind==='round'?30:e.kind==='ramp'?37:54;if(gap<65)target=Math.min(target,Math.max(0,(gap-24)*1.2));if(endDist<70&&!canEnter(c))target=Math.min(target,Math.max(0,(endDist-10)*1.25));if(gap<24)target=0;c.v+=(target-c.v)*Math.min(1,dt*(target<c.v?5:2));let delta=c.v*dt;if(gap-delta<22)delta=Math.max(0,gap-22);if(endDist-delta<9&&!canEnter(c))delta=Math.max(0,endDist-9);c.s+=delta/e.len;if(c.v<2)c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.4);
-if(c.s>=.999&&canEnter(c)){let targetNode=c.ref.forward?e.b:e.a;if(N[targetNode].kind==='signal'){c.hold=.8;c.holdNode=targetNode}c.idx++;if(c.idx>=c.path.length){c.finished=true;score++;points+=10}else{c.ref=c.path[c.idx];c.s=0;c.v=Math.min(c.v,22)}}if(c.hold>0)c.hold=Math.max(0,c.hold-dt)}
+const ordered=[...cars].sort((a,b)=>b.s-a.s);
+for(const c of ordered){
+ let e=c.ref.e,gap=nearAhead(c),endDist=(1-c.s)*e.len;
+ let target=e.kind==='highway'?90:e.kind==='round'?30:e.kind==='ramp'?37:54;
+ const sig=signalFor(c.ref);
+ // A green approach may commit only once, after the junction is free.
+ // Red approaches always stop before the junction, not in its center.
+ if(sig&&!c.committed&&endDist<65&&canEnter(c)){
+   c.committed=true;c.holdNode=c.ref.forward?e.b:e.a;c.hold=1.8;
+ }
+ const blocked=sig?!c.committed:!canEnter(c);
+ const stop=stopDistance(c);
+ if(blocked&&endDist<85)target=Math.min(target,Math.max(0,(endDist-stop)*1.5));
+ if(gap<65)target=Math.min(target,Math.max(0,(gap-24)*1.2));
+ if(gap<24)target=0;
+ c.v+=(target-c.v)*Math.min(1,dt*(target<c.v?5:2));
+ let delta=Math.max(0,c.v*dt);
+ if(gap-delta<22)delta=Math.max(0,gap-22);
+ if(blocked&&endDist-delta<stop)delta=Math.max(0,endDist-stop);
+ c.s+=delta/e.len;
+ if(c.v<2||delta<.1)c.wait+=dt;else c.wait=Math.max(0,c.wait-dt*.4);
+ if(c.s>=.999&&(c.committed||canEnter(c))){
+   c.idx++;c.committed=false;
+   if(c.idx>=c.path.length){c.finished=true;score++;points+=10}
+   else{c.ref=c.path[c.idx];c.s=0;c.v=Math.min(c.v,22)}
+ }
+ if(c.hold>0)c.hold=Math.max(0,c.hold-dt);
+}
 for(let i=cars.length-1;i>=0;i--)if(cars[i].finished)cars.splice(i,1);
 let longest=Math.max(0,...cars.map(c=>c.wait)),queued=cars.filter(c=>c.v<4).length;danger=longest>8?danger+dt:Math.max(0,danger-dt*2);if(danger>13){gameOver=true;paused=true;$('result').textContent='وصلت '+score+' سيارة، وجمعت '+points+' نقطة. استمر الاختناق أكثر من المهلة.';$('over').style.display='flex'}$('score').textContent=score;$('points').textContent=points;$('cars').textContent=cars.length;$('wait').textContent=Math.round(longest)+'ث';$('meter').style.width=Math.min(100,danger/13*100)+'%';$('alert').textContent=danger>0?'تحذير اختناق: '+Math.round(danger)+' / 13 ثانية':'المرور مستقر';}
 function setSignal(sig){if(sig.green){sig.green=false;sig.pending=false;return}const active=signals.some(s=>s.node===sig.node&&s!==sig&&s.green);if(active){sig.pending=!sig.pending;toast(sig.pending?'الطلب بانتظار إغلاق الإشارة المتعارضة':'تم إلغاء الطلب');return}sig.green=true;sig.pending=false}
